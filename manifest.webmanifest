@@ -1,0 +1,15 @@
+{
+  "name": "Аліяс па-беларуску",
+  "short_name": "Аліяс",
+  "description": "Гульня ў тлумачэнне беларускіх словаў для 1–5 каманд.",
+  "lang": "be",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e1018",
+  "theme_color": "#0e1018",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
