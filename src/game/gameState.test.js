@@ -1,23 +1,26 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { inProgress, initialState, makeTeams, reducer, roundScore } from './gameState.js'
-import { DEFAULT_SETTINGS, TEAM_COLORS, TEAM_MOTIFS, TEAM_NAMES } from './constants.js'
+import { DEFAULT_SETTINGS, RANDOM_TEAM_NAMES, TEAM_COLORS, TEAM_MOTIFS } from './constants.js'
 import { getWords } from '../data/words.js'
 
 const run = (actions, from = initialState) => actions.reduce(reducer, from)
 
 describe('makeTeams', () => {
-  it('стварае каманды з назвамі, колерамі і матывамі паводле парадку', () => {
+  it('стварае каманды з назвамі са спіса, колерамі і матывамі паводле парадку', () => {
     const teams = makeTeams(5)
     expect(teams).toHaveLength(5)
+    expect(new Set(teams.map((team) => team.name)).size).toBe(5)
     teams.forEach((team, i) => {
-      expect(team).toEqual({ id: i, name: TEAM_NAMES[i], color: TEAM_COLORS[i], motif: TEAM_MOTIFS[i], score: 0 })
+      expect(RANDOM_TEAM_NAMES).toContain(team.name)
+      expect(team).toEqual({ id: i, name: team.name, color: TEAM_COLORS[i], motif: TEAM_MOTIFS[i], score: 0 })
     })
   })
 
   it('захоўвае назвы папярэдніх камандаў і скідае рахунак', () => {
     const previous = [{ id: 0, name: 'Свае', score: 9 }]
-    expect(makeTeams(2, previous)[0]).toMatchObject({ name: 'Свае', score: 0 })
-    expect(makeTeams(2, previous)[1].name).toBe(TEAM_NAMES[1])
+    const teams = makeTeams(2, previous)
+    expect(teams[0]).toMatchObject({ name: 'Свае', score: 0 })
+    expect(RANDOM_TEAM_NAMES).toContain(teams[1].name)
   })
 })
 
@@ -56,7 +59,7 @@ describe('reducer: налады', () => {
   it('renameTeam мяняе толькі патрэбную каманду', () => {
     const next = reducer(initialState, { type: 'renameTeam', id: 0, name: 'Каты' })
     expect(next.teams[0].name).toBe('Каты')
-    expect(next.teams[1].name).toBe(TEAM_NAMES[1])
+    expect(next.teams[1].name).toBe(initialState.teams[1].name)
   })
 
   it('setSetting змяняе адну наладу', () => {

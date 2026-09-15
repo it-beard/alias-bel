@@ -117,6 +117,41 @@
   gap: 12px;
 }
 
+.panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -6px -6px -2px 0;
+}
+
+.pillbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 14px 0 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.86rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    transform 0.1s,
+    background 0.15s;
+}
+
+.pillbtn:active {
+  transform: scale(0.96);
+  background: var(--surface-3);
+}
+
+.pillbtn__icon {
+  color: var(--accent);
+  transition: transform 0.3s ease;
+}
+
 .panel__title {
   font-size: 0.74rem;
   font-weight: 700;
@@ -138,22 +173,41 @@
 }
 
 .resume {
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
   border-left: 4px solid var(--team);
 }
 
-.resume__text {
+.resume__line {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
 }
 
-.resume__line {
-  font-size: 0.9rem;
+.resume__round {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.resume__team {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .field {
@@ -223,6 +277,17 @@
 
 .teamlist__item:last-child {
   border-bottom: 0;
+}
+
+.teamlist__input.is-rolled {
+  animation: namein 0.3s ease-out;
+}
+
+@keyframes namein {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
 }
 
 .teamlist__input {
@@ -479,14 +544,36 @@
 .scoreboard {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
+/* назва і ачкі ў першым радку, шкала пад імі — так даўгія назвы не абразаюцца */
 .scoreboard__row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) 1.5fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
+  column-gap: 12px;
+  row-gap: 6px;
+}
+
+.scoreboard__motif {
+  grid-column: 1;
+  grid-row: 1 / 3;
+}
+
+.scoreboard__name {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.scoreboard__score {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.scoreboard__bar {
+  grid-column: 2 / 4;
+  grid-row: 2;
 }
 
 .scoreboard__row.is-active .scoreboard__name {

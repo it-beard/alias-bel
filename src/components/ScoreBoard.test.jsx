@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import ScoreBoard from './ScoreBoard.jsx'
-import { makeTeams } from '../game/gameState.js'
+import { fixedTeams } from '../test/fixtures.js'
 import { ScriptContext } from '../i18n/script.js'
 
-const teams = makeTeams(3).map((t, i) => ({ ...t, score: [12, 0, 45][i] }))
+const teams = fixedTeams(3, [12, 0, 45])
 
 describe('ScoreBoard', () => {
   it('паказвае каманды, рахунак і актыўную каманду', () => {
@@ -37,7 +37,7 @@ describe('ScoreBoard', () => {
         <ScoreBoard teams={teams} activeIndex={0} target={30} />
       </ScriptContext.Provider>,
     )
-    expect(screen.getByText('Zubry')).toBeInTheDocument()
-    expect(screen.getByText('Vaŭki')).toBeInTheDocument()
+    expect(screen.getByText('Vusy Mulavina')).toBeInTheDocument()
+    expect(screen.getByText('Kałasy pad siarpom ŠI')).toBeInTheDocument()
   })
 })

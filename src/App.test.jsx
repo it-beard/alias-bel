@@ -2,8 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import App from './App.jsx'
 import { initialState } from './game/gameState.js'
-import { ANSWER_LOCK_MS, COUNTDOWN_STEP_MS, DEFAULT_SETTINGS, STORAGE_KEY } from './game/constants.js'
+import { ANSWER_LOCK_MS, COUNTDOWN_STEP_MS, DEFAULT_SETTINGS, RANDOM_TEAM_NAMES, STORAGE_KEY } from './game/constants.js'
 import { THEME_BG } from './theme.js'
+import { fixedTeams } from './test/fixtures.js'
 import { advance } from './test/timers.js'
 
 const NOW = new Date('2026-09-15T12:00:00Z').getTime()
@@ -39,6 +40,26 @@ describe('App', () => {
     fireEvent.click(screen.getByRole('radio', { name: '3' }))
     expect(saved().teams).toHaveLength(3)
     expect(document.documentElement.getAttribute('lang')).toBe('be')
+  })
+
+  it('без захаванага стану каманды атрымліваюць назвы толькі са спіса', () => {
+    render(<App />)
+    const names = [screen.getByLabelText('Назва каманды 1').value, screen.getByLabelText('Назва каманды 2').value]
+    names.forEach((name) => expect(RANDOM_TEAM_NAMES).toContain(name))
+    expect(names[0]).not.toBe(names[1])
+  })
+
+  it('старыя стандартныя назвы з захаванай гульні замяняюцца назвамі са спіса', () => {
+    seed({ ...initialState, teams: [{ id: 0, name: 'Зубры', score: 4 }, { id: 1, name: 'Буслы', score: 2 }] })
+    render(<App />)
+    const first = screen.getByLabelText('Назва каманды 1').value
+    const second = screen.getByLabelText('Назва каманды 2').value
+    expect(RANDOM_TEAM_NAMES).toContain(first)
+    expect(RANDOM_TEAM_NAMES).toContain(second)
+    expect(saved().teams.map((t) => ({ name: t.name, score: t.score }))).toEqual([
+      { name: first, score: 4 },
+      { name: second, score: 2 },
+    ])
   })
 
   it('аднаўляе захаваны стан, а незавершаны раунд вяртае да гатоўнасці', () => {
@@ -78,6 +99,25 @@ describe('App', () => {
     expect(document.documentElement.hasAttribute('data-theme')).toBe(false)
   })
 
+  it('выпадковыя назвы трапляюць у палі, захоўваюцца і пераходзяць у гульню', () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'Выпадковыя назвы' }))
+    const first = screen.getByLabelText('Назва каманды 1').value
+    const second = screen.getByLabelText('Назва каманды 2').value
+    expect(RANDOM_TEAM_NAMES).toContain(first)
+    expect(RANDOM_TEAM_NAMES).toContain(second)
+    expect(first).not.toBe(second)
+    expect(saved().teams.map((t) => t.name)).toEqual([first, second])
+
+    fireEvent.click(screen.getByRole('radio', { name: '3' }))
+    const third = screen.getByLabelText('Назва каманды 3').value
+    expect(RANDOM_TEAM_NAMES).toContain(third)
+    expect([first, second]).not.toContain(third)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Пачаць гульню' }))
+    expect(screen.getByRole('heading', { level: 2, name: first })).toBeInTheDocument()
+  })
+
   it('адкрывае і зачыняе правілы', () => {
     render(<App />)
     fireEvent.click(screen.getByRole('button', { name: 'Правілы' }))
@@ -87,11 +127,11 @@ describe('App', () => {
   })
 
   it('поўная партыя: дзве каманды да 20 ачкоў', () => {
-    seed({ ...initialState, settings: { ...DEFAULT_SETTINGS, roundSeconds: 30, targetScore: 20, sound: false, vibration: false } })
+    seed({ ...initialState, teams: fixedTeams(2), settings: { ...DEFAULT_SETTINGS, roundSeconds: 30, targetScore: 20, sound: false, vibration: false } })
     render(<App />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Пачаць гульню' }))
-    expect(screen.getByRole('heading', { level: 2, name: 'Зубры' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Вусы Мулявіна' })).toBeInTheDocument()
     expect(screen.getByText('Раунд 1')).toBeInTheDocument()
 
     startRound()
@@ -109,7 +149,7 @@ describe('App', () => {
     expect(screen.getAllByRole('button', { pressed: true })).toHaveLength(26)
     fireEvent.click(screen.getByRole('button', { name: 'Далей' }))
 
-    expect(screen.getByRole('heading', { level: 2, name: 'Буслы' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Крынж Еўфрасінні' })).toBeInTheDocument()
     expect(saved().teams[0].score).toBe(26)
     expect(saved().screen).toBe('ready')
 
@@ -120,7 +160,7 @@ describe('App', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Далей' }))
 
     expect(screen.getByText('Перамога')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 2, name: 'Зубры' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Вусы Мулявіна' })).toBeInTheDocument()
     expect(screen.getByText('26 ачкоў за 1 раунд')).toBeInTheDocument()
     expect(saved().screen).toBe('finish')
 

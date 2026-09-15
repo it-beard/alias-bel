@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { loadSaved, saveState } from './storage.js'
 import { initialState } from './gameState.js'
-import { STORAGE_KEY, TEAM_COLORS, TEAM_MOTIFS, TEAM_NAMES } from './constants.js'
+import { RANDOM_TEAM_NAMES, STORAGE_KEY, TEAM_COLORS, TEAM_MOTIFS } from './constants.js'
 
 function memoryStorage(initial = {}) {
   const map = new Map(Object.entries(initial))
@@ -78,8 +78,29 @@ describe('loadSaved', () => {
     expect(loaded.teams).toHaveLength(3)
     expect(loaded.teams[0]).toMatchObject({ id: 0, name: 'Каты', color: TEAM_COLORS[0], motif: TEAM_MOTIFS[0], score: 4 })
     expect(loaded.teams[1]).toMatchObject({ score: 0, motif: TEAM_MOTIFS[1] })
-    expect(loaded.teams[2].name).toBe(TEAM_NAMES[2])
+    expect(RANDOM_TEAM_NAMES).toContain(loaded.teams[2].name)
     expect(loaded.turnIndex).toBe(2)
+  })
+
+  it('старыя стандартныя назвы на сваіх месцах замяняюцца назвамі са спіса, свае застаюцца', () => {
+    const saved = {
+      screen: 'setup',
+      teams: [
+        { name: 'Зубры', score: 3 },
+        { name: 'Суседзі', score: 1 },
+        { name: 'Ваўкі', score: 0 },
+        { name: 'Зубры', score: 0 },
+      ],
+    }
+    const loaded = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify(saved) }))
+    const names = loaded.teams.map((team) => team.name)
+    expect(RANDOM_TEAM_NAMES).toContain(names[0])
+    expect(names[1]).toBe('Суседзі')
+    expect(RANDOM_TEAM_NAMES).toContain(names[2])
+    expect(names[0]).not.toBe(names[2])
+    // «Зубры» не на першым месцы — гэта ўжо свая назва гульцоў
+    expect(names[3]).toBe('Зубры')
+    expect(loaded.teams[0].score).toBe(3)
   })
 
   it('без камандаў бярэ каманды па змаўчанні', () => {

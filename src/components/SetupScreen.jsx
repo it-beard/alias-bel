@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { LEVELS, LEVEL_ORDER } from '../data/words.js'
-import { MAX_TEAMS, MIN_TEAMS, ROUND_TIMES, TARGET_SCORES } from '../game/constants.js'
-import { unlockAudio } from '../game/feedback.js'
+import { MAX_TEAMS, MIN_TEAMS, ROUND_TIMES, TARGET_SCORES, TEAM_NAME_MAX } from '../game/constants.js'
+import { unlockAudio, vibrate } from '../game/feedback.js'
 import { inProgress } from '../game/gameState.js'
 import { words } from '../game/plural.js'
 import { useScript, useT } from '../i18n/script.js'
@@ -15,6 +15,7 @@ export default function SetupScreen({ state, dispatch, onRules }) {
   const t = useT()
   const script = useScript()
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [rolls, setRolls] = useState(0)
   const { settings, teams } = state
   const set = (key, value) => dispatch({ type: 'setSetting', key, value })
   const canContinue = inProgress(state)
@@ -23,6 +24,11 @@ export default function SetupScreen({ state, dispatch, onRules }) {
   const start = () => {
     if (settings.sound) unlockAudio()
     dispatch({ type: 'startGame' })
+  }
+  const randomizeNames = () => {
+    if (settings.vibration) vibrate(12)
+    setRolls((n) => n + 1)
+    dispatch({ type: 'randomizeTeamNames' })
   }
   const resume = () => {
     if (settings.sound) unlockAudio()
@@ -51,20 +57,47 @@ export default function SetupScreen({ state, dispatch, onRules }) {
 
       {canContinue && (
         <section className="panel resume" style={{ '--team': teams[state.turnIndex]?.color }}>
-          <div className="resume__text">
+          <div className="panel__head">
             <h2 className="panel__title">{t('Незавершаная гульня')}</h2>
-            <p className="resume__line">
-              {t('Раунд')} {state.roundNo} · {teams.map((team) => `${t(team.name)} ${team.score}`).join(' · ')}
-            </p>
+            <button type="button" className="btn btn--primary btn--compact" onClick={resume}>
+              {t('Працягнуць')}
+            </button>
           </div>
-          <button type="button" className="btn btn--primary btn--compact" onClick={resume}>
-            {t('Працягнуць')}
-          </button>
+          <p className="resume__line">
+            <span className="resume__round">
+              {t('Раунд')} {state.roundNo}
+            </span>
+            {teams.map((team) => (
+              <span key={team.id} className="resume__team" style={{ '--team': team.color }}>
+                <Motif name={team.motif} size={14} />
+                <span className="sr-only">{t(team.name)} </span>
+                {team.score}
+              </span>
+            ))}
+          </p>
         </section>
       )}
 
       <section className="panel">
-        <h2 className="panel__title">{t('Каманды')}</h2>
+        <div className="panel__head">
+          <h2 className="panel__title">{t('Каманды')}</h2>
+          <button type="button" className="pillbtn" onClick={randomizeNames}>
+            <svg
+              className="pillbtn__icon"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              aria-hidden="true"
+              style={{ transform: `rotate(${rolls * 90}deg)` }}
+            >
+              <rect x="3.5" y="3.5" width="17" height="17" rx="4" fill="none" stroke="currentColor" strokeWidth="2" />
+              <circle cx="8.5" cy="8.5" r="1.7" fill="currentColor" />
+              <circle cx="12" cy="12" r="1.7" fill="currentColor" />
+              <circle cx="15.5" cy="15.5" r="1.7" fill="currentColor" />
+            </svg>
+            {t('Выпадковыя назвы')}
+          </button>
+        </div>
         <Segmented
           label={t('Колькасць каманд')}
           options={teamCounts.map((n) => ({ value: n, label: n }))}
@@ -76,9 +109,10 @@ export default function SetupScreen({ state, dispatch, onRules }) {
             <li key={team.id} className="teamlist__item" style={{ '--team': team.color }}>
               <Motif name={team.motif} size={20} className="teamlist__motif" />
               <input
-                className="teamlist__input"
+                key={rolls}
+                className={`teamlist__input${rolls > 0 ? ' is-rolled' : ''}`}
                 value={team.name}
-                maxLength={18}
+                maxLength={TEAM_NAME_MAX}
                 autoComplete="off"
                 enterKeyHint="done"
                 aria-label={`${t('Назва каманды')} ${i + 1}`}

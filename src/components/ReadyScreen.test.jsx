@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import ReadyScreen from './ReadyScreen.jsx'
-import { initialState, makeTeams } from '../game/gameState.js'
+import { initialState } from '../game/gameState.js'
+import { fixedTeams } from '../test/fixtures.js'
 import { COUNTDOWN_STEP_MS } from '../game/constants.js'
 import { sounds, unlockAudio, vibrate } from '../game/feedback.js'
 import { ScriptContext } from '../i18n/script.js'
@@ -12,7 +13,7 @@ vi.mock('../game/feedback.js', () => ({
   sounds: { tick: vi.fn(), start: vi.fn() },
 }))
 
-const ready = { ...initialState, screen: 'ready', teams: makeTeams(2).map((t, i) => ({ ...t, score: [5, 8][i] })), roundNo: 2 }
+const ready = { ...initialState, screen: 'ready', teams: fixedTeams(2, [5, 8]), roundNo: 2 }
 
 function setup(state = ready, script = 'cyr') {
   const dispatch = vi.fn()
@@ -32,7 +33,7 @@ describe('ReadyScreen', () => {
   it('паказвае раунд, каманду, рахунак і час раунда', () => {
     setup()
     expect(screen.getByText('Раунд 2')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 2, name: 'Зубры' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Вусы Мулявіна' })).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Знак каманды' })).toHaveAttribute('data-motif', 'sun')
     expect(screen.getByText('60 секунд')).toBeInTheDocument()
     expect(screen.getByText('Рахунак — да 30')).toBeInTheDocument()
@@ -100,7 +101,7 @@ describe('ReadyScreen', () => {
 
   it('у рэжыме лацінкі', () => {
     setup(ready, 'lat')
-    expect(screen.getByRole('heading', { level: 2, name: 'Zubry' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Vusy Mulavina' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Pačać raund/ })).toBeInTheDocument()
     expect(screen.getByText('Raund 2')).toBeInTheDocument()
   })

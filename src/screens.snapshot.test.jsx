@@ -6,7 +6,8 @@ import PlayScreen from './components/PlayScreen.jsx'
 import RoundResultScreen from './components/RoundResultScreen.jsx'
 import FinishScreen from './components/FinishScreen.jsx'
 import RulesSheet from './components/RulesSheet.jsx'
-import { initialState, makeTeams } from './game/gameState.js'
+import { initialState } from './game/gameState.js'
+import { fixedTeams } from './test/fixtures.js'
 import { ScriptContext } from './i18n/script.js'
 
 vi.mock('./game/feedback.js', () => ({
@@ -16,11 +17,11 @@ vi.mock('./game/feedback.js', () => ({
 }))
 
 const NOW = new Date('2026-09-15T12:00:00Z').getTime()
-const teams = makeTeams(3).map((t, i) => ({ ...t, score: [12, 7, 20][i] }))
+const teams = fixedTeams(3, [12, 7, 20])
 const noop = () => {}
 
 const states = {
-  setup: { ...initialState, teams: makeTeams(2) },
+  setup: { ...initialState, teams: fixedTeams(2) },
   ready: { ...initialState, screen: 'ready', teams, roundNo: 2, turnIndex: 1 },
   play: { ...initialState, screen: 'play', teams, current: 'вясёлка', deck: ['соль'], endsAt: NOW + 42_000, results: [{ word: 'хлеб', guessed: true }] },
   result: { ...initialState, screen: 'result', teams, results: [{ word: 'хлеб', guessed: true }, { word: 'соль', guessed: false }] },

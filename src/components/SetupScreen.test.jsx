@@ -3,7 +3,9 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import SetupScreen from './SetupScreen.jsx'
 import { initialState, makeTeams } from '../game/gameState.js'
 import { ScriptContext } from '../i18n/script.js'
-import { unlockAudio } from '../game/feedback.js'
+import { unlockAudio, vibrate } from '../game/feedback.js'
+import { TEAM_NAME_MAX } from '../game/constants.js'
+import { fixedTeams } from '../test/fixtures.js'
 
 vi.mock('../game/feedback.js', () => ({
   unlockAudio: vi.fn(),
@@ -11,7 +13,9 @@ vi.mock('../game/feedback.js', () => ({
   vibrate: vi.fn(),
 }))
 
-function setup(state = initialState, script = 'cyr') {
+const base = { ...initialState, teams: fixedTeams(2) }
+
+function setup(state = base, script = 'cyr') {
   const dispatch = vi.fn()
   const onRules = vi.fn()
   render(
@@ -26,8 +30,8 @@ describe('SetupScreen', () => {
   it('паказвае назву, дзве каманды і бягучыя налады раунда', () => {
     setup()
     expect(screen.getByRole('heading', { level: 1, name: 'Аліяс' })).toBeInTheDocument()
-    expect(screen.getByLabelText('Назва каманды 1')).toHaveValue('Зубры')
-    expect(screen.getByLabelText('Назва каманды 2')).toHaveValue('Буслы')
+    expect(screen.getByLabelText('Назва каманды 1')).toHaveValue('Вусы Мулявіна')
+    expect(screen.getByLabelText('Назва каманды 2')).toHaveValue('Крынж Еўфрасінні')
     expect(screen.getByRole('radio', { name: '2' })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('radio', { name: 'Лёгкі' })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('radio', { name: '60 с' })).toHaveAttribute('aria-checked', 'true')
@@ -59,6 +63,26 @@ describe('SetupScreen', () => {
     expect(dispatch).toHaveBeenCalledWith({ type: 'renameTeam', id: 0, name: 'Каты' })
   })
 
+  it('кнопка «Выпадковыя назвы» раздае назвы з вібрацыяй', () => {
+    vi.mocked(vibrate).mockClear()
+    const { dispatch } = setup()
+    const input = screen.getByLabelText('Назва каманды 1')
+    expect(input).not.toHaveClass('is-rolled')
+    expect(input).toHaveAttribute('maxLength', String(TEAM_NAME_MAX))
+    fireEvent.click(screen.getByRole('button', { name: 'Выпадковыя назвы' }))
+    expect(dispatch).toHaveBeenCalledWith({ type: 'randomizeTeamNames' })
+    expect(vibrate).toHaveBeenCalledWith(12)
+    expect(screen.getByLabelText('Назва каманды 1')).toHaveClass('is-rolled')
+  })
+
+  it('без вібрацыі кнопка выпадковых назваў не вібруе', () => {
+    vi.mocked(vibrate).mockClear()
+    const { dispatch } = setup({ ...base, settings: { ...initialState.settings, vibration: false } })
+    fireEvent.click(screen.getByRole('button', { name: 'Выпадковыя назвы' }))
+    expect(dispatch).toHaveBeenCalledWith({ type: 'randomizeTeamNames' })
+    expect(vibrate).not.toHaveBeenCalled()
+  })
+
   it('мяняе ўзровень, час і мэту', () => {
     const { dispatch } = setup()
     fireEvent.click(screen.getByRole('radio', { name: 'Складаны' }))
@@ -77,7 +101,7 @@ describe('SetupScreen', () => {
   })
 
   it('для рэжыму «усе разам» паказвае агульную колькасць', () => {
-    setup({ ...initialState, settings: { ...initialState.settings, level: 'all' } })
+    setup({ ...base, settings: { ...initialState.settings, level: 'all' } })
     expect(screen.getByText('Мяшанка ўсіх узроўняў · 886 слоў')).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: 'Усе' })).toHaveAttribute('aria-checked', 'true')
   })
@@ -93,20 +117,24 @@ describe('SetupScreen', () => {
 
   it('без гуку не чапае аўдыя', () => {
     vi.mocked(unlockAudio).mockClear()
-    setup({ ...initialState, settings: { ...initialState.settings, sound: false } })
+    setup({ ...base, settings: { ...initialState.settings, sound: false } })
     fireEvent.click(screen.getByRole('button', { name: 'Пачаць гульню' }))
     expect(unlockAudio).not.toHaveBeenCalled()
   })
 
   it('сола-рэжым паказвае падказку', () => {
-    setup({ ...initialState, teams: makeTeams(1) })
+    setup({ ...base, teams: makeTeams(1) })
     expect(screen.getByText(/Сола-рэжым/)).toBeInTheDocument()
   })
 
   it('прапануе працягнуць незавершаную гульню', () => {
-    const teams = makeTeams(2).map((t, i) => ({ ...t, score: [7, 3][i] }))
-    const { dispatch } = setup({ ...initialState, teams, roundNo: 2, turnIndex: 1 })
-    expect(screen.getByText('Раунд 2 · Зубры 7 · Буслы 3')).toBeInTheDocument()
+    const teams = fixedTeams(2, [7, 3])
+    const { dispatch } = setup({ ...base, teams, roundNo: 2, turnIndex: 1 })
+    const panel = screen.getByRole('heading', { name: 'Незавершаная гульня' }).closest('section')
+    expect(panel).toHaveTextContent('Раунд 2')
+    expect(panel).toHaveTextContent('Вусы Мулявіна 7')
+    expect(panel).toHaveTextContent('Крынж Еўфрасінні 3')
+    expect(panel.querySelectorAll('[data-motif]')).toHaveLength(2)
     fireEvent.click(screen.getByRole('button', { name: 'Працягнуць' }))
     expect(dispatch).toHaveBeenCalledWith({ type: 'continueGame' })
     fireEvent.click(screen.getByRole('button', { name: 'Новая гульня' }))
@@ -114,11 +142,12 @@ describe('SetupScreen', () => {
   })
 
   it('у рэжыме лацінкі інтэрфейс на лацінцы, а назвы камандаў рэдагуюцца як ёсць', () => {
-    setup({ ...initialState, settings: { ...initialState.settings, script: 'lat' } }, 'lat')
+    setup({ ...base, settings: { ...initialState.settings, script: 'lat' } }, 'lat')
     expect(screen.getByRole('heading', { level: 1, name: 'Alias' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Pačać hulniu' })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: 'Lohki' })).toHaveAttribute('aria-checked', 'true')
-    expect(screen.getByLabelText('Nazva kamandy 1')).toHaveValue('Зубры')
+    expect(screen.getByLabelText('Nazva kamandy 1')).toHaveValue('Вусы Мулявіна')
+    expect(screen.getByRole('button', { name: 'Vypadkovyja nazvy' })).toBeInTheDocument()
     expect(screen.getByText('Prostyja štodzionnyja słovy · 340 słoŭ')).toBeInTheDocument()
   })
 })

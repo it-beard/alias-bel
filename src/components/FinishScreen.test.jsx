@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import FinishScreen from './FinishScreen.jsx'
 import { initialState, makeTeams } from '../game/gameState.js'
+import { fixedTeams } from '../test/fixtures.js'
 import { sounds, vibrate } from '../game/feedback.js'
 import { ScriptContext } from '../i18n/script.js'
 
@@ -25,14 +26,14 @@ describe('FinishScreen', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('называе пераможцу, сартуе табліцу і грае перамогу', () => {
-    const teams = makeTeams(3).map((t, i) => ({ ...t, score: [12, 31, 20][i] }))
+    const teams = fixedTeams(3, [12, 31, 20])
     setup({ teams })
     expect(screen.getByText('Перамога')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 2, name: 'Буслы' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Крынж Еўфрасінні' })).toBeInTheDocument()
     expect(screen.getByText('31 ачко за 4 раунды')).toBeInTheDocument()
     const rows = screen.getAllByRole('listitem')
-    expect(rows[0]).toHaveTextContent('Буслы')
-    expect(rows[2]).toHaveTextContent('Зубры')
+    expect(rows[0]).toHaveTextContent('Крынж Еўфрасінні')
+    expect(rows[2]).toHaveTextContent('Вусы Мулявіна')
     expect(sounds.win).toHaveBeenCalledTimes(1)
     expect(vibrate).toHaveBeenCalledTimes(1)
   })
@@ -67,10 +68,10 @@ describe('FinishScreen', () => {
   })
 
   it('у рэжыме лацінкі', () => {
-    const teams = makeTeams(2).map((t, i) => ({ ...t, score: [30, 10][i] }))
+    const teams = fixedTeams(2, [30, 10])
     setup({ teams }, 'lat')
     expect(screen.getByText('Pieramoha')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 2, name: 'Zubry' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Vusy Mulavina' })).toBeInTheDocument()
     expect(screen.getByText('30 ačkoŭ za 4 raundy')).toBeInTheDocument()
   })
 })

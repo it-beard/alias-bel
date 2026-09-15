@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import PlayScreen from './PlayScreen.jsx'
 import { initialState } from '../game/gameState.js'
+import { fixedTeams } from '../test/fixtures.js'
 import { ANSWER_LOCK_MS } from '../game/constants.js'
 import { sounds, vibrate } from '../game/feedback.js'
 import { ScriptContext } from '../i18n/script.js'
@@ -17,6 +18,7 @@ const NOW = new Date('2026-09-15T12:00:00Z').getTime()
 
 const playing = () => ({
   ...initialState,
+  teams: fixedTeams(2),
   screen: 'play',
   current: 'хлеб',
   deck: ['соль', 'мора'],
@@ -45,7 +47,7 @@ describe('PlayScreen', () => {
   it('паказвае слова, каманду, таймер і нулявы рахунак', () => {
     setup()
     expect(screen.getByText('хлеб')).toBeInTheDocument()
-    expect(screen.getByText('Зубры')).toBeInTheDocument()
+    expect(screen.getByText('Вусы Мулявіна')).toBeInTheDocument()
     expect(screen.getByRole('timer')).toHaveTextContent('60')
     expect(screen.getByLabelText('Ачкі за раунд')).toHaveTextContent('0')
     expect(screen.getByText('1', { selector: '.card__index' })).toBeInTheDocument()

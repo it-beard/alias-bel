@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { isCyrillic, toLatin } from './latin.js'
 import { EASY, HARD, MEDIUM } from '../data/words.js'
+import { RANDOM_TEAM_NAMES } from '../game/constants.js'
 
 const cases = [
   // базавыя літары
@@ -14,7 +15,7 @@ const cases = [
   ['цукар', 'cukar'],
   // ў
   ['воўк', 'voŭk'],
-  ['Ваўкі', 'Vaŭki'],
+  ['Ваўчыца', 'Vaŭčyca'],
   ['Магілёў', 'Mahiloŭ'],
   ['Барысаў', 'Barysaŭ'],
   // цвёрдае і мяккае л
@@ -78,11 +79,11 @@ const cases = [
   ['Шчучын', 'Ščučyn'],
   ['Свіслач', 'Svisłač'],
   ['Раўбічы', 'Raŭbičy'],
-  // назвы каманд
-  ['Зубры', 'Zubry'],
-  ['Буслы', 'Busły'],
-  ['Вожыкі', 'Vožyki'],
-  ['Рысі', 'Rysi'],
+  // жывёлы
+  ['зубр', 'zubr'],
+  ['бусел', 'busieł'],
+  ['рысь', 'ryś'],
+  ['ласі', 'łasi'],
   // фразы інтэрфейсу
   ['Пачаць гульню', 'Pačać hulniu'],
   ['Правілы', 'Praviły'],
@@ -138,5 +139,29 @@ describe('isCyrillic', () => {
     expect(isCyrillic('a')).toBe(false)
     expect(isCyrillic('1')).toBe(false)
     expect(isCyrillic(undefined)).toBe(false)
+  })
+})
+
+describe('выпадковыя назвы камандаў на лацінцы', () => {
+  it.each([
+    ['Вусы Мулявіна', 'Vusy Mulavina'],
+    ['Крынж Еўфрасінні', 'Krynž Jeŭfrasinni'],
+    ['Каласы пад сярпом ШІ', 'Kałasy pad siarpom ŠI'],
+    ['Жонкі Ягайлы', 'Žonki Jahajły'],
+    ['Коні караля Стаха', 'Koni karala Stacha'],
+    ['Карона Вітаўта', 'Karona Vitaŭta'],
+    ['Косы Касцюшкі', 'Kosy Kasciuški'],
+    ['Барада Барадуліна', 'Barada Baradulina'],
+    ['Ваўчыцы Усяслава', 'Vaŭčycy Usiasłava'],
+    ['Вусы Скарыны', 'Vusy Skaryny'],
+    ['Смочкі Барадуліна', 'Smočki Baradulina'],
+    ['Вусы Купалы', 'Vusy Kupały'],
+    ['Мары Глобуса', 'Mary Hłobusa'],
+  ])('%s → %s', (input, expected) => {
+    expect(toLatin(input)).toBe(expected)
+  })
+
+  it('праверана кожная назва са спіса', () => {
+    for (const name of RANDOM_TEAM_NAMES) expect(toLatin(name), name).not.toMatch(/[\u0400-\u04ff]/)
   })
 })

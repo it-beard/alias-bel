@@ -1,10 +1,16 @@
 import { createDeck, drawWord } from './deck.js'
-import { DEFAULT_SETTINGS, TEAM_COLORS, TEAM_MOTIFS, TEAM_NAMES } from './constants.js'
+import { DEFAULT_SETTINGS, TEAM_COLORS, TEAM_MOTIFS } from './constants.js'
+import { fillNames, pickRandomNames } from './teamNames.js'
 
+/**
+ * Каманды з колерамі і знакамі па парадку. Назвы бяруцца з `previous`,
+ * а новыя каманды атрымліваюць выпадковыя назвы са спіса без паўтораў.
+ */
 export function makeTeams(count, previous = []) {
-  return Array.from({ length: count }, (_, i) => ({
+  const names = fillNames(Array.from({ length: count }, (_, i) => previous[i]?.name))
+  return names.map((name, i) => ({
     id: i,
-    name: previous[i]?.name ?? TEAM_NAMES[i],
+    name,
     color: TEAM_COLORS[i],
     motif: TEAM_MOTIFS[i],
     score: 0,
@@ -50,6 +56,14 @@ export function reducer(state, action) {
 
     case 'setTeamCount':
       return { ...state, teams: makeTeams(action.count, state.teams) }
+
+    case 'randomizeTeamNames': {
+      const names = pickRandomNames(
+        state.teams.length,
+        state.teams.map((team) => team.name),
+      )
+      return { ...state, teams: state.teams.map((team, i) => ({ ...team, name: names[i] })) }
+    }
 
     case 'renameTeam':
       return {
