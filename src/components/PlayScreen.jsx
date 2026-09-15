@@ -8,7 +8,7 @@ import { roundScore } from '../game/gameState.js'
 import { ANSWER_LOCK_MS } from '../game/constants.js'
 import { wordSize } from '../game/wordSize.js'
 import { useScript, useT } from '../i18n/script.js'
-import { Band, Motif } from './Ornament.jsx'
+import { Motif } from './Ornament.jsx'
 
 export default function PlayScreen({ state, dispatch }) {
   const t = useT()
@@ -97,12 +97,11 @@ export default function PlayScreen({ state, dispatch }) {
           lang={script === 'lat' ? 'be-Latn' : 'be'}
           {...swipe.handlers}
         >
-          <Band pattern="zigzag" height={8} className="card__band" />
+          <Motif name={team.motif} size={18} className="card__motif" />
           <p className="card__word" key={results.length} data-len={wordSize(word)}>
             {word}
           </p>
           <p className="card__index">{results.length + 1}</p>
-          <Band pattern="zigzag" height={8} className="card__band card__band--bottom" />
           <span className="card__stamp card__stamp--ok" style={{ opacity: Math.max(0, lean) }} aria-hidden="true">
             ✓
           </span>

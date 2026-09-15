@@ -1,21 +1,24 @@
+import { useState } from 'react'
 import { LEVELS, LEVEL_ORDER } from '../data/words.js'
-import { MAX_TEAMS, MIN_TEAMS, ROUND_TIMES, SCRIPTS, TARGET_SCORES, THEMES } from '../game/constants.js'
+import { MAX_TEAMS, MIN_TEAMS, ROUND_TIMES, TARGET_SCORES } from '../game/constants.js'
 import { unlockAudio } from '../game/feedback.js'
 import { inProgress } from '../game/gameState.js'
 import { words } from '../game/plural.js'
 import { useScript, useT } from '../i18n/script.js'
-import Chips from './Chips.jsx'
-import Toggle from './Toggle.jsx'
-import { Band, Motif } from './Ornament.jsx'
+import Segmented from './Segmented.jsx'
+import SettingsSheet from './SettingsSheet.jsx'
+import { Mark, Motif } from './Ornament.jsx'
 
 const teamCounts = Array.from({ length: MAX_TEAMS - MIN_TEAMS + 1 }, (_, i) => i + MIN_TEAMS)
 
 export default function SetupScreen({ state, dispatch, onRules }) {
   const t = useT()
   const script = useScript()
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const { settings, teams } = state
-  const set = (key) => (value) => dispatch({ type: 'setSetting', key, value })
+  const set = (key, value) => dispatch({ type: 'setSetting', key, value })
   const canContinue = inProgress(state)
+  const level = LEVELS[settings.level] ?? LEVELS.easy
 
   const start = () => {
     if (settings.sound) unlockAudio()
@@ -29,14 +32,25 @@ export default function SetupScreen({ state, dispatch, onRules }) {
   return (
     <div className="screen screen--scroll">
       <header className="brand">
-        <Band pattern="dotted" height={12} lines className="brand__band" />
-        <h1 className="brand__title">{script === 'lat' ? 'Alias' : 'Аліяс'}</h1>
+        <div className="brand__row">
+          <h1 className="brand__title">
+            <Mark className="brand__mark" />
+            {script === 'lat' ? 'Alias' : 'Аліяс'}
+          </h1>
+          <button type="button" className="iconbtn" onClick={() => setSettingsOpen(true)} aria-label={t('Налады')}>
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M4 7h16M4 12h16M4 17h16" />
+              <circle cx="9" cy="7" r="2.2" fill="currentColor" stroke="none" />
+              <circle cx="15" cy="12" r="2.2" fill="currentColor" stroke="none" />
+              <circle cx="7" cy="17" r="2.2" fill="currentColor" stroke="none" />
+            </svg>
+          </button>
+        </div>
         <p className="brand__subtitle">{t('тлумач словы па-беларуску')}</p>
-        <Band pattern="dotted" height={12} lines className="brand__band" />
       </header>
 
       {canContinue && (
-        <section className="panel panel--accent resume" style={{ '--team': teams[state.turnIndex]?.color }}>
+        <section className="panel resume" style={{ '--team': teams[state.turnIndex]?.color }}>
           <div className="resume__text">
             <h2 className="panel__title">{t('Незавершаная гульня')}</h2>
             <p className="resume__line">
@@ -51,7 +65,7 @@ export default function SetupScreen({ state, dispatch, onRules }) {
 
       <section className="panel">
         <h2 className="panel__title">{t('Каманды')}</h2>
-        <Chips
+        <Segmented
           label={t('Колькасць каманд')}
           options={teamCounts.map((n) => ({ value: n, label: n }))}
           value={teams.length}
@@ -60,7 +74,7 @@ export default function SetupScreen({ state, dispatch, onRules }) {
         <ul className="teamlist">
           {teams.map((team, i) => (
             <li key={team.id} className="teamlist__item" style={{ '--team': team.color }}>
-              <Motif name={team.motif} size={22} className="teamlist__motif" />
+              <Motif name={team.motif} size={20} className="teamlist__motif" />
               <input
                 className="teamlist__input"
                 value={team.name}
@@ -74,89 +88,41 @@ export default function SetupScreen({ state, dispatch, onRules }) {
           ))}
         </ul>
         {teams.length === 1 && (
-          <p className="hint">{t('Сола-рэжым: гуляеце адной камандай і спрабуеце дабіцца мэты за найменшую колькасць раундаў.')}</p>
+          <p className="panel__hint">{t('Сола-рэжым: адна каманда імкнецца да мэты за найменшую колькасць раундаў.')}</p>
         )}
       </section>
 
       <section className="panel">
         <h2 className="panel__title">{t('Словы')}</h2>
-        <div className="levels" role="radiogroup" aria-label={t('Складанасць слоў')}>
-          {LEVEL_ORDER.map((id) => {
-            const level = LEVELS[id]
-            const on = settings.level === id
-            return (
-              <button
-                key={id}
-                type="button"
-                role="radio"
-                aria-checked={on}
-                className={`level${on ? ' is-on' : ''}`}
-                onClick={() => set('level')(id)}
-              >
-                <span className="level__label">{t(level.label)}</span>
-                <span className="level__hint">{t(level.hint)}</span>
-                <span className="level__count">{t(words(new Set(level.words).size))}</span>
-              </button>
-            )
-          })}
-        </div>
-        <div className="row">
-          <span className="row__label">{t('Алфавіт')}</span>
-          <Chips
-            label={t('Алфавіт')}
-            options={SCRIPTS.map((s) => ({ value: s.id, label: t(s.label) }))}
-            value={settings.script}
-            onChange={set('script')}
-          />
-        </div>
+        <Segmented
+          label={t('Складанасць слоў')}
+          options={LEVEL_ORDER.map((id) => ({ value: id, label: t(LEVELS[id].short) }))}
+          value={settings.level}
+          onChange={(value) => set('level', value)}
+        />
+        <p className="panel__hint">
+          {t(level.hint)} · {t(words(new Set(level.words).size))}
+        </p>
       </section>
 
       <section className="panel">
         <h2 className="panel__title">{t('Раунд')}</h2>
-        <div className="row">
-          <span className="row__label">{t('Час раунда')}</span>
-          <Chips
+        <div className="field">
+          <span className="field__label">{t('Час')}</span>
+          <Segmented
             label={t('Час раунда')}
             options={ROUND_TIMES.map((s) => ({ value: s, label: `${s} ${t('с')}` }))}
             value={settings.roundSeconds}
-            onChange={set('roundSeconds')}
+            onChange={(value) => set('roundSeconds', value)}
           />
         </div>
-        <div className="row">
-          <span className="row__label">{t('Гуляем да')}</span>
-          <Chips
+        <div className="field">
+          <span className="field__label">{t('Гуляем да')}</span>
+          <Segmented
             label={t('Мэтавы лік')}
             options={TARGET_SCORES.map((s) => ({ value: s, label: s }))}
             value={settings.targetScore}
-            onChange={set('targetScore')}
-          />
-        </div>
-      </section>
-
-      <section className="panel">
-        <h2 className="panel__title">{t('Дадаткова')}</h2>
-        <Toggle
-          label={t('Штраф за пас')}
-          hint={t('Прапушчанае слова адымае адно ачко')}
-          value={settings.skipPenalty}
-          onChange={set('skipPenalty')}
-        />
-        <Toggle
-          label={t('Апошняе слова')}
-          hint={t('Пасля сігналу дазваляецца дагуляць слова на экране')}
-          value={settings.lastWordRule}
-          onChange={set('lastWordRule')}
-        />
-        <Toggle label={t('Гук')} value={settings.sound} onChange={set('sound')} />
-        <Toggle label={t('Вібрацыя')} value={settings.vibration} onChange={set('vibration')} />
-        <div className="row">
-          <span className="row__label">{t('Тэма')}</span>
-          <Chips
-            label={t('Тэма')}
-            size="sm"
-            options={THEMES.map((th) => ({ value: th.id, label: t(th.label) }))}
-            value={settings.theme}
-            onChange={set('theme')}
+            onChange={(value) => set('targetScore', value)}
           />
         </div>
       </section>
@@ -169,6 +135,8 @@ export default function SetupScreen({ state, dispatch, onRules }) {
           {t(canContinue ? 'Новая гульня' : 'Пачаць гульню')}
         </button>
       </div>
+
+      {settingsOpen && <SettingsSheet settings={settings} onChange={set} onClose={() => setSettingsOpen(false)} />}
     </div>
   )
 }

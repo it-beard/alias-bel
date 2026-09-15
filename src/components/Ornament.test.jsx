@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { render } from '@testing-library/react'
-import { Band, Motif } from './Ornament.jsx'
+import { Mark, Motif } from './Ornament.jsx'
 import { MOTIFS, pathFor } from '../ornament/motifs.js'
 
 describe('Motif', () => {
@@ -25,28 +25,13 @@ describe('Motif', () => {
   })
 })
 
-describe('Band', () => {
-  it('будуе паўтаральны ўзор на ўсю шырыню', () => {
-    const { container } = render(<Band pattern="chain" height={14} />)
+describe('Mark', () => {
+  it('малюе ромб з унутраным ромбам', () => {
+    const { container } = render(<Mark size={30} className="brand__mark" />)
     const svg = container.querySelector('svg')
-    expect(svg).toHaveAttribute('data-band', 'chain')
-    expect(svg).toHaveAttribute('width', '100%')
-    expect(svg).toHaveAttribute('height', '14')
-    expect(svg.querySelector('pattern')).toHaveAttribute('width', '12')
-    expect(svg.querySelectorAll('rect')).toHaveLength(1)
-    expect(svg.querySelector('rect').getAttribute('fill')).toMatch(/^url\(#/)
-  })
-
-  it('з лініямі дадае абрамленне зверху і знізу', () => {
-    const { container } = render(<Band pattern="dotted" height={14} lines />)
-    const svg = container.querySelector('svg')
-    expect(svg.querySelectorAll('rect')).toHaveLength(3)
-    expect(svg).toHaveAttribute('height', '22')
-  })
-
-  it('невядомая стужка адкатваецца да ланцужка', () => {
-    const { container } = render(<Band pattern="nope" />)
-    expect(container.querySelector('svg')).toHaveAttribute('data-band', 'nope')
-    expect(container.querySelector('pattern path')).toHaveAttribute('d', expect.stringContaining('M'))
+    expect(svg).toHaveClass('mark', 'brand__mark')
+    expect(svg).toHaveAttribute('width', '30')
+    expect(svg).toHaveAttribute('aria-hidden', 'true')
+    expect(svg.querySelectorAll('path')).toHaveLength(2)
   })
 })

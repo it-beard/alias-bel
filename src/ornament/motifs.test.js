@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { BANDS, BAND_NAMES, MOTIFS, MOTIF_NAMES, cells, pathFor, size } from './motifs.js'
+import { MOTIFS, MOTIF_NAMES, cells, pathFor, size } from './motifs.js'
 import { TEAM_MOTIFS } from '../game/constants.js'
 
 const rectangular = (rows) => rows.every((row) => row.length === rows[0].length)
@@ -26,15 +26,6 @@ describe('матывы', () => {
   it('кожная каманда мае свой існуючы матыў', () => {
     expect(new Set(TEAM_MOTIFS).size).toBe(TEAM_MOTIFS.length)
     for (const name of TEAM_MOTIFS) expect(MOTIFS[name]).toBeDefined()
-  })
-})
-
-describe('стужкі', () => {
-  it.each(BAND_NAMES)('%s — прамавугольная матрыца з дапушчальных знакаў', (name) => {
-    const rows = BANDS[name]
-    expect(rectangular(rows)).toBe(true)
-    expect(onlyCells(rows)).toBe(true)
-    expect(cells(rows).length).toBeGreaterThan(0)
   })
 })
 

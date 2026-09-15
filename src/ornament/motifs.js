@@ -84,35 +84,6 @@ export const MOTIFS = {
 
 export const MOTIF_NAMES = Object.keys(MOTIFS)
 
-/** Стужкі (паўтаральныя ўзоры) для аздобных палосак. */
-export const BANDS = {
-  chain: [
-    '...X..',
-    '..X.X.',
-    '.X...X',
-    'X.....',
-    '.X...X',
-    '..X.X.',
-    '...X..',
-  ],
-  dotted: [
-    '...X..',
-    '..X.X.',
-    '.X...X',
-    'X..X..',
-    '.X...X',
-    '..X.X.',
-    '...X..',
-  ],
-  zigzag: [
-    'X...',
-    '.X.X',
-    '..X.',
-  ],
-}
-
-export const BAND_NAMES = Object.keys(BANDS)
-
 /** Каардынаты зашытых квадрацікаў матрыцы. */
 export function cells(rows) {
   const out = []

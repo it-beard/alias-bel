@@ -143,10 +143,10 @@ export const HARD = [
 ]
 
 export const LEVELS = {
-  easy: { id: 'easy', label: 'Лёгкі', hint: 'Простыя штодзённыя словы', words: EASY },
-  medium: { id: 'medium', label: 'Сярэдні', hint: 'Паняцці, прафесіі, дзеясловы', words: MEDIUM },
-  hard: { id: 'hard', label: 'Складаны', hint: 'Тэрміны і абстракцыі', words: HARD },
-  all: { id: 'all', label: 'Усе разам', hint: 'Мяшанка ўсіх узроўняў', words: [...EASY, ...MEDIUM, ...HARD] },
+  easy: { id: 'easy', label: 'Лёгкі', short: 'Лёгкі', hint: 'Простыя штодзённыя словы', words: EASY },
+  medium: { id: 'medium', label: 'Сярэдні', short: 'Сярэдні', hint: 'Паняцці, прафесіі, дзеясловы', words: MEDIUM },
+  hard: { id: 'hard', label: 'Складаны', short: 'Складаны', hint: 'Тэрміны і абстракцыі', words: HARD },
+  all: { id: 'all', label: 'Усе разам', short: 'Усе', hint: 'Мяшанка ўсіх узроўняў', words: [...EASY, ...MEDIUM, ...HARD] },
 }
 
 export const LEVEL_ORDER = ['easy', 'medium', 'hard', 'all']

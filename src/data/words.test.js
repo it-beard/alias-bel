@@ -44,6 +44,7 @@ describe('слоўнікі', () => {
     for (const id of LEVEL_ORDER) {
       expect(LEVELS[id].id).toBe(id)
       expect(LEVELS[id].label).toBeTruthy()
+      expect(LEVELS[id].short).toBeTruthy()
       expect(LEVELS[id].hint).toBeTruthy()
     }
   })

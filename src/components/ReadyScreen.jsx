@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import ScoreBoard from './ScoreBoard.jsx'
 import ConfirmSheet from './ConfirmSheet.jsx'
-import { Band, Motif } from './Ornament.jsx'
+import { Motif } from './Ornament.jsx'
 import { sounds, unlockAudio, vibrate } from '../game/feedback.js'
 import { COUNTDOWN_STEP_MS } from '../game/constants.js'
 import { useT } from '../i18n/script.js'
@@ -48,10 +48,9 @@ export default function ReadyScreen({ state, dispatch, onRules }) {
       </header>
 
       <div className="ready">
-        <Motif name={team.motif} size={72} className="ready__motif" title={t('Знак каманды')} />
+        <Motif name={team.motif} size={56} className="ready__motif" title={t('Знак каманды')} />
         <p className="ready__eyebrow">{t('Тлумачыць')}</p>
         <h2 className="ready__team">{t(team.name)}</h2>
-        <Band pattern="chain" height={10} className="ready__band" />
         <p className="ready__hint">
           {t('Перадайце тэлефон таму, хто тлумачыць. Астатнія ў камандзе адгадваюць слова — называць аднакаранёвыя словы нельга.')}
         </p>

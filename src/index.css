@@ -1,29 +1,26 @@
-/* ---------- палітра: лён, чырвань, бяроста ---------- */
+/* ---------- палітра: лён і чырвань, без лішняга ---------- */
 :root {
   --font-body: 'Manrope Variable', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-display: 'Unbounded Variable', var(--font-body);
 
-  --bg: #f4eee2;
-  --bg-soft: #ebe3d2;
-  --paper: #fffdf7;
-  --surface: rgba(255, 253, 247, 0.72);
-  --surface-2: rgba(84, 58, 36, 0.08);
-  --surface-3: rgba(84, 58, 36, 0.14);
-  --line: rgba(84, 58, 36, 0.16);
-  --text: #201b18;
-  --muted: #6e635a;
-  --accent: #c1272d;
-  --accent-deep: #9d1d24;
-  --on-accent: #fff8f0;
+  --bg: #f6f3ee;
+  --paper: #ffffff;
+  --surface-2: #efebe4;
+  --surface-3: #e3ded5;
+  --line: #e7e2d9;
+  --text: #1d1a17;
+  --muted: #7a726a;
+  --accent: #cf2033;
+  --accent-deep: #ad1a2b;
+  --on-accent: #ffffff;
   --ok: #2a7f4c;
-  --on-ok: #f3fff6;
-  --bad: #c1272d;
-  --weave: rgba(84, 58, 36, 0.035);
-  --shadow: 0 12px 32px -20px rgba(60, 40, 20, 0.5);
+  --on-ok: #ffffff;
+  --bad: #cf2033;
+  --shadow: 0 12px 32px -20px rgba(40, 30, 20, 0.35);
   --team: var(--accent);
-  --team-text: color-mix(in srgb, var(--team) 86%, black);
-  --radius: 18px;
-  --gap: 14px;
+  --team-text: color-mix(in srgb, var(--team) 88%, black);
+  --radius: 16px;
+  --gap: 16px;
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
 
@@ -35,47 +32,41 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #17141a;
-    --bg-soft: #1f1b23;
-    --paper: #26212b;
-    --surface: rgba(255, 255, 255, 0.05);
-    --surface-2: rgba(255, 255, 255, 0.09);
-    --surface-3: rgba(255, 255, 255, 0.15);
-    --line: rgba(255, 255, 255, 0.13);
-    --text: #f4eee3;
-    --muted: #a79d92;
-    --accent: #e0303f;
-    --accent-deep: #b52430;
-    --on-accent: #fff;
-    --ok: #48c07a;
-    --on-ok: #08160d;
+    --bg: #141215;
+    --paper: #1d1a1f;
+    --surface-2: #2a262e;
+    --surface-3: #39343e;
+    --line: #2d2932;
+    --text: #f3efe8;
+    --muted: #9d958c;
+    --accent: #e5364a;
+    --accent-deep: #c22a3c;
+    --on-accent: #ffffff;
+    --ok: #3fb872;
+    --on-ok: #0a1a10;
     --bad: #ff5f70;
-    --weave: rgba(255, 255, 255, 0.025);
-    --shadow: 0 12px 32px -20px rgba(0, 0, 0, 0.9);
-    --team-text: color-mix(in srgb, var(--team) 62%, white);
+    --shadow: 0 12px 32px -20px rgba(0, 0, 0, 0.8);
+    --team-text: color-mix(in srgb, var(--team) 65%, white);
     color-scheme: dark;
   }
 }
 
 :root[data-theme='dark'] {
-  --bg: #17141a;
-  --bg-soft: #1f1b23;
-  --paper: #26212b;
-  --surface: rgba(255, 255, 255, 0.05);
-  --surface-2: rgba(255, 255, 255, 0.09);
-  --surface-3: rgba(255, 255, 255, 0.15);
-  --line: rgba(255, 255, 255, 0.13);
-  --text: #f4eee3;
-  --muted: #a79d92;
-  --accent: #e0303f;
-  --accent-deep: #b52430;
-  --on-accent: #fff;
-  --ok: #48c07a;
-  --on-ok: #08160d;
+  --bg: #141215;
+  --paper: #1d1a1f;
+  --surface-2: #2a262e;
+  --surface-3: #39343e;
+  --line: #2d2932;
+  --text: #f3efe8;
+  --muted: #9d958c;
+  --accent: #e5364a;
+  --accent-deep: #c22a3c;
+  --on-accent: #ffffff;
+  --ok: #3fb872;
+  --on-ok: #0a1a10;
   --bad: #ff5f70;
-  --weave: rgba(255, 255, 255, 0.025);
-  --shadow: 0 12px 32px -20px rgba(0, 0, 0, 0.9);
-  --team-text: color-mix(in srgb, var(--team) 62%, white);
+  --shadow: 0 12px 32px -20px rgba(0, 0, 0, 0.8);
+  --team-text: color-mix(in srgb, var(--team) 65%, white);
   color-scheme: dark;
 }
 
@@ -98,19 +89,6 @@ body {
   line-height: 1.35;
 }
 
-/* фактура палатна: дзве перакрыжаваныя ніткі */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    repeating-linear-gradient(0deg, var(--weave) 0 1px, transparent 1px 3px),
-    repeating-linear-gradient(90deg, var(--weave) 0 1px, transparent 1px 3px),
-    var(--bg);
-}
-
 button,
 input {
   font: inherit;
@@ -130,7 +108,7 @@ button:disabled {
 
 button:focus-visible,
 input:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent);
   outline-offset: 2px;
 }
 

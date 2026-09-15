@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import ScoreBoard from './ScoreBoard.jsx'
-import { Band, Motif } from './Ornament.jsx'
+import { Motif } from './Ornament.jsx'
 import { sounds, vibrate } from '../game/feedback.js'
 import { points, rounds } from '../game/plural.js'
 import { useT } from '../i18n/script.js'
@@ -24,14 +24,12 @@ export default function FinishScreen({ state, dispatch }) {
   return (
     <div className="screen screen--scroll" style={{ '--team': best.color }}>
       <div className="finish">
-        <Band pattern="dotted" height={12} lines className="finish__band" />
-        {!draw && <Motif name={best.motif} size={80} className="finish__motif" />}
+        {!draw && <Motif name={best.motif} size={64} className="finish__motif" />}
         <p className="finish__eyebrow">{t(eyebrow)}</p>
         <h2 className="finish__team">{draw ? t('Роўны рахунак') : t(best.name)}</h2>
         <p className="finish__score">
           {t(points(best.score))} {t('за')} {t(rounds(state.roundNo))}
         </p>
-        <Band pattern="dotted" height={12} lines className="finish__band" />
       </div>
 
       <section className="panel">

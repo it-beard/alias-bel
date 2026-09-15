@@ -23,20 +23,32 @@ function setup(state = initialState, script = 'cyr') {
 }
 
 describe('SetupScreen', () => {
-  it('паказвае назву, дзве каманды і бягучыя налады', () => {
+  it('паказвае назву, дзве каманды і бягучыя налады раунда', () => {
     setup()
     expect(screen.getByRole('heading', { level: 1, name: 'Аліяс' })).toBeInTheDocument()
     expect(screen.getByLabelText('Назва каманды 1')).toHaveValue('Зубры')
     expect(screen.getByLabelText('Назва каманды 2')).toHaveValue('Буслы')
     expect(screen.getByRole('radio', { name: '2' })).toHaveAttribute('aria-checked', 'true')
-    expect(screen.getByRole('radio', { name: /Лёгкі/ })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('radio', { name: 'Лёгкі' })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('radio', { name: '60 с' })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('radio', { name: '30' })).toHaveAttribute('aria-checked', 'true')
-    expect(screen.getByRole('radio', { name: 'Кірыліца' })).toHaveAttribute('aria-checked', 'true')
-    expect(screen.getByRole('radio', { name: 'Як у сістэме' })).toHaveAttribute('aria-checked', 'true')
-    expect(screen.getByRole('switch', { name: /Штраф за пас/ })).toHaveAttribute('aria-checked', 'true')
     expect(screen.queryByText(/Сола-рэжым/)).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Працягнуць' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('рэдкія налады схаваныя ў шторцы', () => {
+    const { dispatch } = setup()
+    expect(screen.queryByRole('radio', { name: 'Лацінка' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('switch')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Налады' }))
+    expect(screen.getByRole('dialog', { name: 'Налады' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('radio', { name: 'Лацінка' }))
+    expect(dispatch).toHaveBeenCalledWith({ type: 'setSetting', key: 'script', value: 'lat' })
+    fireEvent.click(screen.getByRole('switch', { name: 'Гук' }))
+    expect(dispatch).toHaveBeenCalledWith({ type: 'setSetting', key: 'sound', value: false })
+    fireEvent.click(screen.getByRole('button', { name: 'Гатова' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('мяняе колькасць камандаў і назвы', () => {
@@ -47,42 +59,27 @@ describe('SetupScreen', () => {
     expect(dispatch).toHaveBeenCalledWith({ type: 'renameTeam', id: 0, name: 'Каты' })
   })
 
-  it('мяняе ўзровень, час, мэту, алфавіт і тэму', () => {
+  it('мяняе ўзровень, час і мэту', () => {
     const { dispatch } = setup()
-    fireEvent.click(screen.getByRole('radio', { name: /Складаны/ }))
+    fireEvent.click(screen.getByRole('radio', { name: 'Складаны' }))
     fireEvent.click(screen.getByRole('radio', { name: '45 с' }))
     fireEvent.click(screen.getByRole('radio', { name: '50' }))
-    fireEvent.click(screen.getByRole('radio', { name: 'Лацінка' }))
-    fireEvent.click(screen.getByRole('radio', { name: 'Цёмная' }))
     expect(dispatch.mock.calls.map((c) => c[0])).toEqual([
       { type: 'setSetting', key: 'level', value: 'hard' },
       { type: 'setSetting', key: 'roundSeconds', value: 45 },
       { type: 'setSetting', key: 'targetScore', value: 50 },
-      { type: 'setSetting', key: 'script', value: 'lat' },
-      { type: 'setSetting', key: 'theme', value: 'dark' },
     ])
   })
 
-  it('пераключальнікі мяняюць налады', () => {
-    const { dispatch } = setup()
-    fireEvent.click(screen.getByRole('switch', { name: /Штраф за пас/ }))
-    fireEvent.click(screen.getByRole('switch', { name: /Апошняе слова/ }))
-    fireEvent.click(screen.getByRole('switch', { name: 'Гук' }))
-    fireEvent.click(screen.getByRole('switch', { name: 'Вібрацыя' }))
-    expect(dispatch.mock.calls.map((c) => c[0])).toEqual([
-      { type: 'setSetting', key: 'skipPenalty', value: false },
-      { type: 'setSetting', key: 'lastWordRule', value: false },
-      { type: 'setSetting', key: 'sound', value: false },
-      { type: 'setSetting', key: 'vibration', value: false },
-    ])
-  })
-
-  it('паказвае колькасць слоў кожнага ўзроўню', () => {
+  it('падказвае, што за словы ў выбраным узроўні', () => {
     setup()
-    expect(screen.getByText('340 слоў')).toBeInTheDocument()
-    expect(screen.getByText('304 словы')).toBeInTheDocument()
-    expect(screen.getByText('242 словы')).toBeInTheDocument()
-    expect(screen.getByText('886 слоў')).toBeInTheDocument()
+    expect(screen.getByText('Простыя штодзённыя словы · 340 слоў')).toBeInTheDocument()
+  })
+
+  it('для рэжыму «усе разам» паказвае агульную колькасць', () => {
+    setup({ ...initialState, settings: { ...initialState.settings, level: 'all' } })
+    expect(screen.getByText('Мяшанка ўсіх узроўняў · 886 слоў')).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: 'Усе' })).toHaveAttribute('aria-checked', 'true')
   })
 
   it('пачынае гульню, разблакаваўшы аўдыя, і адкрывае правілы', () => {
@@ -120,8 +117,8 @@ describe('SetupScreen', () => {
     setup({ ...initialState, settings: { ...initialState.settings, script: 'lat' } }, 'lat')
     expect(screen.getByRole('heading', { level: 1, name: 'Alias' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Pačać hulniu' })).toBeInTheDocument()
-    expect(screen.getByRole('radio', { name: 'Łacinka' })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('radio', { name: 'Lohki' })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByLabelText('Nazva kamandy 1')).toHaveValue('Зубры')
-    expect(screen.getByText('340 słoŭ')).toBeInTheDocument()
+    expect(screen.getByText('Prostyja štodzionnyja słovy · 340 słoŭ')).toBeInTheDocument()
   })
 })

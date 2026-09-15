@@ -1,7 +1,6 @@
-import { useId } from 'react'
-import { BANDS, MOTIFS, pathFor, size } from '../ornament/motifs.js'
+import { MOTIFS, pathFor, size } from '../ornament/motifs.js'
 
-/** Адзін матыў арнаменту; колер бярэцца з currentColor. */
+/** Знак каманды — матыў арнаменту ў стылі вышыўкі; колер бярэцца з currentColor. */
 export function Motif({ name, size: px = 24, title, className = '' }) {
   const motif = MOTIFS[name] ?? MOTIFS.sun
   const { width, height } = size(motif.rows)
@@ -22,30 +21,12 @@ export function Motif({ name, size: px = 24, title, className = '' }) {
   )
 }
 
-/** Гарызантальная арнаментальная стужка на ўсю шырыню кантэйнера. */
-export function Band({ pattern = 'chain', height = 14, className = '', lines = false }) {
-  const rows = BANDS[pattern] ?? BANDS.chain
-  const id = useId()
-  const grid = size(rows)
-  const cell = height / grid.height
-  const tileWidth = grid.width * cell
+/** Знак гульні — ромб, найпрасцейшы элемент беларускага арнаменту. */
+export function Mark({ size: px = 22, className = '' }) {
   return (
-    <svg
-      className={`band ${className}`.trim()}
-      height={lines ? height + cell * 4 : height}
-      width="100%"
-      aria-hidden="true"
-      shapeRendering="crispEdges"
-      data-band={pattern}
-    >
-      <defs>
-        <pattern id={id} patternUnits="userSpaceOnUse" width={tileWidth} height={height} x="50%">
-          <path d={pathFor(rows, cell)} fill="currentColor" />
-        </pattern>
-      </defs>
-      {lines && <rect x="0" y="0" width="100%" height={cell} fill="currentColor" />}
-      <rect x="0" y={lines ? cell * 2 : 0} width="100%" height={height} fill={`url(#${id})`} />
-      {lines && <rect x="0" y={height + cell * 3} width="100%" height={cell} fill="currentColor" />}
+    <svg className={`mark ${className}`.trim()} viewBox="0 0 24 24" width={px} height={px} aria-hidden="true">
+      <path d="M12 2.5 21.5 12 12 21.5 2.5 12z" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="miter" />
+      <path d="M12 8.2 15.8 12 12 15.8 8.2 12z" fill="currentColor" />
     </svg>
   )
 }

@@ -1,5 +1,4 @@
 import { useT } from '../i18n/script.js'
-import { Band } from './Ornament.jsx'
 
 export default function RulesSheet({ onClose }) {
   const t = useT()
@@ -9,7 +8,6 @@ export default function RulesSheet({ onClose }) {
       <div className="sheet__body">
         <div className="sheet__grip" aria-hidden="true" />
         <h2 className="sheet__title">{t('Правілы')}</h2>
-        <Band pattern="chain" height={10} className="sheet__band" />
         <ol className="rules">
           <li>{t('Гульцы дзеляцца на каманды (ад 1 да 5). Каманды тлумачаць словы па чарзе.')}</li>
           <li>{t('Адзін гулец бярэ тэлефон і тлумачыць слова з экрана, астатнія ў камандзе адгадваюць.')}</li>

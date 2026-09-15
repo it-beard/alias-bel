@@ -1,6 +1,6 @@
 import { roundScore } from '../game/gameState.js'
 import { useT } from '../i18n/script.js'
-import { Band, Motif } from './Ornament.jsx'
+import { Motif } from './Ornament.jsx'
 
 export default function RoundResultScreen({ state, dispatch }) {
   const t = useT()
@@ -21,7 +21,6 @@ export default function RoundResultScreen({ state, dispatch }) {
 
       <div className="result">
         <p className="result__delta">{delta > 0 ? `+${delta}` : delta}</p>
-        <Band pattern="chain" height={10} className="result__band" />
         <p className="result__summary">
           {t('адгадана')} {guessed} · {t('пас')} {skipped}
         </p>

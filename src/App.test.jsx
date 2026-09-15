@@ -56,6 +56,7 @@ describe('App', () => {
 
   it('пераключае алфавіт на лацінку для ўсяго інтэрфейсу', () => {
     render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'Налады' }))
     fireEvent.click(screen.getByRole('radio', { name: 'Лацінка' }))
     expect(screen.getByRole('heading', { level: 1, name: 'Alias' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Pačać hulniu' })).toBeInTheDocument()
@@ -67,12 +68,13 @@ describe('App', () => {
 
   it('пераключае тэму і абнаўляе колер радка стану', () => {
     render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'Налады' }))
     fireEvent.click(screen.getByRole('radio', { name: 'Цёмная' }))
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
     expect(document.querySelector('meta[name="theme-color"]').getAttribute('content')).toBe(THEME_BG.dark)
     fireEvent.click(screen.getByRole('radio', { name: 'Светлая' }))
     expect(document.documentElement.getAttribute('data-theme')).toBe('light')
-    fireEvent.click(screen.getByRole('radio', { name: 'Як у сістэме' }))
+    fireEvent.click(screen.getByRole('radio', { name: 'Аўта' }))
     expect(document.documentElement.hasAttribute('data-theme')).toBe(false)
   })
 

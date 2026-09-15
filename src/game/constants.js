@@ -18,7 +18,7 @@ export const SCRIPTS = [
 ]
 
 export const THEMES = [
-  { id: 'auto', label: 'Як у сістэме' },
+  { id: 'auto', label: 'Аўта' },
   { id: 'light', label: 'Светлая' },
   { id: 'dark', label: 'Цёмная' },
 ]
