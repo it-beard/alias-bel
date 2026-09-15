@@ -1,14 +1,35 @@
 export const MIN_TEAMS = 1
 export const MAX_TEAMS = 5
 
-export const TEAM_COLORS = ['#f472b6', '#60a5fa', '#34d399', '#fbbf24', '#a78bfa']
+/** Колеры камандаў: чырвань, васілёк, лес, бурштын, верас. */
+export const TEAM_COLORS = ['#c1272d', '#2b6cc4', '#2f8a4b', '#c58a12', '#6b4fa3']
 
 export const TEAM_NAMES = ['Зубры', 'Буслы', 'Ваўкі', 'Вожыкі', 'Рысі']
+
+/** Матыў арнаменту кожнай каманды (гл. src/ornament/motifs.js). */
+export const TEAM_MOTIFS = ['sun', 'star', 'tree', 'field', 'hooks']
 
 export const ROUND_TIMES = [30, 45, 60, 90]
 export const TARGET_SCORES = [20, 30, 50, 75]
 
+export const SCRIPTS = [
+  { id: 'cyr', label: 'Кірыліца' },
+  { id: 'lat', label: 'Лацінка' },
+]
+
+export const THEMES = [
+  { id: 'auto', label: 'Як у сістэме' },
+  { id: 'light', label: 'Светлая' },
+  { id: 'dark', label: 'Цёмная' },
+]
+
 export const STORAGE_KEY = 'alias-bel/state/v1'
+
+/** Затрымка перад пачаткам раунда (3, 2, 1), мс на крок. */
+export const COUNTDOWN_STEP_MS = 800
+
+/** Абарона ад падвойнага націску на кнопкі адказу, мс. */
+export const ANSWER_LOCK_MS = 300
 
 export const DEFAULT_SETTINGS = {
   level: 'easy',
@@ -18,4 +39,6 @@ export const DEFAULT_SETTINGS = {
   lastWordRule: true,
   sound: true,
   vibration: true,
+  script: 'cyr',
+  theme: 'auto',
 }

@@ -26,7 +26,7 @@ export function useWakeLock(active) {
     return () => {
       cancelled = true
       document.removeEventListener('visibilitychange', onVisibility)
-      lock?.release().catch(() => {})
+      Promise.resolve(lock?.release?.()).catch(() => {})
       lock = null
     }
   }, [active])

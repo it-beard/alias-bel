@@ -1,22 +1,82 @@
+/* ---------- палітра: лён, чырвань, бяроста ---------- */
 :root {
-  --bg: #0e1018;
-  --bg-soft: #161a27;
-  --surface: rgba(255, 255, 255, 0.06);
-  --surface-2: rgba(255, 255, 255, 0.1);
-  --line: rgba(255, 255, 255, 0.12);
-  --text: #f2f4f8;
-  --muted: #98a1b6;
-  --ok: #34d399;
-  --bad: #fb7185;
-  --team: #60a5fa;
+  --font-body: 'Manrope Variable', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Unbounded Variable', var(--font-body);
+
+  --bg: #f4eee2;
+  --bg-soft: #ebe3d2;
+  --paper: #fffdf7;
+  --surface: rgba(255, 253, 247, 0.72);
+  --surface-2: rgba(84, 58, 36, 0.08);
+  --surface-3: rgba(84, 58, 36, 0.14);
+  --line: rgba(84, 58, 36, 0.16);
+  --text: #201b18;
+  --muted: #6e635a;
+  --accent: #c1272d;
+  --accent-deep: #9d1d24;
+  --on-accent: #fff8f0;
+  --ok: #2a7f4c;
+  --on-ok: #f3fff6;
+  --bad: #c1272d;
+  --weave: rgba(84, 58, 36, 0.035);
+  --shadow: 0 12px 32px -20px rgba(60, 40, 20, 0.5);
+  --team: var(--accent);
+  --team-text: color-mix(in srgb, var(--team) 86%, black);
   --radius: 18px;
   --gap: 14px;
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
 
-  color-scheme: dark;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color-scheme: light;
+  font-family: var(--font-body);
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #17141a;
+    --bg-soft: #1f1b23;
+    --paper: #26212b;
+    --surface: rgba(255, 255, 255, 0.05);
+    --surface-2: rgba(255, 255, 255, 0.09);
+    --surface-3: rgba(255, 255, 255, 0.15);
+    --line: rgba(255, 255, 255, 0.13);
+    --text: #f4eee3;
+    --muted: #a79d92;
+    --accent: #e0303f;
+    --accent-deep: #b52430;
+    --on-accent: #fff;
+    --ok: #48c07a;
+    --on-ok: #08160d;
+    --bad: #ff5f70;
+    --weave: rgba(255, 255, 255, 0.025);
+    --shadow: 0 12px 32px -20px rgba(0, 0, 0, 0.9);
+    --team-text: color-mix(in srgb, var(--team) 62%, white);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #17141a;
+  --bg-soft: #1f1b23;
+  --paper: #26212b;
+  --surface: rgba(255, 255, 255, 0.05);
+  --surface-2: rgba(255, 255, 255, 0.09);
+  --surface-3: rgba(255, 255, 255, 0.15);
+  --line: rgba(255, 255, 255, 0.13);
+  --text: #f4eee3;
+  --muted: #a79d92;
+  --accent: #e0303f;
+  --accent-deep: #b52430;
+  --on-accent: #fff;
+  --ok: #48c07a;
+  --on-ok: #08160d;
+  --bad: #ff5f70;
+  --weave: rgba(255, 255, 255, 0.025);
+  --shadow: 0 12px 32px -20px rgba(0, 0, 0, 0.9);
+  --team-text: color-mix(in srgb, var(--team) 62%, white);
+  color-scheme: dark;
 }
 
 * {
@@ -35,16 +95,19 @@ body {
   background: var(--bg);
   color: var(--text);
   overscroll-behavior: none;
+  line-height: 1.35;
 }
 
+/* фактура палатна: дзве перакрыжаваныя ніткі */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
+  pointer-events: none;
   background:
-    radial-gradient(120vw 60vh at 50% -10%, rgba(96, 165, 250, 0.18), transparent 70%),
-    radial-gradient(90vw 50vh at 10% 110%, rgba(244, 114, 182, 0.14), transparent 70%),
+    repeating-linear-gradient(0deg, var(--weave) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, var(--weave) 0 1px, transparent 1px 3px),
     var(--bg);
 }
 
@@ -58,6 +121,17 @@ button {
   border: 0;
   background: none;
   cursor: pointer;
+  touch-action: manipulation;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  outline-offset: 2px;
 }
 
 h1,
@@ -72,4 +146,8 @@ ul,
 ol {
   padding: 0;
   list-style: none;
+}
+
+svg {
+  display: block;
 }

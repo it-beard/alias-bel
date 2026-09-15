@@ -35,6 +35,10 @@ export const sounds = {
   correct: () => tone({ freq: 880, duration: 0.12, type: 'triangle' }),
   skip: () => tone({ freq: 220, duration: 0.16, type: 'sawtooth', gain: 0.05 }),
   tick: () => tone({ freq: 1200, duration: 0.05, type: 'square', gain: 0.03 }),
+  start: () => {
+    tone({ freq: 660, duration: 0.1, type: 'triangle', gain: 0.07 })
+    tone({ freq: 990, duration: 0.18, type: 'triangle', gain: 0.07, delay: 0.1 })
+  },
   timeUp: () => {
     tone({ freq: 440, duration: 0.2, type: 'square', gain: 0.07 })
     tone({ freq: 330, duration: 0.35, type: 'square', gain: 0.07, delay: 0.2 })

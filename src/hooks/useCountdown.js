@@ -1,34 +1,34 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useReducer, useRef } from 'react'
 
 /**
  * Адлік да абсалютнай адзнакі часу. Абсалютны час, а не лічыльнік крокаў,
  * бо мабільныя браўзеры прытрымліваюць таймеры ў фоне.
+ * `onEnd` выклікаецца адзін раз, калі час выйшаў.
  */
 export function useCountdown(endsAt, onEnd) {
-  const [left, setLeft] = useState(() => remaining(endsAt))
+  const [, tick] = useReducer((n) => n + 1, 0)
+  const onEndRef = useRef(onEnd)
 
   useEffect(() => {
-    if (!endsAt) {
-      setLeft(0)
-      return
-    }
-    setLeft(remaining(endsAt))
+    onEndRef.current = onEnd
+  })
+
+  useEffect(() => {
+    if (!endsAt) return
     const id = setInterval(() => {
-      const value = remaining(endsAt)
-      setLeft(value)
-      if (value <= 0) {
+      tick()
+      if (remaining(endsAt) <= 0) {
         clearInterval(id)
-        onEnd?.()
+        onEndRef.current?.()
       }
     }, 100)
     return () => clearInterval(id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [endsAt])
 
-  return left
+  return remaining(endsAt)
 }
 
-function remaining(endsAt) {
+export function remaining(endsAt, now = Date.now()) {
   if (!endsAt) return 0
-  return Math.max(0, Math.ceil((endsAt - Date.now()) / 1000))
+  return Math.max(0, Math.ceil((endsAt - now) / 1000))
 }

@@ -1,11 +1,12 @@
 import { createDeck, drawWord } from './deck.js'
-import { DEFAULT_SETTINGS, TEAM_COLORS, TEAM_NAMES } from './constants.js'
+import { DEFAULT_SETTINGS, TEAM_COLORS, TEAM_MOTIFS, TEAM_NAMES } from './constants.js'
 
 export function makeTeams(count, previous = []) {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
     name: previous[i]?.name ?? TEAM_NAMES[i],
     color: TEAM_COLORS[i],
+    motif: TEAM_MOTIFS[i],
     score: 0,
   }))
 }
@@ -17,6 +18,7 @@ export const initialState = {
   turnIndex: 0,
   roundNo: 1,
   deck: [],
+  deckLevel: null,
   current: null,
   results: [],
   endsAt: null,
@@ -29,6 +31,11 @@ export function roundScore(results, skipPenalty) {
   const guessed = results.filter((r) => r.guessed).length
   const skipped = results.length - guessed
   return skipPenalty ? guessed - skipped : guessed
+}
+
+/** Ці ёсць незавершаная гульня, да якой можна вярнуцца з наладаў. */
+export function inProgress(state) {
+  return state.roundNo > 1 || state.turnIndex > 0 || state.teams.some((t) => t.score !== 0)
 }
 
 function nextWord(state) {
@@ -62,8 +69,26 @@ export function reducer(state, action) {
         turnIndex: 0,
         roundNo: 1,
         deck: createDeck(state.settings.level),
+        deckLevel: state.settings.level,
         results: [],
         current: null,
+        endsAt: null,
+        pausedLeft: null,
+        lastWord: false,
+      }
+    }
+
+    case 'continueGame': {
+      const sameDeck = state.deckLevel === state.settings.level && state.deck.length > 0
+      return {
+        ...state,
+        screen: 'ready',
+        deck: sameDeck ? state.deck : createDeck(state.settings.level),
+        deckLevel: state.settings.level,
+        results: [],
+        current: null,
+        endsAt: null,
+        pausedLeft: null,
         lastWord: false,
       }
     }
@@ -79,9 +104,10 @@ export function reducer(state, action) {
     }
 
     case 'answer': {
+      if (!state.current) return state
       const results = [...state.results, { word: state.current, guessed: action.guessed }]
       if (state.lastWord) {
-        return { ...state, results, current: null, screen: 'result', endsAt: null }
+        return { ...state, results, current: null, screen: 'result', endsAt: null, lastWord: false }
       }
       return nextWord({ ...state, results })
     }
@@ -103,10 +129,12 @@ export function reducer(state, action) {
       }
 
     case 'pause':
+      if (state.pausedLeft !== null || state.lastWord) return state
       return { ...state, pausedLeft: Math.max(0, (state.endsAt ?? Date.now()) - Date.now()), endsAt: null }
 
     case 'resume':
-      return { ...state, endsAt: Date.now() + (state.pausedLeft ?? 0), pausedLeft: null }
+      if (state.pausedLeft === null) return state
+      return { ...state, endsAt: Date.now() + state.pausedLeft, pausedLeft: null }
 
     case 'commitRound': {
       const delta = roundScore(state.results, state.settings.skipPenalty)

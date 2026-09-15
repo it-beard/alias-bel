@@ -2,14 +2,22 @@ import { useEffect, useRef } from 'react'
 import { useCountdown } from '../hooks/useCountdown.js'
 import { useWakeLock } from '../hooks/useWakeLock.js'
 import { useSwipe } from '../hooks/useSwipe.js'
+import { useKeys } from '../hooks/useKeys.js'
 import { sounds, vibrate } from '../game/feedback.js'
 import { roundScore } from '../game/gameState.js'
+import { ANSWER_LOCK_MS } from '../game/constants.js'
+import { wordSize } from '../game/wordSize.js'
+import { useScript, useT } from '../i18n/script.js'
+import { Band, Motif } from './Ornament.jsx'
 
 export default function PlayScreen({ state, dispatch }) {
+  const t = useT()
+  const script = useScript()
   const { settings, current, results, lastWord, endsAt, pausedLeft } = state
   const team = state.teams[state.turnIndex]
   const paused = pausedLeft !== null
   const lastTick = useRef(null)
+  const lockUntil = useRef(0)
 
   const left = useCountdown(endsAt, () => {
     if (settings.sound) sounds.timeUp()
@@ -27,77 +35,117 @@ export default function PlayScreen({ state, dispatch }) {
   }, [left, paused, lastWord, settings.sound])
 
   const answer = (guessed) => {
+    if (paused) return
+    const now = Date.now()
+    if (now < lockUntil.current) return
+    lockUntil.current = now + ANSWER_LOCK_MS
     if (settings.sound) (guessed ? sounds.correct : sounds.skip)()
     if (settings.vibration) vibrate(guessed ? 30 : [20, 40, 20])
     dispatch({ type: 'answer', guessed })
   }
 
-  const swipe = useSwipe({ onRight: () => answer(true), onLeft: () => answer(false) })
+  const togglePause = () => {
+    if (lastWord) return
+    dispatch({ type: paused ? 'resume' : 'pause' })
+  }
+
+  const swipe = useSwipe({ onRight: () => answer(true), onLeft: () => answer(false), enabled: !paused })
+  useKeys({ ArrowRight: () => answer(true), ArrowLeft: () => answer(false), ' ': togglePause, Escape: togglePause })
 
   const shownLeft = paused ? Math.ceil(pausedLeft / 1000) : left
   const progress = lastWord ? 0 : Math.max(0, Math.min(1, shownLeft / settings.roundSeconds))
+  const urgent = !lastWord && !paused && left <= 5
   const running = roundScore(results, settings.skipPenalty)
+  const word = t(current ?? '')
+  const lean = Math.max(-1, Math.min(1, swipe.offset / swipe.threshold))
 
   return (
     <div className="screen screen--play" style={{ '--team': team.color }}>
       <header className="playbar">
-        <button type="button" className="playbar__btn" onClick={() => dispatch({ type: 'pause' })} aria-label="Паўза">
-          ❚❚
+        <button
+          type="button"
+          className="playbar__btn"
+          onClick={togglePause}
+          aria-label={t('Паўза')}
+          disabled={lastWord}
+        >
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+            <rect x="4" y="3" width="4" height="14" rx="1" fill="currentColor" />
+            <rect x="12" y="3" width="4" height="14" rx="1" fill="currentColor" />
+          </svg>
         </button>
-        <span className="playbar__team">{team.name}</span>
-        <span className="playbar__score" aria-label="Ачкі за раунд">
+        <span className="playbar__team">
+          <Motif name={team.motif} size={18} />
+          <span className="playbar__name">{t(team.name)}</span>
+        </span>
+        <span className="playbar__score" aria-label={t('Ачкі за раунд')}>
           {running > 0 ? `+${running}` : running}
         </span>
       </header>
 
-      <div className={`timer${!lastWord && !paused && left <= 5 ? ' is-urgent' : ''}`}>
+      <div className={`timer${urgent ? ' is-urgent' : ''}${lastWord ? ' is-last' : ''}`} role="timer" aria-live="off">
         <div className="timer__track">
           <div className="timer__fill" style={{ transform: `scaleX(${progress})` }} />
         </div>
-        <span className="timer__value">{lastWord ? 'Апошняе слова!' : `${shownLeft} с`}</span>
+        <span className="timer__value">{lastWord ? t('Апошняе слова!') : shownLeft}</span>
       </div>
 
-      <div className="card" {...swipe}>
-        <p className="card__word" style={{ fontSize: wordSize(current) }}>
-          {current}
+      <div className="cardzone">
+        <div
+          className={`card${swipe.dragging ? ' is-dragging' : ''}`}
+          style={{ transform: `translateX(${swipe.offset}px) rotate(${lean * 5}deg)` }}
+          lang={script === 'lat' ? 'be-Latn' : 'be'}
+          {...swipe.handlers}
+        >
+          <Band pattern="zigzag" height={8} className="card__band" />
+          <p className="card__word" key={results.length} data-len={wordSize(word)}>
+            {word}
+          </p>
+          <p className="card__index">{results.length + 1}</p>
+          <Band pattern="zigzag" height={8} className="card__band card__band--bottom" />
+          <span className="card__stamp card__stamp--ok" style={{ opacity: Math.max(0, lean) }} aria-hidden="true">
+            ✓
+          </span>
+          <span className="card__stamp card__stamp--skip" style={{ opacity: Math.max(0, -lean) }} aria-hidden="true">
+            ✕
+          </span>
+        </div>
+        <p className="card__swipe">
+          ← {t('пас')} · {t('адгадана')} →
         </p>
-        <p className="card__swipe">← пас&nbsp;&nbsp;·&nbsp;&nbsp;адгадана →</p>
       </div>
 
       <div className="answers">
-        <button type="button" className="answer answer--skip" onClick={() => answer(false)}>
-          <span className="answer__icon">✕</span>
-          Пас
+        <button type="button" className="answer answer--skip" onClick={() => answer(false)} disabled={paused}>
+          <span className="answer__icon" aria-hidden="true">
+            ✕
+          </span>
+          {t('Пас')}
         </button>
-        <button type="button" className="answer answer--ok" onClick={() => answer(true)}>
-          <span className="answer__icon">✓</span>
-          Адгадана
+        <button type="button" className="answer answer--ok" onClick={() => answer(true)} disabled={paused}>
+          <span className="answer__icon" aria-hidden="true">
+            ✓
+          </span>
+          {t('Адгадана')}
         </button>
       </div>
 
       {paused && (
-        <div className="overlay">
+        <div className="overlay" role="dialog" aria-modal="true" aria-label={t('Паўза')}>
           <div className="overlay__box">
-            <h2 className="overlay__title">Паўза</h2>
-            <p className="overlay__text">Засталося {Math.ceil((pausedLeft ?? 0) / 1000)} с</p>
+            <h2 className="overlay__title">{t('Паўза')}</h2>
+            <p className="overlay__text">
+              {t('Засталося')} {Math.ceil((pausedLeft ?? 0) / 1000)} {t('с')}
+            </p>
             <button type="button" className="btn btn--primary" onClick={() => dispatch({ type: 'resume' })}>
-              Працягнуць
+              {t('Працягнуць')}
             </button>
             <button type="button" className="btn btn--ghost" onClick={() => dispatch({ type: 'endRound' })}>
-              Спыніць раунд
+              {t('Спыніць раунд')}
             </button>
           </div>
         </div>
       )}
     </div>
   )
-}
-
-/** Доўгія словы паказваем драбнейшым кеглем, каб змяшчаліся на вузкім экране. */
-function wordSize(word) {
-  const n = (word ?? '').length
-  if (n <= 7) return 'clamp(2.6rem, 15vw, 4.2rem)'
-  if (n <= 11) return 'clamp(2rem, 11vw, 3.4rem)'
-  if (n <= 15) return 'clamp(1.6rem, 8.5vw, 2.8rem)'
-  return 'clamp(1.3rem, 7vw, 2.2rem)'
 }

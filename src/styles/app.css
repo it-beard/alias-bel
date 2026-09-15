@@ -11,34 +11,49 @@
   display: flex;
   flex-direction: column;
   gap: var(--gap);
-  padding: calc(var(--safe-t) + 16px) 16px calc(var(--safe-b) + 16px);
+  padding: calc(var(--safe-t) + 14px) 16px calc(var(--safe-b) + 16px);
 }
 
 .screen--scroll {
   overflow-y: auto;
 }
 
+/* ---------- арнамент ---------- */
+.band {
+  color: var(--accent);
+  flex: none;
+}
+
+.motif {
+  color: var(--team);
+  flex: none;
+}
+
 /* ---------- шапка ---------- */
 .brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0 2px;
   text-align: center;
-  padding: 10px 0 2px;
 }
 
 .brand__title {
-  font-size: clamp(2.4rem, 12vw, 3.4rem);
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 11vw, 3.2rem);
   font-weight: 800;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  background: linear-gradient(100deg, #f472b6, #60a5fa 45%, #34d399);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--accent);
+  line-height: 1;
+  margin-top: 4px;
 }
 
 .brand__subtitle {
-  margin-top: 6px;
   color: var(--muted);
   font-size: 0.95rem;
+  margin-bottom: 4px;
 }
 
 .topbar {
@@ -46,20 +61,34 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  min-height: 40px;
+  min-height: 44px;
+}
+
+.topbar--center {
+  justify-content: center;
 }
 
 .topbar__title {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--muted);
 }
 
+.topbar__title--team {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--team-text);
+  font-size: 1.05rem;
+}
+
 .topbar__btn {
-  padding: 8px 12px;
+  min-height: 40px;
+  padding: 8px 14px;
   border-radius: 999px;
-  background: var(--surface);
-  color: var(--muted);
+  background: var(--surface-2);
+  color: var(--text);
   font-size: 0.9rem;
+  font-weight: 600;
 }
 
 /* ---------- блокі ---------- */
@@ -71,14 +100,39 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  box-shadow: var(--shadow);
+}
+
+.panel--accent {
+  border-color: color-mix(in srgb, var(--team) 45%, transparent);
+  background: color-mix(in srgb, var(--team) 9%, var(--surface));
 }
 
 .panel__title {
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
+}
+
+.resume {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.resume__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.resume__line {
+  font-size: 0.9rem;
+  color: var(--text);
 }
 
 .hint {
@@ -102,6 +156,7 @@
 
 .row__label {
   font-size: 0.95rem;
+  font-weight: 600;
 }
 
 /* ---------- чыпы ---------- */
@@ -118,14 +173,23 @@
   border-radius: 12px;
   background: var(--surface-2);
   border: 1px solid transparent;
-  font-weight: 600;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  font-weight: 700;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+
+.chips--sm .chip {
+  min-height: 38px;
+  padding: 0 12px;
+  font-size: 0.9rem;
 }
 
 .chip.is-on {
-  background: color-mix(in srgb, var(--team) 26%, transparent);
-  border-color: var(--team);
-  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent-deep);
+  color: var(--on-accent);
 }
 
 /* ---------- каманды ---------- */
@@ -138,20 +202,11 @@
 .teamlist__item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   background: var(--surface-2);
   border-radius: 12px;
   padding: 0 12px;
-}
-
-.teamlist__dot,
-.scoreboard__dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--team);
-  flex: none;
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--team) 22%, transparent);
+  border-left: 4px solid var(--team);
 }
 
 .teamlist__input {
@@ -162,7 +217,7 @@
   outline: none;
   padding: 12px 0;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* ---------- узроўні ---------- */
@@ -180,16 +235,18 @@
   border-radius: 14px;
   background: var(--surface-2);
   border: 1px solid transparent;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
 
 .level.is-on {
-  background: color-mix(in srgb, var(--team) 20%, transparent);
-  border-color: var(--team);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: var(--accent);
 }
 
 .level__label {
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .level__hint {
@@ -226,7 +283,7 @@
 }
 
 .toggle__label {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .toggle__hint {
@@ -239,7 +296,7 @@
   width: 50px;
   height: 30px;
   border-radius: 999px;
-  background: var(--surface-2);
+  background: var(--surface-3);
   padding: 3px;
   transition: background 0.18s;
 }
@@ -254,6 +311,7 @@
   height: 24px;
   border-radius: 50%;
   background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
   transition: transform 0.18s;
 }
 
@@ -271,18 +329,21 @@
 .actions--sticky {
   position: sticky;
   bottom: 0;
-  padding-top: 10px;
-  background: linear-gradient(to top, var(--bg) 55%, transparent);
+  padding-top: 12px;
+  padding-bottom: 2px;
+  background: linear-gradient(to top, var(--bg) 60%, transparent);
 }
 
 .btn {
   flex: 1;
-  min-height: 52px;
+  min-height: 54px;
   border-radius: 14px;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 800;
   padding: 0 18px;
-  transition: transform 0.1s, filter 0.15s;
+  transition:
+    transform 0.1s,
+    filter 0.15s;
 }
 
 .btn:active {
@@ -290,8 +351,14 @@
 }
 
 .btn--primary {
-  background: linear-gradient(100deg, #60a5fa, #a78bfa);
-  color: #0b1020;
+  background: linear-gradient(180deg, var(--accent), var(--accent-deep));
+  color: var(--on-accent);
+  box-shadow: 0 10px 24px -14px var(--accent);
+}
+
+.btn--danger {
+  background: var(--bad);
+  color: #fff;
 }
 
 .btn--ghost {
@@ -300,20 +367,30 @@
   flex: 0 1 auto;
 }
 
+.btn--wide {
+  flex: 1;
+}
+
+.btn--compact {
+  flex: none;
+  min-height: 46px;
+  padding: 0 16px;
+}
+
 .bigbtn {
   width: 100%;
-  min-height: 96px;
+  min-height: 100px;
   border-radius: 24px;
-  background: var(--team);
-  color: #0b1020;
-  font-size: 1.4rem;
+  background: linear-gradient(180deg, var(--team), color-mix(in srgb, var(--team) 80%, black));
+  color: #fff;
+  font-size: 1.45rem;
   font-weight: 800;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  box-shadow: 0 14px 40px -16px var(--team);
+  box-shadow: 0 16px 40px -18px var(--team);
   transition: transform 0.1s;
 }
 
@@ -324,7 +401,7 @@
 .bigbtn__sub {
   font-size: 0.85rem;
   font-weight: 600;
-  opacity: 0.75;
+  opacity: 0.8;
 }
 
 /* ---------- экран гатоўнасці ---------- */
@@ -334,19 +411,35 @@
   align-items: center;
   text-align: center;
   gap: 10px;
-  padding: 18px 0 6px;
+  padding: 10px 0 4px;
+}
+
+.ready__motif {
+  padding: 14px;
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--team) 12%, transparent);
+  box-sizing: content-box;
 }
 
 .ready__eyebrow {
   color: var(--muted);
-  font-size: 0.82rem;
-  letter-spacing: 0.1em;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  font-weight: 700;
 }
 
 .ready__team {
-  font-size: clamp(2rem, 10vw, 2.8rem);
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 9vw, 2.6rem);
   font-weight: 800;
+  color: var(--team-text);
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.ready__band {
+  width: 60%;
   color: var(--team);
 }
 
@@ -354,8 +447,50 @@
   color: var(--muted);
   font-size: 0.88rem;
   line-height: 1.5;
-  max-width: 34ch;
+  max-width: 36ch;
   margin-bottom: 8px;
+}
+
+/* ---------- адлік 3-2-1 ---------- */
+.overlay.overlay--count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  color: var(--text);
+  z-index: 20;
+}
+
+.count__team {
+  font-weight: 800;
+  color: var(--team-text);
+  font-size: 1.2rem;
+}
+
+.count__num {
+  font-family: var(--font-display);
+  font-size: clamp(6rem, 40vw, 11rem);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--team-text);
+  animation: countpop 0.75s ease-out;
+}
+
+.count__hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+@keyframes countpop {
+  from {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
 }
 
 /* ---------- рахунак ---------- */
@@ -367,17 +502,17 @@
 
 .scoreboard__row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) 1.6fr auto;
+  grid-template-columns: auto minmax(0, 1fr) 1.5fr auto;
   align-items: center;
   gap: 10px;
 }
 
 .scoreboard__row.is-active .scoreboard__name {
-  color: var(--team);
+  color: var(--team-text);
 }
 
 .scoreboard__name {
-  font-weight: 600;
+  font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -386,7 +521,7 @@
 .scoreboard__bar {
   height: 8px;
   border-radius: 999px;
-  background: var(--surface-2);
+  background: var(--surface-3);
   overflow: hidden;
 }
 
@@ -399,6 +534,7 @@
 }
 
 .scoreboard__score {
+  font-family: var(--font-display);
   font-variant-numeric: tabular-nums;
   font-weight: 800;
   min-width: 2.2ch;
@@ -410,6 +546,7 @@
   height: 100dvh;
   overflow: hidden;
   justify-content: space-between;
+  gap: 12px;
 }
 
 .playbar {
@@ -423,21 +560,33 @@
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: var(--surface);
-  color: var(--muted);
-  font-size: 0.8rem;
-  letter-spacing: 0.1em;
+  background: var(--surface-2);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+}
+
+.playbar__btn:disabled {
+  opacity: 0.4;
 }
 
 .playbar__team {
-  font-weight: 700;
-  color: var(--team);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-weight: 800;
+  color: var(--team-text);
+}
+
+.playbar__name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .playbar__score {
+  font-family: var(--font-display);
   font-variant-numeric: tabular-nums;
   font-weight: 800;
   min-width: 3ch;
@@ -454,7 +603,7 @@
   flex: 1;
   height: 10px;
   border-radius: 999px;
-  background: var(--surface-2);
+  background: var(--surface-3);
   overflow: hidden;
 }
 
@@ -466,11 +615,19 @@
 }
 
 .timer__value {
+  font-family: var(--font-display);
   font-variant-numeric: tabular-nums;
-  font-weight: 700;
+  font-weight: 800;
+  font-size: 1.3rem;
   color: var(--muted);
-  min-width: 4ch;
+  min-width: 2.6ch;
   text-align: right;
+}
+
+.timer.is-last .timer__value {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--accent);
 }
 
 .timer.is-urgent .timer__fill {
@@ -488,22 +645,56 @@
   }
 }
 
-.card {
+.cardzone {
   flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card {
+  position: relative;
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 18px;
+  gap: 14px;
   text-align: center;
-  padding: 20px;
-  margin: 4px 0;
+  padding: 18px 20px;
   border-radius: 26px;
-  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  background: var(--paper);
   border: 1px solid var(--line);
-  touch-action: pan-y;
+  box-shadow: var(--shadow);
+  touch-action: none;
   user-select: none;
   -webkit-user-select: none;
+  cursor: grab;
+  transition: transform 0.22s ease;
+  will-change: transform;
+  container-type: inline-size;
+}
+
+.card.is-dragging {
+  transition: none;
+  cursor: grabbing;
+}
+
+.card__band {
+  position: absolute;
+  left: 20px;
+  top: 12px;
+  width: calc(100% - 40px);
+  color: var(--team);
+  opacity: 0.85;
+}
+
+.card__band--bottom {
+  top: auto;
+  bottom: 12px;
+  transform: scaleY(-1);
 }
 
 .card__word {
@@ -511,12 +702,79 @@
   line-height: 1.1;
   overflow-wrap: anywhere;
   hyphens: auto;
+  animation: wordin 0.22s ease-out;
+  max-width: 100%;
+}
+
+/* кегль ад шырыні карткі (cqw), а не экрана — так слова змяшчаецца і ў ландшафце;
+   радок з vw — запасны для браўзераў без container queries */
+.card__word[data-len='s'] {
+  font-size: clamp(2.6rem, 15vw, 4.8rem);
+  font-size: clamp(2.6rem, 18cqw, 4.8rem);
+}
+
+.card__word[data-len='m'] {
+  font-size: clamp(2rem, 11vw, 3.6rem);
+  font-size: clamp(2rem, 13cqw, 3.6rem);
+}
+
+.card__word[data-len='l'] {
+  font-size: clamp(1.6rem, 8.5vw, 2.8rem);
+  font-size: clamp(1.6rem, 10cqw, 2.8rem);
+}
+
+.card__word[data-len='xl'] {
+  font-size: clamp(1.3rem, 7vw, 2.2rem);
+  font-size: clamp(1.3rem, 8cqw, 2.2rem);
+}
+
+@keyframes wordin {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+}
+
+.card__index {
+  position: absolute;
+  right: 18px;
+  bottom: 26px;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.card__stamp {
+  position: absolute;
+  top: 26px;
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: 3px solid currentColor;
+  pointer-events: none;
+}
+
+.card__stamp--ok {
+  left: 22px;
+  color: var(--ok);
+  transform: rotate(-12deg);
+}
+
+.card__stamp--skip {
+  right: 22px;
+  color: var(--bad);
+  transform: rotate(12deg);
 }
 
 .card__swipe {
   color: var(--muted);
   font-size: 0.78rem;
   letter-spacing: 0.04em;
+  text-align: center;
 }
 
 .answers {
@@ -526,20 +784,26 @@
 }
 
 .answer {
-  min-height: 76px;
+  min-height: 84px;
   border-radius: 20px;
-  font-size: 1.05rem;
-  font-weight: 700;
+  font-size: 1.1rem;
+  font-weight: 800;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  transition: transform 0.1s;
+  transition:
+    transform 0.1s,
+    opacity 0.15s;
 }
 
 .answer:active {
   transform: scale(0.97);
+}
+
+.answer:disabled {
+  opacity: 0.5;
 }
 
 .answer__icon {
@@ -548,15 +812,59 @@
 }
 
 .answer--ok {
-  background: color-mix(in srgb, var(--ok) 22%, transparent);
-  border: 1px solid color-mix(in srgb, var(--ok) 55%, transparent);
-  color: var(--ok);
+  background: var(--ok);
+  color: var(--on-ok);
+  box-shadow: 0 10px 24px -14px var(--ok);
 }
 
 .answer--skip {
-  background: color-mix(in srgb, var(--bad) 18%, transparent);
-  border: 1px solid color-mix(in srgb, var(--bad) 45%, transparent);
+  background: color-mix(in srgb, var(--bad) 10%, transparent);
+  border: 2px solid color-mix(in srgb, var(--bad) 55%, transparent);
   color: var(--bad);
+}
+
+/* ландшафт на тэлефоне: картка па цэнтры, кнопкі па баках */
+@media (orientation: landscape) and (max-height: 520px) {
+  .screen--play {
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 2fr) 1fr;
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      'bar bar bar'
+      'timer timer timer'
+      'skip card ok';
+    gap: 10px;
+  }
+
+  .playbar {
+    grid-area: bar;
+  }
+
+  .timer {
+    grid-area: timer;
+  }
+
+  .cardzone {
+    grid-area: card;
+  }
+
+  .answers {
+    display: contents;
+  }
+
+  .answer--skip {
+    grid-area: skip;
+    min-height: 0;
+  }
+
+  .answer--ok {
+    grid-area: ok;
+    min-height: 0;
+  }
+
+  .card__swipe {
+    display: none;
+  }
 }
 
 /* ---------- вынік раунда ---------- */
@@ -564,19 +872,27 @@
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 12px 0;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
 }
 
 .result__delta {
+  font-family: var(--font-display);
   font-size: clamp(3rem, 18vw, 4.5rem);
   font-weight: 800;
-  color: var(--team);
+  color: var(--team-text);
   line-height: 1;
+}
+
+.result__band {
+  width: 50%;
+  color: var(--team);
 }
 
 .result__summary {
   color: var(--muted);
+  font-weight: 600;
 }
 
 .wordlist {
@@ -587,7 +903,7 @@
 
 .wordlist__item {
   width: 100%;
-  min-height: 52px;
+  min-height: 54px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -598,6 +914,7 @@
   background: var(--surface);
   text-align: left;
   font-size: 1.05rem;
+  font-weight: 600;
 }
 
 .wordlist__item.is-ok {
@@ -635,36 +952,57 @@
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 28px 0 12px;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 0 8px;
+}
+
+.finish__band {
+  color: var(--team);
+}
+
+.finish__motif {
+  margin-top: 8px;
+  padding: 16px;
+  border-radius: 32px;
+  background: color-mix(in srgb, var(--team) 12%, transparent);
+  box-sizing: content-box;
+  animation: countpop 0.6s ease-out;
 }
 
 .finish__eyebrow {
   color: var(--muted);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 .finish__team {
-  font-size: clamp(2.2rem, 11vw, 3rem);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 10vw, 2.8rem);
   font-weight: 800;
-  color: var(--team);
+  color: var(--team-text);
+  line-height: 1.1;
+  overflow-wrap: anywhere;
 }
 
 .finish__score {
   color: var(--muted);
+  margin-bottom: 6px;
 }
 
 /* ---------- накладкі ---------- */
 .overlay {
   position: fixed;
   inset: 0;
+  z-index: 15;
   display: grid;
   place-items: center;
   padding: 20px;
-  background: rgba(8, 10, 16, 0.78);
-  backdrop-filter: blur(6px);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .overlay__box {
@@ -675,11 +1013,13 @@
   text-align: center;
   padding: 24px;
   border-radius: 22px;
-  background: var(--bg-soft);
+  background: var(--paper);
   border: 1px solid var(--line);
+  box-shadow: var(--shadow);
 }
 
 .overlay__title {
+  font-family: var(--font-display);
   font-size: 1.4rem;
   font-weight: 800;
 }
@@ -691,7 +1031,7 @@
 .sheet {
   position: fixed;
   inset: 0;
-  z-index: 10;
+  z-index: 30;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -700,7 +1040,7 @@
 .sheet__backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(8, 10, 16, 0.7);
+  background: rgba(20, 12, 8, 0.55);
 }
 
 .sheet__body {
@@ -711,11 +1051,25 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding: 22px 20px calc(var(--safe-b) + 22px);
+  padding: 14px 20px calc(var(--safe-b) + 22px);
   border-radius: 24px 24px 0 0;
-  background: var(--bg-soft);
+  background: var(--paper);
   border: 1px solid var(--line);
+  border-bottom: 0;
   animation: rise 0.22s ease;
+}
+
+.sheet__body--compact {
+  gap: 10px;
+  padding-top: 22px;
+}
+
+.sheet__grip {
+  width: 40px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  margin: 0 auto 4px;
 }
 
 @keyframes rise {
@@ -726,8 +1080,18 @@
 }
 
 .sheet__title {
-  font-size: 1.4rem;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
   font-weight: 800;
+}
+
+.sheet__text {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.sheet__band {
+  width: 40%;
 }
 
 .rules {
@@ -756,10 +1120,10 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--surface-2);
-  color: var(--text);
+  background: var(--accent);
+  color: var(--on-accent);
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .rules b {
