@@ -18,7 +18,7 @@
 
 ## Магчымасці
 
-- **1–5 каманд**, назвы выпадкова бяруцца са спіса, перакідваюцца кнопкай з косткай або ўпісваюцца свае
+- **1–5 каманд**, назвы выпадкова бяруцца са спіса і перакідваюцца кнопкай з косткай
   («Вусы Мулявіна», «Карона Вітаўта», «Мары Глобуса»…); у кожнай — свой колер і знак беларускага арнаменту
   (сонца, зорка, дрэва жыцця, засеянае поле, крукі). Пры адной камандзе — сола-рэжым.
 - **Тры ўзроўні складанасці** + рэжым «усе разам»:
@@ -48,8 +48,19 @@ npm test               # тэсты (vitest + testing-library)
 npm run test:coverage  # тэсты з пакрыццём
 npm run lint           # oxlint
 npm run build          # зборка ў dist/
-npm run deploy         # публікацыя на GitHub Pages (галіна gh-pages)
+npm run deploy         # ручная публікацыя на GitHub Pages (галіна gh-pages)
 ```
+
+### Аўтаматызацыя (GitHub Actions)
+
+- **Deploy** ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)) — пры кожным пушы ў `main`
+  правярае лінтар і тэсты, збірае праект і публікуе `dist/` у галіну `gh-pages`. Калі праверкі
+  не прайшлі, сайт не абнаўляецца. Можна запусціць і ўручную з укладкі Actions.
+- **CI** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) — тыя ж праверкі для кожнага pull request,
+  у тым ліку ад Dependabot.
+- **Dependabot** ([`.github/dependabot.yml`](.github/dependabot.yml)) — штопанядзелка правярае абнаўленні
+  npm-пакетаў і GitHub Actions і адкрывае pull request'ы: React асобнай групай, астатнія
+  дробныя абнаўленні адным PR, мажорныя — паасобку.
 
 Стэк: React 19 + Vite, звычайны JavaScript і CSS, без знешніх бібліятэк у рантайме.
 Шрыфты (Manrope, Unbounded) убудаваныя ў зборку праз fontsource.

@@ -279,7 +279,7 @@
   border-bottom: 0;
 }
 
-.teamlist__input.is-rolled {
+.teamlist__name.is-rolled {
   animation: namein 0.3s ease-out;
 }
 
@@ -290,15 +290,13 @@
   }
 }
 
-.teamlist__input {
+.teamlist__name {
   flex: 1;
   min-width: 0;
-  background: none;
-  border: 0;
-  outline: none;
   padding: 12px 0;
   font-size: 1rem;
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 /* ---------- пераключальнікі ---------- */

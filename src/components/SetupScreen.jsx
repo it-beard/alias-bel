@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { LEVELS, LEVEL_ORDER } from '../data/words.js'
-import { APP_NAME, MAX_TEAMS, MIN_TEAMS, ROUND_TIMES, TARGET_SCORES, TEAM_NAME_MAX } from '../game/constants.js'
+import { APP_NAME, MAX_TEAMS, MIN_TEAMS, ROUND_TIMES, TARGET_SCORES } from '../game/constants.js'
 import { unlockAudio, vibrate } from '../game/feedback.js'
 import { inProgress } from '../game/gameState.js'
 import { words } from '../game/plural.js'
@@ -104,20 +104,13 @@ export default function SetupScreen({ state, dispatch, onRules }) {
           value={teams.length}
           onChange={(count) => dispatch({ type: 'setTeamCount', count })}
         />
-        <ul className="teamlist">
-          {teams.map((team, i) => (
+        <ul className="teamlist" aria-label={t('Каманды')}>
+          {teams.map((team) => (
             <li key={team.id} className="teamlist__item" style={{ '--team': team.color }}>
               <Motif name={team.motif} size={20} className="teamlist__motif" />
-              <input
-                key={rolls}
-                className={`teamlist__input${rolls > 0 ? ' is-rolled' : ''}`}
-                value={t(team.name)}
-                maxLength={TEAM_NAME_MAX}
-                autoComplete="off"
-                enterKeyHint="done"
-                aria-label={`${t('Назва каманды')} ${i + 1}`}
-                onChange={(e) => dispatch({ type: 'renameTeam', id: team.id, name: e.target.value })}
-              />
+              <span key={rolls} className={`teamlist__name${rolls > 0 ? ' is-rolled' : ''}`}>
+                {t(team.name)}
+              </span>
             </li>
           ))}
         </ul>

@@ -1,0 +1,43 @@
+# Dependabot штопанядзелка правярае абнаўленні і адкрывае pull request'ы,
+# на якіх запускаецца CI (.github/workflows/ci.yml).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Europe/Minsk
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: deps
+    groups:
+      # React і яго тыпы абнаўляюцца разам, у тым ліку мажорныя версіі
+      react:
+        patterns:
+          - react
+          - react-dom
+          - "@types/react"
+          - "@types/react-dom"
+      # астатнія дробныя абнаўленні — адным PR; мажорныя прыходзяць паасобку
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Europe/Minsk
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        patterns:
+          - "*"

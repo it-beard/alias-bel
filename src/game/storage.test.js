@@ -68,39 +68,37 @@ describe('loadSaved', () => {
     const saved = {
       screen: 'ready',
       teams: [
-        { id: 0, name: 'Каты', color: '#000', score: '4' },
-        { id: 1, name: 'Сабакі', score: null },
+        { id: 0, name: 'Вусы Купалы', color: '#000', score: '4' },
+        { id: 1, name: 'Мары Глобуса', score: null },
         { id: 2, score: 1 },
       ],
       turnIndex: 7,
     }
     const loaded = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify(saved) }))
     expect(loaded.teams).toHaveLength(3)
-    expect(loaded.teams[0]).toMatchObject({ id: 0, name: 'Каты', color: TEAM_COLORS[0], motif: TEAM_MOTIFS[0], score: 4 })
-    expect(loaded.teams[1]).toMatchObject({ score: 0, motif: TEAM_MOTIFS[1] })
+    expect(loaded.teams[0]).toMatchObject({ id: 0, name: 'Вусы Купалы', color: TEAM_COLORS[0], motif: TEAM_MOTIFS[0], score: 4 })
+    expect(loaded.teams[1]).toMatchObject({ name: 'Мары Глобуса', score: 0, motif: TEAM_MOTIFS[1] })
     expect(RANDOM_TEAM_NAMES).toContain(loaded.teams[2].name)
     expect(loaded.turnIndex).toBe(2)
   })
 
-  it('старыя стандартныя назвы на сваіх месцах замяняюцца назвамі са спіса, свае застаюцца', () => {
+  it('назвы не са спіса (старыя стандартныя, упісаныя, паўторы) замяняюцца назвамі са спіса', () => {
     const saved = {
       screen: 'setup',
       teams: [
         { name: 'Зубры', score: 3 },
-        { name: 'Суседзі', score: 1 },
-        { name: 'Ваўкі', score: 0 },
-        { name: 'Зубры', score: 0 },
+        { name: 'Вусы Купалы', score: 1 },
+        { name: 'Суседзі', score: 0 },
+        { name: 'Vusy Kupały', score: 0 },
+        { name: 'Вусы Купалы', score: 2 },
       ],
     }
     const loaded = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify(saved) }))
     const names = loaded.teams.map((team) => team.name)
-    expect(RANDOM_TEAM_NAMES).toContain(names[0])
-    expect(names[1]).toBe('Суседзі')
-    expect(RANDOM_TEAM_NAMES).toContain(names[2])
-    expect(names[0]).not.toBe(names[2])
-    // «Зубры» не на першым месцы — гэта ўжо свая назва гульцоў
-    expect(names[3]).toBe('Зубры')
-    expect(loaded.teams[0].score).toBe(3)
+    expect(names[1]).toBe('Вусы Купалы')
+    names.forEach((name) => expect(RANDOM_TEAM_NAMES).toContain(name))
+    expect(new Set(names).size).toBe(5)
+    expect(loaded.teams.map((team) => team.score)).toEqual([3, 1, 0, 0, 2])
   })
 
   it('без камандаў бярэ каманды па змаўчанні', () => {

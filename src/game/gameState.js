@@ -65,12 +65,6 @@ export function reducer(state, action) {
       return { ...state, teams: state.teams.map((team, i) => ({ ...team, name: names[i] })) }
     }
 
-    case 'renameTeam':
-      return {
-        ...state,
-        teams: state.teams.map((t) => (t.id === action.id ? { ...t, name: action.name } : t)),
-      }
-
     case 'setSetting':
       return { ...state, settings: { ...state.settings, [action.key]: action.value } }
 

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { fillNames, pickRandomNames } from './teamNames.js'
 import { makeTeams, reducer, initialState } from './gameState.js'
-import { MAX_TEAMS, RANDOM_TEAM_NAMES, TEAM_COLORS, TEAM_MOTIFS, TEAM_NAME_MAX } from './constants.js'
+import { MAX_TEAMS, RANDOM_TEAM_NAMES, TEAM_COLORS, TEAM_MOTIFS } from './constants.js'
 
 describe('спіс выпадковых назваў', () => {
   it('змест зафіксаваны', () => {
@@ -22,11 +22,11 @@ describe('спіс выпадковых назваў', () => {
     ])
   })
 
-  it('назвы ўнікальныя, змяшчаюцца ў поле і іх хапае на ўсе каманды двойчы', () => {
+  it('назвы ўнікальныя, не задаўгія для табліцы і іх хапае на ўсе каманды двойчы', () => {
     expect(new Set(RANDOM_TEAM_NAMES).size).toBe(RANDOM_TEAM_NAMES.length)
     expect(RANDOM_TEAM_NAMES.length).toBeGreaterThanOrEqual(MAX_TEAMS * 2)
     for (const name of RANDOM_TEAM_NAMES) {
-      expect(name.length, name).toBeLessThanOrEqual(TEAM_NAME_MAX)
+      expect(name.length, name).toBeLessThanOrEqual(24)
       expect(name, name).toBe(name.trim())
     }
   })

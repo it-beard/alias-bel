@@ -1,17 +1,14 @@
 import { initialState } from './gameState.js'
-import { MAX_TEAMS, STORAGE_KEY, TEAM_COLORS, TEAM_MOTIFS } from './constants.js'
+import { MAX_TEAMS, RANDOM_TEAM_NAMES, STORAGE_KEY, TEAM_COLORS, TEAM_MOTIFS } from './constants.js'
 import { fillNames } from './teamNames.js'
-
-/** Стандартныя назвы з ранейшых версій: у захаваным стане яны замяняюцца назвамі са спіса. */
-const LEGACY_TEAM_NAMES = ['Зубры', 'Буслы', 'Ваўкі', 'Вожыкі', 'Рысі']
 
 export const SCREENS = ['setup', 'ready', 'play', 'result', 'finish']
 
 /**
  * Аднаўляе захаваны стан з localStorage.
  * Незавершаны раунд аднаўляць несумленна — вяртаемся да экрана гатоўнасці.
- * Каманды нармалізуюцца: колер і матыў заўсёды бяруцца з бягучай палітры, а адсутныя
- * і старыя стандартныя назвы (на сваім месцы) замяняюцца выпадковымі са спіса.
+ * Каманды нармалізуюцца: колер і матыў заўсёды бяруцца з бягучай палітры, а назвы не са спіса
+ * (старыя стандартныя, упісаныя ўручную ў ранейшых версіях, паўторы) замяняюцца выпадковымі са спіса.
  */
 export function loadSaved(storage = globalThis.localStorage) {
   try {
@@ -21,7 +18,13 @@ export function loadSaved(storage = globalThis.localStorage) {
     if (!saved || typeof saved !== 'object') return null
 
     const rawTeams = Array.isArray(saved.teams) ? saved.teams.slice(0, MAX_TEAMS) : []
-    const names = fillNames(rawTeams.map((team, i) => (team?.name === LEGACY_TEAM_NAMES[i] ? null : team?.name)))
+    const names = fillNames(
+      rawTeams.map((team, i) => {
+        const name = team?.name
+        const repeated = rawTeams.slice(0, i).some((earlier) => earlier?.name === name)
+        return RANDOM_TEAM_NAMES.includes(name) && !repeated ? name : null
+      }),
+    )
     const teams =
       rawTeams.length > 0
         ? rawTeams.map((team, i) => ({

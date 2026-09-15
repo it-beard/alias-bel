@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import App from './App.jsx'
 import { initialState } from './game/gameState.js'
 import { ANSWER_LOCK_MS, COUNTDOWN_STEP_MS, DEFAULT_SETTINGS, RANDOM_TEAM_NAMES, STORAGE_KEY } from './game/constants.js'
@@ -12,6 +12,10 @@ const NOW = new Date('2026-09-15T12:00:00Z').getTime()
 
 const saved = () => JSON.parse(localStorage.getItem(STORAGE_KEY))
 const seed = (state) => localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+const teamNames = (label = 'Каманды') =>
+  within(screen.getByRole('list', { name: label }))
+    .getAllByRole('listitem')
+    .map((item) => item.textContent)
 
 function startRound() {
   fireEvent.click(screen.getByRole('button', { name: /Пачаць раунд/ }))
@@ -45,7 +49,7 @@ describe('App', () => {
 
   it('без захаванага стану каманды атрымліваюць назвы толькі са спіса', () => {
     render(<App />)
-    const names = [screen.getByLabelText('Назва каманды 1').value, screen.getByLabelText('Назва каманды 2').value]
+    const names = teamNames()
     names.forEach((name) => expect(RANDOM_TEAM_NAMES).toContain(name))
     expect(names[0]).not.toBe(names[1])
   })
@@ -53,8 +57,7 @@ describe('App', () => {
   it('старыя стандартныя назвы з захаванай гульні замяняюцца назвамі са спіса', () => {
     seed({ ...initialState, teams: [{ id: 0, name: 'Зубры', score: 4 }, { id: 1, name: 'Буслы', score: 2 }] })
     render(<App />)
-    const first = screen.getByLabelText('Назва каманды 1').value
-    const second = screen.getByLabelText('Назва каманды 2').value
+    const [first, second] = teamNames()
     expect(RANDOM_TEAM_NAMES).toContain(first)
     expect(RANDOM_TEAM_NAMES).toContain(second)
     expect(saved().teams.map((t) => ({ name: t.name, score: t.score }))).toEqual([
@@ -86,14 +89,12 @@ describe('App', () => {
     expect(document.documentElement.getAttribute('lang')).toBe('be-Latn')
     expect(document.title).toBe('Alias pa-biełarusku')
     expect(saved().settings.script).toBe('lat')
-    saved().teams.forEach((team, i) => {
-      expect(screen.getByLabelText(`Nazva kamandy ${i + 1}`)).toHaveValue(toLatin(team.name))
-      expect(screen.getByLabelText(`Nazva kamandy ${i + 1}`).value).not.toMatch(/[\u0400-\u04ff]/)
-    })
+    expect(teamNames('Kamandy')).toEqual(saved().teams.map((team) => toLatin(team.name)))
+    teamNames('Kamandy').forEach((name) => expect(name).not.toMatch(/[\u0400-\u04ff]/))
     fireEvent.click(screen.getByRole('radio', { name: 'Kirylica' }))
     expect(screen.getByRole('heading', { level: 1, name: 'Аліяс' })).toBeInTheDocument()
     expect(document.title).toBe('Аліяс па-беларуску')
-    expect(screen.getByLabelText('Назва каманды 1')).toHaveValue(saved().teams[0].name)
+    expect(teamNames()[0]).toBe(saved().teams[0].name)
   })
 
   it('пераключае тэму і абнаўляе колер радка стану', () => {
@@ -111,15 +112,14 @@ describe('App', () => {
   it('выпадковыя назвы трапляюць у палі, захоўваюцца і пераходзяць у гульню', () => {
     render(<App />)
     fireEvent.click(screen.getByRole('button', { name: 'Выпадковыя назвы' }))
-    const first = screen.getByLabelText('Назва каманды 1').value
-    const second = screen.getByLabelText('Назва каманды 2').value
+    const [first, second] = teamNames()
     expect(RANDOM_TEAM_NAMES).toContain(first)
     expect(RANDOM_TEAM_NAMES).toContain(second)
     expect(first).not.toBe(second)
     expect(saved().teams.map((t) => t.name)).toEqual([first, second])
 
     fireEvent.click(screen.getByRole('radio', { name: '3' }))
-    const third = screen.getByLabelText('Назва каманды 3').value
+    const third = teamNames()[2]
     expect(RANDOM_TEAM_NAMES).toContain(third)
     expect([first, second]).not.toContain(third)
 

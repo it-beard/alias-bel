@@ -1,0 +1,53 @@
+name: Deploy
+
+# Пры кожным пушы ў main: праверкі, зборка і публікацыя dist/ у галіну gh-pages,
+# з якой GitHub Pages аддае сайт. Калі лінтар або тэсты падаюць, сайт не абнаўляецца.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Публікацыі ідуць па чарзе, каб дзве адначасовыя не перапісалі адна адну.
+concurrency:
+  group: deploy-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Праверыць і апублікаваць
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Атрымаць код
+        uses: actions/checkout@v7
+
+      - name: Наладзіць Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Усталяваць залежнасці
+        run: npm ci
+
+      - name: Лінтар
+        run: npm run lint
+
+      - name: Тэсты
+        run: npm test
+
+      - name: Зборка
+        run: npm run build
+
+      - name: Апублікаваць у gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          npx gh-pages \
+            --dist dist \
+            --user "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>" \
+            --message "Deploy ${GITHUB_SHA}"

@@ -25,9 +25,6 @@ export const RANDOM_TEAM_NAMES = [
   'Мары Глобуса',
 ]
 
-/** Найбольшая даўжыня назвы каманды ў полі ўводу. */
-export const TEAM_NAME_MAX = 24
-
 /** Матыў арнаменту кожнай каманды (гл. src/ornament/motifs.js). */
 export const TEAM_MOTIFS = ['sun', 'star', 'tree', 'field', 'hooks']
 

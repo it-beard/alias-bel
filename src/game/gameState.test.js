@@ -17,9 +17,9 @@ describe('makeTeams', () => {
   })
 
   it('захоўвае назвы папярэдніх камандаў і скідае рахунак', () => {
-    const previous = [{ id: 0, name: 'Свае', score: 9 }]
+    const previous = [{ id: 0, name: 'Вусы Купалы', score: 9 }]
     const teams = makeTeams(2, previous)
-    expect(teams[0]).toMatchObject({ name: 'Свае', score: 0 })
+    expect(teams[0]).toMatchObject({ name: 'Вусы Купалы', score: 0 })
     expect(RANDOM_TEAM_NAMES).toContain(teams[1].name)
   })
 })
@@ -48,18 +48,15 @@ describe('reducer: налады', () => {
   })
 
   it('setTeamCount мяняе колькасць камандаў, захоўваючы назвы', () => {
-    const renamed = reducer(initialState, { type: 'renameTeam', id: 1, name: 'Сябры' })
-    const more = reducer(renamed, { type: 'setTeamCount', count: 4 })
+    const more = reducer(initialState, { type: 'setTeamCount', count: 4 })
     expect(more.teams).toHaveLength(4)
-    expect(more.teams[1].name).toBe('Сябры')
+    expect(more.teams[1].name).toBe(initialState.teams[1].name)
     const fewer = reducer(more, { type: 'setTeamCount', count: 1 })
     expect(fewer.teams).toHaveLength(1)
   })
 
-  it('renameTeam мяняе толькі патрэбную каманду', () => {
-    const next = reducer(initialState, { type: 'renameTeam', id: 0, name: 'Каты' })
-    expect(next.teams[0].name).toBe('Каты')
-    expect(next.teams[1].name).toBe(initialState.teams[1].name)
+  it('перайменаваць каманду нельга: дзеянне renameTeam ігнаруецца', () => {
+    expect(reducer(initialState, { type: 'renameTeam', id: 0, name: 'Каты' })).toBe(initialState)
   })
 
   it('setSetting змяняе адну наладу', () => {

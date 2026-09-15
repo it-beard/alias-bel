@@ -1,10 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import SetupScreen from './SetupScreen.jsx'
 import { initialState, makeTeams } from '../game/gameState.js'
 import { ScriptContext } from '../i18n/script.js'
 import { unlockAudio, vibrate } from '../game/feedback.js'
-import { TEAM_NAME_MAX } from '../game/constants.js'
 import { fixedTeams } from '../test/fixtures.js'
 
 vi.mock('../game/feedback.js', () => ({
@@ -14,6 +13,11 @@ vi.mock('../game/feedback.js', () => ({
 }))
 
 const base = { ...initialState, teams: fixedTeams(2) }
+
+const teamNames = (label = 'Каманды') =>
+  within(screen.getByRole('list', { name: label }))
+    .getAllByRole('listitem')
+    .map((item) => item.textContent)
 
 function setup(state = base, script = 'cyr') {
   const dispatch = vi.fn()
@@ -30,8 +34,7 @@ describe('SetupScreen', () => {
   it('паказвае назву, дзве каманды і бягучыя налады раунда', () => {
     setup()
     expect(screen.getByRole('heading', { level: 1, name: 'Аліяс' })).toBeInTheDocument()
-    expect(screen.getByLabelText('Назва каманды 1')).toHaveValue('Вусы Мулявіна')
-    expect(screen.getByLabelText('Назва каманды 2')).toHaveValue('Крынж Еўфрасінні')
+    expect(teamNames()).toEqual(['Вусы Мулявіна', 'Крынж Еўфрасінні'])
     expect(screen.getByRole('radio', { name: '2' })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('radio', { name: 'Лёгкі' })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('radio', { name: '60 с' })).toHaveAttribute('aria-checked', 'true')
@@ -55,24 +58,22 @@ describe('SetupScreen', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('мяняе колькасць камандаў і назвы', () => {
+  it('мяняе колькасць камандаў, а назвы рэдагаваць нельга', () => {
     const { dispatch } = setup()
     fireEvent.click(screen.getByRole('radio', { name: '3' }))
     expect(dispatch).toHaveBeenCalledWith({ type: 'setTeamCount', count: 3 })
-    fireEvent.change(screen.getByLabelText('Назва каманды 1'), { target: { value: 'Каты' } })
-    expect(dispatch).toHaveBeenCalledWith({ type: 'renameTeam', id: 0, name: 'Каты' })
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+    expect(document.querySelector('input, textarea, [contenteditable]')).toBeNull()
   })
 
   it('кнопка «Выпадковыя назвы» раздае назвы з вібрацыяй', () => {
     vi.mocked(vibrate).mockClear()
     const { dispatch } = setup()
-    const input = screen.getByLabelText('Назва каманды 1')
-    expect(input).not.toHaveClass('is-rolled')
-    expect(input).toHaveAttribute('maxLength', String(TEAM_NAME_MAX))
+    expect(screen.getByText('Вусы Мулявіна')).not.toHaveClass('is-rolled')
     fireEvent.click(screen.getByRole('button', { name: 'Выпадковыя назвы' }))
     expect(dispatch).toHaveBeenCalledWith({ type: 'randomizeTeamNames' })
     expect(vibrate).toHaveBeenCalledWith(12)
-    expect(screen.getByLabelText('Назва каманды 1')).toHaveClass('is-rolled')
+    expect(screen.getByText('Вусы Мулявіна')).toHaveClass('is-rolled')
   })
 
   it('без вібрацыі кнопка выпадковых назваў не вібруе', () => {
@@ -146,21 +147,9 @@ describe('SetupScreen', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Alias' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Pačać hulniu' })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: 'Lohki' })).toHaveAttribute('aria-checked', 'true')
-    expect(screen.getByLabelText('Nazva kamandy 1')).toHaveValue('Vusy Mulavina')
-    expect(screen.getByLabelText('Nazva kamandy 2')).toHaveValue('Krynž Jeŭfrasinni')
+    expect(teamNames('Kamandy')).toEqual(['Vusy Mulavina', 'Krynž Jeŭfrasinni'])
     expect(screen.getByRole('button', { name: 'Vypadkovyja nazvy' })).toBeInTheDocument()
     expect(screen.getByText('Prostyja štodzionnyja słovy · 340 słoŭ')).toBeInTheDocument()
   })
 
-  it('у рэжыме лацінкі назва рэдагуецца так, як яе бачаць, а кірыліца адразу паказваецца лацінкай', () => {
-    const teams = [
-      { ...base.teams[0], name: 'Суседзі' },
-      { ...base.teams[1], name: 'Vusy Kupały' },
-    ]
-    const { dispatch } = setup({ ...base, teams, settings: { ...initialState.settings, script: 'lat' } }, 'lat')
-    expect(screen.getByLabelText('Nazva kamandy 1')).toHaveValue('Susiedzi')
-    expect(screen.getByLabelText('Nazva kamandy 2')).toHaveValue('Vusy Kupały')
-    fireEvent.change(screen.getByLabelText('Nazva kamandy 1'), { target: { value: 'Susiedzi z dvara' } })
-    expect(dispatch).toHaveBeenCalledWith({ type: 'renameTeam', id: 0, name: 'Susiedzi z dvara' })
-  })
 })
