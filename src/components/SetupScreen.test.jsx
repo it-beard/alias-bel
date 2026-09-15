@@ -145,7 +145,22 @@ describe('SetupScreen', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Працягнуць' }))
     expect(dispatch).toHaveBeenCalledWith({ type: 'continueGame' })
     fireEvent.click(screen.getByRole('button', { name: 'Новая гульня' }))
+    expect(screen.getByRole('dialog', { name: 'Пачаць новую гульню?' })).toBeInTheDocument()
+    expect(dispatch).not.toHaveBeenCalledWith({ type: 'startGame' })
+    fireEvent.click(screen.getByRole('button', { name: 'Пачаць нанова' }))
     expect(dispatch).toHaveBeenCalledWith({ type: 'startGame' })
+  })
+
+  it('скід рахунку пры змене каманд можна скасаваць', () => {
+    const { dispatch } = setup({ ...base, gameActive: true, turnIndex: 1 })
+    fireEvent.click(screen.getByRole('radio', { name: '1' }))
+    expect(screen.getByRole('dialog', { name: 'Змяніць каманды?' })).toBeInTheDocument()
+    expect(dispatch).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Не, вярнуцца' }))
+    expect(dispatch).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('radio', { name: '1' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Змяніць' }))
+    expect(dispatch).toHaveBeenCalledWith({ type: 'setTeamCount', count: 1 })
   })
 
   it('у рэжыме лацінкі інтэрфейс і назвы камандаў на лацінцы', () => {

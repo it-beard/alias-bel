@@ -1,10 +1,11 @@
 import { useT } from '../i18n/script.js'
+import Dialog from './Dialog.jsx'
 
 /** Ніжняя шторка з пацверджаннем дзеяння, якое цяжка адкаціць. */
 export default function ConfirmSheet({ title, text, confirmLabel, onConfirm, onClose, danger = false }) {
   const t = useT()
   return (
-    <div className="sheet" role="dialog" aria-modal="true" aria-label={title}>
+    <Dialog label={title} onClose={onClose}>
       <div className="sheet__backdrop" onClick={onClose} />
       <div className="sheet__body sheet__body--compact">
         <h2 className="sheet__title">{title}</h2>
@@ -18,6 +19,6 @@ export default function ConfirmSheet({ title, text, confirmLabel, onConfirm, onC
           </button>
         </div>
       </div>
-    </div>
+    </Dialog>
   )
 }

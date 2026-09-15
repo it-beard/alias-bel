@@ -5,9 +5,14 @@ function audioContext() {
   if (typeof window === 'undefined') return null
   const Ctor = window.AudioContext || window.webkitAudioContext
   if (!Ctor) return null
-  if (!ctx) ctx = new Ctor()
-  if (ctx.state === 'suspended') ctx.resume()
-  return ctx
+  try {
+    if (!ctx || ctx.state === 'closed') ctx = new Ctor()
+    if (ctx.state === 'suspended') Promise.resolve(ctx.resume()).catch(() => {})
+    return ctx
+  } catch {
+    // Адмова ў гуку не павінна перашкаджаць запуску раунда.
+    return null
+  }
 }
 
 /** Разблакіроўка аўдыя — выклікаецца ў адказ на дотык карыстальніка. */
@@ -51,5 +56,9 @@ export const sounds = {
 }
 
 export function vibrate(pattern) {
-  if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(pattern)
+  try {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(pattern)
+  } catch {
+    /* Вібрацыя можа быць забаронена наладамі браўзера. */
+  }
 }

@@ -42,4 +42,26 @@ describe('useKeys', () => {
     fireEvent.keyDown(window, { key: 'ArrowLeft' })
     expect(second).toHaveBeenCalledTimes(1)
   })
+
+  it('утрыманая клавіша і сістэмны скарот не адказваюць за гульца', () => {
+    const right = vi.fn()
+    renderHook(() => useKeys({ ArrowRight: right }))
+    fireEvent.keyDown(window, { key: 'ArrowRight', repeat: true })
+    fireEvent.keyDown(window, { key: 'ArrowRight', altKey: true })
+    fireEvent.keyDown(window, { key: 'ArrowRight', ctrlKey: true })
+    expect(right).not.toHaveBeenCalled()
+  })
+
+  it('прабел на кнопцы пакідае яе натыўнае дзеянне', () => {
+    const pause = vi.fn()
+    function View() {
+      useKeys({ ' ': pause })
+      return <button type="button">Адгадана</button>
+    }
+    const { getByRole } = render(<View />)
+    const event = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true })
+    fireEvent(getByRole('button'), event)
+    expect(pause).not.toHaveBeenCalled()
+    expect(event.defaultPrevented).toBe(false)
+  })
 })

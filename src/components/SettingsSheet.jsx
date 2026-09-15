@@ -2,6 +2,7 @@ import { SCRIPTS, THEMES } from '../game/constants.js'
 import { useT } from '../i18n/script.js'
 import Segmented from './Segmented.jsx'
 import Toggle from './Toggle.jsx'
+import Dialog from './Dialog.jsx'
 
 /** Шторка з наладамі, якія мяняюць рэдка: алфавіт, тэма, правілы падліку, гук. */
 export default function SettingsSheet({ settings, onChange, onClose }) {
@@ -9,7 +10,7 @@ export default function SettingsSheet({ settings, onChange, onClose }) {
   const set = (key) => (value) => onChange(key, value)
 
   return (
-    <div className="sheet" role="dialog" aria-modal="true" aria-label={t('Налады')}>
+    <Dialog label={t('Налады')} onClose={onClose}>
       <div className="sheet__backdrop" onClick={onClose} />
       <div className="sheet__body">
         <div className="sheet__grip" aria-hidden="true" />
@@ -55,6 +56,6 @@ export default function SettingsSheet({ settings, onChange, onClose }) {
           {t('Гатова')}
         </button>
       </div>
-    </div>
+    </Dialog>
   )
 }

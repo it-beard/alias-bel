@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { loadSaved, saveState } from './storage.js'
 import { initialState } from './gameState.js'
 import { RANDOM_TEAM_NAMES, STORAGE_KEY, TEAM_COLORS, TEAM_MOTIFS } from './constants.js'
@@ -41,19 +41,22 @@ describe('loadSaved', () => {
     expect(loadSaved(null)).toBeNull()
   })
 
-  it('незавершаны раунд вяртае да экрана гатоўнасці і чысціць раунд', () => {
-    const saved = { ...initialState, screen: 'play', current: 'хлеб', results: [{ word: 'а', guessed: true }], endsAt: 1 }
+  it('незавершаны раунд аднаўляецца на паўзе з адказамі і рэштай часу', () => {
+    vi.useFakeTimers()
+    const saved = { ...initialState, screen: 'play', current: 'хлеб', results: [{ word: 'а', guessed: true }], endsAt: Date.now() + 25_000 }
     const storage = memoryStorage({ [STORAGE_KEY]: JSON.stringify(saved) })
     const loaded = loadSaved(storage)
-    expect(loaded.screen).toBe('ready')
-    expect(loaded.current).toBeNull()
-    expect(loaded.results).toEqual([])
+    expect(loaded.screen).toBe('play')
+    expect(loaded.current).toBe('хлеб')
+    expect(loaded.results).toEqual(saved.results)
+    expect(loaded.pausedLeft).toBe(25_000)
     expect(loaded.endsAt).toBeNull()
     expect(loaded.lastWord).toBe(false)
   })
 
-  it('экран выніку таксама вяртае да гатоўнасці, невядомы — да наладаў', () => {
-    expect(loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ ...initialState, screen: 'result' }) })).screen).toBe('ready')
+  it('экран выніку захоўваецца, невядомы — вяртаецца да наладаў', () => {
+    const saved = { ...initialState, screen: 'result', results: [{ word: 'хлеб', guessed: true }] }
+    expect(loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify(saved) }))).toMatchObject({ screen: 'result', results: saved.results })
     expect(loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ ...initialState, screen: 'wat' }) })).screen).toBe('setup')
     expect(loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ ...initialState, screen: 'finish' }) })).screen).toBe('finish')
   })
@@ -113,5 +116,44 @@ describe('loadSaved', () => {
     const teams = Array.from({ length: 9 }, (_, i) => ({ id: i, name: `К${i}`, score: 0 }))
     const loaded = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ screen: 'setup', teams }) }))
     expect(loaded.teams).toHaveLength(5)
+  })
+
+  it('правярае налады, нумары і словы, каб сапсаванае сховішча не ламала гульню', () => {
+    const saved = {
+      screen: 'ready', turnIndex: 0.5, roundNo: 'Infinity',
+      teams: [{ score: 'Infinity' }, { score: 2 }],
+      settings: { level: {}, roundSeconds: '60', targetScore: -10, script: null, sound: 'false' },
+      deckLevel: 'easy', deck: [null, {}, 'хлеб', 'хлеб', 'not-a-word'],
+    }
+    const loaded = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify(saved) }))
+    expect(loaded.settings).toEqual(initialState.settings)
+    expect(loaded.turnIndex).toBe(0)
+    expect(loaded.roundNo).toBe(1)
+    expect(loaded.teams[0].score).toBe(0)
+    expect(loaded.deck).toEqual(['хлеб'])
+  })
+
+  it.each([true, false])('аднаўляе раунд з мінулым часам паводле правіла апошняга слова (%s)', (lastWordRule) => {
+    const saved = { ...initialState, screen: 'play', current: 'хлеб', endsAt: Date.now() - 10_000, settings: { ...initialState.settings, lastWordRule } }
+    const loaded = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify(saved) }))
+    expect(loaded.screen).toBe(lastWordRule ? 'play' : 'result')
+    expect(loaded.lastWord).toBe(lastWordRule)
+    expect(loaded.endsAt).toBeNull()
+  })
+
+  it('раней пастаўленая паўза не губляе час пры перазагрузцы', () => {
+    const saved = { ...initialState, screen: 'play', current: 'хлеб', pausedLeft: 12_300 }
+    expect(loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify(saved) })).pausedLeft).toBe(12_300)
+  })
+
+  it('не падае, калі браўзер забараняе нават доступ да localStorage', () => {
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
+    Object.defineProperty(globalThis, 'localStorage', { configurable: true, get() { throw new Error('SecurityError') } })
+    try {
+      expect(loadSaved()).toBeNull()
+      expect(saveState(initialState)).toBe(false)
+    } finally {
+      Object.defineProperty(globalThis, 'localStorage', descriptor)
+    }
   })
 })

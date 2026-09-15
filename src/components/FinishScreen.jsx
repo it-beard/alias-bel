@@ -28,7 +28,7 @@ export default function FinishScreen({ state, dispatch }) {
         <p className="finish__eyebrow">{t(eyebrow)}</p>
         <h2 className="finish__team">{draw ? t('Роўны рахунак') : t(best.name)}</h2>
         <p className="finish__score">
-          {t(points(best.score))} {t('за')} {t(rounds(state.roundNo))}
+          {t(points(best.score))} {t('за')} {t(rounds(best.roundsPlayed ?? state.roundNo))}
         </p>
       </div>
 

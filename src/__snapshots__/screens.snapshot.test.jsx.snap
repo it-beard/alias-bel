@@ -1379,11 +1379,11 @@ exports[`снапшоты экранаў > result (lat) 1`] = `
 `;
 
 exports[`снапшоты экранаў > rules (cyr) 1`] = `
-<div
+<dialog
   aria-label="Правілы гульні"
   aria-modal="true"
   class="sheet"
-  role="dialog"
+  open=""
 >
   <div
     class="sheet__backdrop"
@@ -1442,15 +1442,15 @@ exports[`снапшоты экранаў > rules (cyr) 1`] = `
       Зразумела
     </button>
   </div>
-</div>
+</dialog>
 `;
 
 exports[`снапшоты экранаў > rules (lat) 1`] = `
-<div
+<dialog
   aria-label="Praviły hulni"
   aria-modal="true"
   class="sheet"
-  role="dialog"
+  open=""
 >
   <div
     class="sheet__backdrop"
@@ -1509,12 +1509,12 @@ exports[`снапшоты экранаў > rules (lat) 1`] = `
       Zrazumieła
     </button>
   </div>
-</div>
+</dialog>
 `;
 
 exports[`снапшоты экранаў > setup (cyr) 1`] = `
 <div
-  class="screen screen--scroll"
+  class="screen screen--scroll screen--setup"
 >
   <header
     class="brand"
@@ -1658,6 +1658,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
         aria-checked="false"
         class="seg__btn"
         role="radio"
+        tabindex="-1"
         type="button"
       >
         1
@@ -1666,6 +1667,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
         aria-checked="true"
         class="seg__btn is-on"
         role="radio"
+        tabindex="0"
         type="button"
       >
         2
@@ -1674,6 +1676,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
         aria-checked="false"
         class="seg__btn"
         role="radio"
+        tabindex="-1"
         type="button"
       >
         3
@@ -1682,6 +1685,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
         aria-checked="false"
         class="seg__btn"
         role="radio"
+        tabindex="-1"
         type="button"
       >
         4
@@ -1690,6 +1694,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
         aria-checked="false"
         class="seg__btn"
         role="radio"
+        tabindex="-1"
         type="button"
       >
         5
@@ -1766,6 +1771,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
         aria-checked="true"
         class="seg__btn is-on"
         role="radio"
+        tabindex="0"
         type="button"
       >
         Лёгкі
@@ -1774,6 +1780,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
         aria-checked="false"
         class="seg__btn"
         role="radio"
+        tabindex="-1"
         type="button"
       >
         Сярэдні
@@ -1782,6 +1789,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
         aria-checked="false"
         class="seg__btn"
         role="radio"
+        tabindex="-1"
         type="button"
       >
         Складаны
@@ -1790,6 +1798,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
         aria-checked="false"
         class="seg__btn"
         role="radio"
+        tabindex="-1"
         type="button"
       >
         Усе
@@ -1828,6 +1837,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
           aria-checked="false"
           class="seg__btn"
           role="radio"
+          tabindex="-1"
           type="button"
         >
           30 с
@@ -1836,6 +1846,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
           aria-checked="false"
           class="seg__btn"
           role="radio"
+          tabindex="-1"
           type="button"
         >
           45 с
@@ -1844,6 +1855,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
           aria-checked="true"
           class="seg__btn is-on"
           role="radio"
+          tabindex="0"
           type="button"
         >
           60 с
@@ -1852,6 +1864,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
           aria-checked="false"
           class="seg__btn"
           role="radio"
+          tabindex="-1"
           type="button"
         >
           90 с
@@ -1875,6 +1888,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
           aria-checked="false"
           class="seg__btn"
           role="radio"
+          tabindex="-1"
           type="button"
         >
           20
@@ -1883,6 +1897,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
           aria-checked="true"
           class="seg__btn is-on"
           role="radio"
+          tabindex="0"
           type="button"
         >
           30
@@ -1891,6 +1906,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
           aria-checked="false"
           class="seg__btn"
           role="radio"
+          tabindex="-1"
           type="button"
         >
           50
@@ -1899,6 +1915,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
           aria-checked="false"
           class="seg__btn"
           role="radio"
+          tabindex="-1"
           type="button"
         >
           75
@@ -1906,59 +1923,71 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
       </div>
     </div>
   </section>
-  <section
-    aria-labelledby="game-info-title"
-    class="panel game-info"
+  <details
+    class="game-info"
   >
-    <h2
-      class="panel__title"
-      id="game-info-title"
+    <summary
+      class="game-info__toggle"
     >
-      Што такое «Аліяс па-беларуску»?
-    </h2>
-    <p
-      class="game-info__lead"
+      Пра гульню
+      <span>
+        886 слоў · кірыліца і лацінка
+      </span>
+    </summary>
+    <section
+      aria-labelledby="game-info-title"
+      class="game-info__body"
     >
-      Гэта бясплатная браўзерная гульня, у якой трэба тлумачыць беларускія словы, не называючы іх. У гульні 886 слоў, тры ўзроўні складанасці і рэжымы для 1–5 каманд.
-    </p>
-    <ul
-      aria-label="Магчымасці гульні"
-      class="game-info__facts"
-    >
-      <li>
-        886 беларускіх слоў
-      </li>
-      <li>
-        Ад 1 да 5 каманд
-      </li>
-      <li>
-        Тры ўзроўні складанасці
-      </li>
-      <li>
-        Кірыліца і лацінка
-      </li>
-    </ul>
-    <details
-      class="game-info__question"
-    >
-      <summary>
-        Як гуляць у «Аліяс»?
-      </summary>
-      <p>
-        Адзін гулец тлумачыць слова з экрана, а яго каманда адгадвае. За адгаданае слова каманда атрымлівае ачко; перамагае каманда, якая набярэ зададзеную колькасць ачкоў.
+      <h2
+        class="panel__title"
+        id="game-info-title"
+      >
+        Што такое «Аліяс па-беларуску»?
+      </h2>
+      <p
+        class="game-info__lead"
+      >
+        Гэта бясплатная браўзерная гульня, у якой трэба тлумачыць беларускія словы, не называючы іх. У гульні 886 слоў, тры ўзроўні складанасці і рэжымы для 1–5 каманд.
       </p>
-    </details>
-    <details
-      class="game-info__question"
-    >
-      <summary>
-        Ці трэба спампоўваць або рэгістравацца?
-      </summary>
-      <p>
-        Не. Гульня бясплатна працуе проста ў сучасным браўзеры без рэгістрацыі. Яе таксама можна дадаць на хатні экран тэлефона.
-      </p>
-    </details>
-  </section>
+      <ul
+        aria-label="Магчымасці гульні"
+        class="game-info__facts"
+      >
+        <li>
+          886 беларускіх слоў
+        </li>
+        <li>
+          Ад 1 да 5 каманд
+        </li>
+        <li>
+          Тры ўзроўні складанасці
+        </li>
+        <li>
+          Кірыліца і лацінка
+        </li>
+      </ul>
+      <details
+        class="game-info__question"
+      >
+        <summary>
+          Як гуляць у «Аліяс»?
+        </summary>
+        <p>
+          Адзін гулец тлумачыць слова з экрана, а яго каманда адгадвае. За адгаданае слова каманда атрымлівае ачко; перамагае каманда, якая набярэ зададзеную колькасць ачкоў.
+        </p>
+      </details>
+      <details
+        class="game-info__question"
+      >
+        <summary>
+          Ці трэба спампоўваць або рэгістравацца?
+        </summary>
+        <p>
+          Не. Гульня бясплатна працуе проста ў сучасным браўзеры без рэгістрацыі. Яе таксама можна дадаць на хатні экран тэлефона.
+        </p>
+      </details>
+    </section>
+  </details>
   <footer
     aria-label="Карысныя спасылкі"
     class="site-links"
@@ -2004,7 +2033,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
 
 exports[`снапшоты экранаў > setup (lat) 1`] = `
 <div
-  class="screen screen--scroll"
+  class="screen screen--scroll screen--setup"
 >
   <header
     class="brand"
@@ -2148,6 +2177,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
         aria-checked="false"
         class="seg__btn"
         role="radio"
+        tabindex="-1"
         type="button"
       >
         1
@@ -2156,6 +2186,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
         aria-checked="true"
         class="seg__btn is-on"
         role="radio"
+        tabindex="0"
         type="button"
       >
         2
@@ -2164,6 +2195,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
         aria-checked="false"
         class="seg__btn"
         role="radio"
+        tabindex="-1"
         type="button"
       >
         3
@@ -2172,6 +2204,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
         aria-checked="false"
         class="seg__btn"
         role="radio"
+        tabindex="-1"
         type="button"
       >
         4
@@ -2180,6 +2213,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
         aria-checked="false"
         class="seg__btn"
         role="radio"
+        tabindex="-1"
         type="button"
       >
         5
@@ -2256,6 +2290,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
         aria-checked="true"
         class="seg__btn is-on"
         role="radio"
+        tabindex="0"
         type="button"
       >
         Lohki
@@ -2264,6 +2299,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
         aria-checked="false"
         class="seg__btn"
         role="radio"
+        tabindex="-1"
         type="button"
       >
         Siaredni
@@ -2272,6 +2308,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
         aria-checked="false"
         class="seg__btn"
         role="radio"
+        tabindex="-1"
         type="button"
       >
         Składany
@@ -2280,6 +2317,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
         aria-checked="false"
         class="seg__btn"
         role="radio"
+        tabindex="-1"
         type="button"
       >
         Usie
@@ -2318,6 +2356,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
           aria-checked="false"
           class="seg__btn"
           role="radio"
+          tabindex="-1"
           type="button"
         >
           30 s
@@ -2326,6 +2365,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
           aria-checked="false"
           class="seg__btn"
           role="radio"
+          tabindex="-1"
           type="button"
         >
           45 s
@@ -2334,6 +2374,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
           aria-checked="true"
           class="seg__btn is-on"
           role="radio"
+          tabindex="0"
           type="button"
         >
           60 s
@@ -2342,6 +2383,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
           aria-checked="false"
           class="seg__btn"
           role="radio"
+          tabindex="-1"
           type="button"
         >
           90 s
@@ -2365,6 +2407,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
           aria-checked="false"
           class="seg__btn"
           role="radio"
+          tabindex="-1"
           type="button"
         >
           20
@@ -2373,6 +2416,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
           aria-checked="true"
           class="seg__btn is-on"
           role="radio"
+          tabindex="0"
           type="button"
         >
           30
@@ -2381,6 +2425,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
           aria-checked="false"
           class="seg__btn"
           role="radio"
+          tabindex="-1"
           type="button"
         >
           50
@@ -2389,6 +2434,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
           aria-checked="false"
           class="seg__btn"
           role="radio"
+          tabindex="-1"
           type="button"
         >
           75
@@ -2396,59 +2442,71 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
       </div>
     </div>
   </section>
-  <section
-    aria-labelledby="game-info-title"
-    class="panel game-info"
+  <details
+    class="game-info"
   >
-    <h2
-      class="panel__title"
-      id="game-info-title"
+    <summary
+      class="game-info__toggle"
     >
-      Što takoje «Alijas pa-biełarusku»?
-    </h2>
-    <p
-      class="game-info__lead"
+      Pra hulniu
+      <span>
+        886 słoŭ · kirylica i łacinka
+      </span>
+    </summary>
+    <section
+      aria-labelledby="game-info-title"
+      class="game-info__body"
     >
-      Heta biaspłatnaja braŭziernaja hulnia, u jakoj treba tłumačyć biełaruskija słovy, nie nazyvajučy ich. U hulni 886 słoŭ, try ŭzroŭni składanasci i režymy dla 1–5 kamand.
-    </p>
-    <ul
-      aria-label="Mahčymasci hulni"
-      class="game-info__facts"
-    >
-      <li>
-        886 biełaruskich słoŭ
-      </li>
-      <li>
-        Ad 1 da 5 kamand
-      </li>
-      <li>
-        Try ŭzroŭni składanasci
-      </li>
-      <li>
-        Kirylica i łacinka
-      </li>
-    </ul>
-    <details
-      class="game-info__question"
-    >
-      <summary>
-        Jak hulać u «Alijas»?
-      </summary>
-      <p>
-        Adzin hulec tłumačyć słova z ekrana, a jaho kamanda adhadvaje. Za adhadanaje słova kamanda atrymlivaje ačko; pieramahaje kamanda, jakaja nabiare zadadzienuju kolkasć ačkoŭ.
+      <h2
+        class="panel__title"
+        id="game-info-title"
+      >
+        Što takoje «Alijas pa-biełarusku»?
+      </h2>
+      <p
+        class="game-info__lead"
+      >
+        Heta biaspłatnaja braŭziernaja hulnia, u jakoj treba tłumačyć biełaruskija słovy, nie nazyvajučy ich. U hulni 886 słoŭ, try ŭzroŭni składanasci i režymy dla 1–5 kamand.
       </p>
-    </details>
-    <details
-      class="game-info__question"
-    >
-      <summary>
-        Ci treba spampoŭvać abo rehistravacca?
-      </summary>
-      <p>
-        Nie. Hulnia biaspłatna pracuje prosta ŭ sučasnym braŭziery biez rehistracyi. Jaje taksama možna dadać na chatni ekran telefona.
-      </p>
-    </details>
-  </section>
+      <ul
+        aria-label="Mahčymasci hulni"
+        class="game-info__facts"
+      >
+        <li>
+          886 biełaruskich słoŭ
+        </li>
+        <li>
+          Ad 1 da 5 kamand
+        </li>
+        <li>
+          Try ŭzroŭni składanasci
+        </li>
+        <li>
+          Kirylica i łacinka
+        </li>
+      </ul>
+      <details
+        class="game-info__question"
+      >
+        <summary>
+          Jak hulać u «Alijas»?
+        </summary>
+        <p>
+          Adzin hulec tłumačyć słova z ekrana, a jaho kamanda adhadvaje. Za adhadanaje słova kamanda atrymlivaje ačko; pieramahaje kamanda, jakaja nabiare zadadzienuju kolkasć ačkoŭ.
+        </p>
+      </details>
+      <details
+        class="game-info__question"
+      >
+        <summary>
+          Ci treba spampoŭvać abo rehistravacca?
+        </summary>
+        <p>
+          Nie. Hulnia biaspłatna pracuje prosta ŭ sučasnym braŭziery biez rehistracyi. Jaje taksama možna dadać na chatni ekran telefona.
+        </p>
+      </details>
+    </section>
+  </details>
   <footer
     aria-label="Karysnyja spasyłki"
     class="site-links"

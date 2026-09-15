@@ -43,10 +43,10 @@ export default function App() {
 
   return (
     <ScriptContext.Provider value={script}>
-      <div className="app" data-screen={state.screen}>
+      <main className="app" data-screen={state.screen}>
         {screens[state.screen] ?? screens.setup}
         {rulesOpen && <RulesSheet onClose={() => setRulesOpen(false)} />}
-      </div>
+      </main>
     </ScriptContext.Provider>
   )
 }

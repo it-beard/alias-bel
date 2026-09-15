@@ -28,7 +28,7 @@ export default function RoundResultScreen({ state, dispatch }) {
       </div>
 
       {results.length === 0 ? (
-        <p className="hint hint--center">{t('Ніводнага слова не паказана.')}</p>
+        <p className="hint hint--center">{t('Пакуль няма адказаў.')}</p>
       ) : (
         <ul className="wordlist">
           {results.map((r, i) => (

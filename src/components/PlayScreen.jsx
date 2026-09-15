@@ -3,12 +3,13 @@ import { useCountdown } from '../hooks/useCountdown.js'
 import { useWakeLock } from '../hooks/useWakeLock.js'
 import { useSwipe } from '../hooks/useSwipe.js'
 import { useKeys } from '../hooks/useKeys.js'
-import { sounds, vibrate } from '../game/feedback.js'
+import { sounds, unlockAudio, vibrate } from '../game/feedback.js'
 import { roundScore } from '../game/gameState.js'
 import { ANSWER_LOCK_MS } from '../game/constants.js'
 import { wordSize } from '../game/wordSize.js'
 import { useScript, useT } from '../i18n/script.js'
 import { Motif } from './Ornament.jsx'
+import Dialog from './Dialog.jsx'
 
 export default function PlayScreen({ state, dispatch }) {
   const t = useT()
@@ -37,6 +38,10 @@ export default function PlayScreen({ state, dispatch }) {
   const answer = (guessed) => {
     if (paused) return
     const now = Date.now()
+    if (!lastWord && endsAt !== null && now >= endsAt && !settings.lastWordRule) {
+      dispatch({ type: 'timeUp' })
+      return
+    }
     if (now < lockUntil.current) return
     lockUntil.current = now + ANSWER_LOCK_MS
     if (settings.sound) (guessed ? sounds.correct : sounds.skip)()
@@ -46,11 +51,12 @@ export default function PlayScreen({ state, dispatch }) {
 
   const togglePause = () => {
     if (lastWord) return
+    if (paused && settings.sound) unlockAudio()
     dispatch({ type: paused ? 'resume' : 'pause' })
   }
 
   const swipe = useSwipe({ onRight: () => answer(true), onLeft: () => answer(false), enabled: !paused })
-  useKeys({ ArrowRight: () => answer(true), ArrowLeft: () => answer(false), ' ': togglePause, Escape: togglePause })
+  useKeys({ ArrowRight: () => answer(true), ArrowLeft: () => answer(false), ' ': togglePause, Escape: togglePause }, !paused)
 
   const shownLeft = paused ? Math.ceil(pausedLeft / 1000) : left
   const progress = lastWord ? 0 : Math.max(0, Math.min(1, shownLeft / settings.roundSeconds))
@@ -95,6 +101,7 @@ export default function PlayScreen({ state, dispatch }) {
           className={`card${swipe.dragging ? ' is-dragging' : ''}`}
           style={{ transform: `translateX(${swipe.offset}px) rotate(${lean * 5}deg)` }}
           lang={script === 'lat' ? 'be-Latn' : 'be'}
+          aria-hidden={paused || undefined}
           {...swipe.handlers}
         >
           <Motif name={team.motif} size={18} className="card__motif" />
@@ -130,20 +137,20 @@ export default function PlayScreen({ state, dispatch }) {
       </div>
 
       {paused && (
-        <div className="overlay" role="dialog" aria-modal="true" aria-label={t('Паўза')}>
+        <Dialog className="overlay" label={t('Паўза')} onClose={togglePause}>
           <div className="overlay__box">
             <h2 className="overlay__title">{t('Паўза')}</h2>
             <p className="overlay__text">
               {t('Засталося')} {Math.ceil((pausedLeft ?? 0) / 1000)} {t('с')}
             </p>
-            <button type="button" className="btn btn--primary" onClick={() => dispatch({ type: 'resume' })}>
+            <button type="button" className="btn btn--primary" onClick={togglePause}>
               {t('Працягнуць')}
             </button>
             <button type="button" className="btn btn--ghost" onClick={() => dispatch({ type: 'endRound' })}>
               {t('Спыніць раунд')}
             </button>
           </div>
-        </div>
+        </Dialog>
       )}
     </div>
   )

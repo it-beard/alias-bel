@@ -40,4 +40,17 @@ describe('useWakeLock', () => {
     document.dispatchEvent(new Event('visibilitychange'))
     await waitFor(() => expect(request).toHaveBeenCalledTimes(2))
   })
+
+  it('аднаўляе блакіроўку пасля аўтаматычнага вызвалення браўзерам', async () => {
+    const lock = new EventTarget()
+    lock.release = vi.fn().mockResolvedValue()
+    const request = vi.fn().mockResolvedValue(lock)
+    installWakeLock(request)
+    renderHook(() => useWakeLock(true))
+    await waitFor(() => expect(request).toHaveBeenCalledTimes(1))
+    lock.dispatchEvent(new Event('release'))
+    Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true })
+    document.dispatchEvent(new Event('visibilitychange'))
+    await waitFor(() => expect(request).toHaveBeenCalledTimes(2))
+  })
 })

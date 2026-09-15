@@ -67,6 +67,11 @@ describe('FinishScreen', () => {
     expect(dispatch).toHaveBeenCalledWith({ type: 'startGame' })
   })
 
+  it('датэрміновае завяршэнне паказвае толькі сапраўды згуляныя раунды', () => {
+    setup({ roundNo: 2, teams: fixedTeams(1, [7]).map((team) => ({ ...team, roundsPlayed: 1 })) })
+    expect(screen.getByText('7 ачкоў за 1 раунд')).toBeInTheDocument()
+  })
+
   it('у рэжыме лацінкі', () => {
     const teams = fixedTeams(2, [30, 10])
     setup({ teams }, 'lat')

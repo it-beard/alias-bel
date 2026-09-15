@@ -51,7 +51,7 @@ describe('RoundResultScreen', () => {
 
   it('пусты раунд', () => {
     setup({ results: [] })
-    expect(screen.getByText('Ніводнага слова не паказана.')).toBeInTheDocument()
+    expect(screen.getByText('Пакуль няма адказаў.')).toBeInTheDocument()
     expect(screen.getByText('0')).toBeInTheDocument()
     expect(screen.queryByText(/выправіць адзнаку/)).not.toBeInTheDocument()
   })

@@ -1,9 +1,10 @@
 import { useT } from '../i18n/script.js'
+import Dialog from './Dialog.jsx'
 
 export default function RulesSheet({ onClose }) {
   const t = useT()
   return (
-    <div className="sheet" role="dialog" aria-modal="true" aria-label={t('Правілы гульні')}>
+    <Dialog label={t('Правілы гульні')} onClose={onClose}>
       <div className="sheet__backdrop" onClick={onClose} />
       <div className="sheet__body">
         <div className="sheet__grip" aria-hidden="true" />
@@ -33,6 +34,6 @@ export default function RulesSheet({ onClose }) {
           {t('Зразумела')}
         </button>
       </div>
-    </div>
+    </Dialog>
   )
 }

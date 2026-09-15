@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import ScoreBoard from './ScoreBoard.jsx'
 import ConfirmSheet from './ConfirmSheet.jsx'
+import Dialog from './Dialog.jsx'
 import { Motif } from './Ornament.jsx'
 import { sounds, unlockAudio, vibrate } from '../game/feedback.js'
 import { COUNTDOWN_STEP_MS } from '../game/constants.js'
@@ -76,13 +77,15 @@ export default function ReadyScreen({ state, dispatch, onRules }) {
       </div>
 
       {count !== null && (
-        <button type="button" className="overlay overlay--count" onClick={() => setCount(null)} aria-label={t('Скасаваць')}>
-          <span className="count__team">{t(team.name)}</span>
-          <span className="count__num" key={count} aria-live="assertive">
-            {count}
-          </span>
-          <span className="count__hint">{t('Націсніце, каб скасаваць')}</span>
-        </button>
+        <Dialog className="overlay overlay--count" label={t('Пачатак раунда')} onClose={() => setCount(null)}>
+          <button type="button" className="count__cancel" onClick={() => setCount(null)} aria-label={t('Скасаваць')}>
+            <span className="count__team">{t(team.name)}</span>
+            <span className="count__num" key={count} aria-live="assertive">
+              {count}
+            </span>
+            <span className="count__hint">{t('Націсніце, каб скасаваць')}</span>
+          </button>
+        </Dialog>
       )}
 
       {confirmEnd && (

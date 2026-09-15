@@ -6,19 +6,29 @@ export function useWakeLock(active) {
     if (!active || typeof navigator === 'undefined' || !navigator.wakeLock) return
     let lock = null
     let cancelled = false
+    let requesting = false
 
     const request = async () => {
+      if (requesting || cancelled) return
+      requesting = true
       try {
         const next = await navigator.wakeLock.request('screen')
-        if (cancelled) next.release()
-        else lock = next
+        if (cancelled) await next.release()
+        else {
+          lock = next
+          next.addEventListener?.('release', () => {
+            if (lock === next) lock = null
+          }, { once: true })
+        }
       } catch {
         /* карыстальнік або браўзер адмовіў — гуляць гэта не замінае */
+      } finally {
+        requesting = false
       }
     }
 
     const onVisibility = () => {
-      if (document.visibilityState === 'visible' && !lock) request()
+      if (document.visibilityState === 'visible' && (!lock || lock.released)) request()
     }
 
     request()

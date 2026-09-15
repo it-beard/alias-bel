@@ -194,13 +194,14 @@ describe('reducer: ход гульні', () => {
   it('commitRound без штрафу не адымае за пас', () => {
     const state = {
       ...run([{ type: 'setSetting', key: 'skipPenalty', value: false }, { type: 'startGame' }]),
+      screen: 'result',
       results: [{ word: 'а', guessed: true }, { word: 'б', guessed: false }],
     }
     expect(reducer(state, { type: 'commitRound' }).teams[0].score).toBe(1)
   })
 
   it('пасля апошняй каманды ў крузе нумар раунда расце', () => {
-    const state = { ...run([{ type: 'startGame' }]), turnIndex: 1, results: [] }
+    const state = { ...run([{ type: 'startGame' }]), screen: 'result', turnIndex: 1, results: [] }
     const next = reducer(state, { type: 'commitRound' })
     expect(next.turnIndex).toBe(0)
     expect(next.roundNo).toBe(2)
@@ -209,11 +210,11 @@ describe('reducer: ход гульні', () => {
   it('гульня сканчаецца толькі калі мэта дасягнута і круг дагуляны', () => {
     const base = run([{ type: 'setSetting', key: 'targetScore', value: 20 }, { type: 'startGame' }])
     const results = Array.from({ length: 20 }, (_, i) => ({ word: `w${i}`, guessed: true }))
-    const afterFirst = reducer({ ...base, results }, { type: 'commitRound' })
+    const afterFirst = reducer({ ...base, screen: 'result', results }, { type: 'commitRound' })
     expect(afterFirst.screen).toBe('ready')
     expect(afterFirst.teams[0].score).toBe(20)
     expect(afterFirst.turnIndex).toBe(1)
-    const afterSecond = reducer({ ...afterFirst, results: [] }, { type: 'commitRound' })
+    const afterSecond = reducer({ ...afterFirst, screen: 'result', results: [] }, { type: 'commitRound' })
     expect(afterSecond.screen).toBe('finish')
     expect(afterSecond.results).toEqual([])
   })
@@ -225,7 +226,7 @@ describe('reducer: ход гульні', () => {
       { type: 'startGame' },
     ])
     const results = Array.from({ length: 21 }, (_, i) => ({ word: `w${i}`, guessed: true }))
-    expect(reducer({ ...base, results }, { type: 'commitRound' }).screen).toBe('finish')
+    expect(reducer({ ...base, screen: 'result', results }, { type: 'commitRound' }).screen).toBe('finish')
   })
 
   it('finishNow і toSetup чысцяць раунд', () => {
@@ -251,5 +252,44 @@ describe('reducer: ход гульні', () => {
   it('continueGame перасабірае калоду, калі яна пустая (стары захаваны стан)', () => {
     const state = { ...initialState, deck: [], deckLevel: 'easy' }
     expect(reducer(state, { type: 'continueGame' }).deck.length).toBeGreaterThan(0)
+  })
+
+  it('памятае пачатую партыю нават да першых ачкоў, але не прапануе працягваць завершаную', () => {
+    const setup = run([{ type: 'startGame' }, { type: 'toSetup' }])
+    expect(inProgress(setup)).toBe(true)
+    const finished = run([{ type: 'finishNow' }, { type: 'toSetup' }], { ...setup, roundNo: 3 })
+    expect(inProgress(finished)).toBe(false)
+  })
+
+  it('змена складу каманд скідае і ход, і рахунак; выбар той жа колькасці нічога не скідае', () => {
+    const setup = { ...run([{ type: 'startGame' }, { type: 'toSetup' }]), turnIndex: 1, roundNo: 4 }
+    expect(reducer(setup, { type: 'setTeamCount', count: 2 })).toBe(setup)
+    const changed = reducer(setup, { type: 'setTeamCount', count: 1 })
+    expect(changed.turnIndex).toBe(0)
+    expect(changed.roundNo).toBe(1)
+    expect(inProgress(changed)).toBe(false)
+    expect(reducer(changed, { type: 'startGame' }).teams[0]).toBeDefined()
+  })
+
+  it('паўторнае пацверджанне выніку не прапускае ход наступнай каманды', () => {
+    const result = run([{ type: 'startGame' }, { type: 'startTurn' }, { type: 'answer', guessed: true }, { type: 'endRound' }])
+    const ready = reducer(result, { type: 'commitRound' })
+    expect(ready.teams.map((team) => team.roundsPlayed)).toEqual([1, 0])
+    expect(reducer(ready, { type: 'commitRound' })).toBe(ready)
+  })
+
+  it('не прымае адказы і запознены timeUp на паўзе', () => {
+    const paused = run([{ type: 'startGame' }, { type: 'startTurn' }, { type: 'pause' }])
+    expect(reducer(paused, { type: 'answer', guessed: true })).toBe(paused)
+    expect(reducer(paused, { type: 'timeUp' })).toBe(paused)
+  })
+
+  it.each([true, false])('адказ пасля дэдлайну не выдае дадатковае слова (lastWordRule=%s)', (lastWordRule) => {
+    const playing = run([{ type: 'setSetting', key: 'lastWordRule', value: lastWordRule }, { type: 'startGame' }, { type: 'startTurn' }])
+    vi.setSystemTime(playing.endsAt + 1)
+    const done = reducer(playing, { type: 'answer', guessed: true })
+    expect(done.screen).toBe('result')
+    expect(done.results).toHaveLength(lastWordRule ? 1 : 0)
+    expect(done.deck).toBe(playing.deck)
   })
 })

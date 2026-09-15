@@ -66,11 +66,14 @@ describe('App', () => {
     ])
   })
 
-  it('аднаўляе захаваны стан, а незавершаны раунд вяртае да гатоўнасці', () => {
+  it('аднаўляе захаваны раунд на паўзе', () => {
     seed({ ...initialState, screen: 'play', current: 'хлеб', endsAt: NOW + 1000, roundNo: 3 })
     render(<App />)
-    expect(screen.getByText('Раунд 3')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Пачаць раунд/ })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Паўза' })).toBeInTheDocument()
+    expect(screen.getByText('Засталося 1 с')).toBeInTheDocument()
+    expect(saved().roundNo).toBe(3)
+    fireEvent.click(screen.getByRole('button', { name: 'Працягнуць' }))
+    expect(screen.getByText('хлеб')).toBeVisible()
   })
 
   it('сапсаваны запіс у сховішчы не ламае запуск', () => {
@@ -191,7 +194,7 @@ describe('App', () => {
     expect(screen.getByRole('timer')).toHaveTextContent('50')
     fireEvent.click(screen.getByRole('button', { name: 'Паўза' }))
     fireEvent.click(screen.getByRole('button', { name: 'Спыніць раунд' }))
-    expect(screen.getByText('Ніводнага слова не паказана.')).toBeInTheDocument()
+    expect(screen.getByText('Пакуль няма адказаў.')).toBeInTheDocument()
   })
 
   it('з наладаў можна вярнуцца да незавершанай гульні', () => {

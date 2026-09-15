@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /**
  * Свайп па картцы праз pointer-падзеі (дотык і мыш).
@@ -6,21 +6,25 @@ import { useRef, useState } from 'react'
  * Направа — адгадана, налева — пас.
  */
 export function useSwipe({ onLeft, onRight, threshold = 80, enabled = true }) {
-  const [offset, setOffset] = useState(0)
-  const [dragging, setDragging] = useState(false)
+  const [gesture, setGesture] = useState({ offset: 0, dragging: false, enabled })
   const start = useRef(null)
+
+  if (gesture.enabled !== enabled) setGesture({ offset: 0, dragging: false, enabled })
 
   const reset = () => {
     start.current = null
-    setOffset(0)
-    setDragging(false)
+    setGesture({ offset: 0, dragging: false, enabled })
   }
+
+  useEffect(() => {
+    if (!enabled) start.current = null
+  }, [enabled])
 
   const handlers = {
     onPointerDown: (e) => {
-      if (!enabled || (e.button !== undefined && e.button !== 0)) return
+      if (!enabled || start.current || (e.button !== undefined && e.button !== 0)) return
       start.current = { x: e.clientX, y: e.clientY, id: e.pointerId }
-      setDragging(true)
+      setGesture({ offset: 0, dragging: true, enabled })
       try {
         e.currentTarget.setPointerCapture?.(e.pointerId)
       } catch {
@@ -29,8 +33,8 @@ export function useSwipe({ onLeft, onRight, threshold = 80, enabled = true }) {
     },
     onPointerMove: (e) => {
       const from = start.current
-      if (!from || e.pointerId !== from.id) return
-      setOffset(e.clientX - from.x)
+      if (!enabled || !from || e.pointerId !== from.id) return
+      setGesture({ offset: e.clientX - from.x, dragging: true, enabled })
     },
     onPointerUp: (e) => {
       const from = start.current
@@ -38,12 +42,14 @@ export function useSwipe({ onLeft, onRight, threshold = 80, enabled = true }) {
       const dx = e.clientX - from.x
       const dy = e.clientY - from.y
       reset()
+      if (!enabled) return
       if (Math.abs(dx) < threshold || Math.abs(dx) < Math.abs(dy)) return
       if (dx > 0) onRight?.()
       else onLeft?.()
     },
     onPointerCancel: reset,
+    onLostPointerCapture: reset,
   }
 
-  return { offset, dragging, handlers, threshold }
+  return { offset: gesture.offset, dragging: gesture.dragging, handlers, threshold }
 }

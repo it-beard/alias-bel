@@ -9,7 +9,7 @@
   --surface-3: #e3ded5;
   --line: #e7e2d9;
   --text: #1d1a17;
-  --muted: #7a726a;
+  --muted: #6f675f;
   --accent: #cf2033;
   --accent-deep: #ad1a2b;
   --on-accent: #ffffff;
@@ -23,6 +23,8 @@
   --gap: 16px;
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
 
   color-scheme: light;
   font-family: var(--font-body);
@@ -107,7 +109,9 @@ button:disabled {
 }
 
 button:focus-visible,
-input:focus-visible {
+input:focus-visible,
+summary:focus-visible,
+a:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent);
   outline-offset: 2px;
 }

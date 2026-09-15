@@ -7,6 +7,7 @@ import { words } from '../game/plural.js'
 import { useScript, useT } from '../i18n/script.js'
 import Segmented from './Segmented.jsx'
 import SettingsSheet from './SettingsSheet.jsx'
+import ConfirmSheet from './ConfirmSheet.jsx'
 import { Mark, Motif } from './Ornament.jsx'
 
 const teamCounts = Array.from({ length: MAX_TEAMS - MIN_TEAMS + 1 }, (_, i) => i + MIN_TEAMS)
@@ -16,6 +17,7 @@ export default function SetupScreen({ state, dispatch, onRules }) {
   const script = useScript()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [rolls, setRolls] = useState(0)
+  const [pending, setPending] = useState(null)
   const { settings, teams } = state
   const set = (key, value) => dispatch({ type: 'setSetting', key, value })
   const canContinue = inProgress(state)
@@ -24,6 +26,16 @@ export default function SetupScreen({ state, dispatch, onRules }) {
   const start = () => {
     if (settings.sound) unlockAudio()
     dispatch({ type: 'startGame' })
+  }
+  const changeTeamCount = (count) => {
+    if (count === teams.length) return
+    if (canContinue) setPending({ type: 'teams', count })
+    else dispatch({ type: 'setTeamCount', count })
+  }
+  const confirmChange = () => {
+    if (pending.type === 'teams') dispatch({ type: 'setTeamCount', count: pending.count })
+    else start()
+    setPending(null)
   }
   const randomizeNames = () => {
     if (settings.vibration) vibrate(12)
@@ -36,7 +48,7 @@ export default function SetupScreen({ state, dispatch, onRules }) {
   }
 
   return (
-    <div className="screen screen--scroll">
+    <div className="screen screen--scroll screen--setup">
       <header className="brand">
         <div className="brand__row">
           <h1 className="brand__title">
@@ -102,7 +114,7 @@ export default function SetupScreen({ state, dispatch, onRules }) {
           label={t('Колькасць каманд')}
           options={teamCounts.map((n) => ({ value: n, label: n }))}
           value={teams.length}
-          onChange={(count) => dispatch({ type: 'setTeamCount', count })}
+          onChange={changeTeamCount}
         />
         <ul className="teamlist" aria-label={t('Каманды')}>
           {teams.map((team) => (
@@ -154,26 +166,29 @@ export default function SetupScreen({ state, dispatch, onRules }) {
         </div>
       </section>
 
-      <section className="panel game-info" aria-labelledby="game-info-title">
-        <h2 className="panel__title" id="game-info-title">{t('Што такое «Аліяс па-беларуску»?')}</h2>
-        <p className="game-info__lead">
-          {t('Гэта бясплатная браўзерная гульня, у якой трэба тлумачыць беларускія словы, не называючы іх. У гульні 886 слоў, тры ўзроўні складанасці і рэжымы для 1–5 каманд.')}
-        </p>
-        <ul className="game-info__facts" aria-label={t('Магчымасці гульні')}>
-          <li>{t('886 беларускіх слоў')}</li>
-          <li>{t('Ад 1 да 5 каманд')}</li>
-          <li>{t('Тры ўзроўні складанасці')}</li>
-          <li>{t('Кірыліца і лацінка')}</li>
-        </ul>
-        <details className="game-info__question">
-          <summary>{t('Як гуляць у «Аліяс»?')}</summary>
-          <p>{t('Адзін гулец тлумачыць слова з экрана, а яго каманда адгадвае. За адгаданае слова каманда атрымлівае ачко; перамагае каманда, якая набярэ зададзеную колькасць ачкоў.')}</p>
-        </details>
-        <details className="game-info__question">
-          <summary>{t('Ці трэба спампоўваць або рэгістравацца?')}</summary>
-          <p>{t('Не. Гульня бясплатна працуе проста ў сучасным браўзеры без рэгістрацыі. Яе таксама можна дадаць на хатні экран тэлефона.')}</p>
-        </details>
-      </section>
+      <details className="game-info">
+        <summary className="game-info__toggle">{t('Пра гульню')}<span>{t('886 слоў · кірыліца і лацінка')}</span></summary>
+        <section className="game-info__body" aria-labelledby="game-info-title">
+          <h2 className="panel__title" id="game-info-title">{t('Што такое «Аліяс па-беларуску»?')}</h2>
+          <p className="game-info__lead">
+            {t('Гэта бясплатная браўзерная гульня, у якой трэба тлумачыць беларускія словы, не называючы іх. У гульні 886 слоў, тры ўзроўні складанасці і рэжымы для 1–5 каманд.')}
+          </p>
+          <ul className="game-info__facts" aria-label={t('Магчымасці гульні')}>
+            <li>{t('886 беларускіх слоў')}</li>
+            <li>{t('Ад 1 да 5 каманд')}</li>
+            <li>{t('Тры ўзроўні складанасці')}</li>
+            <li>{t('Кірыліца і лацінка')}</li>
+          </ul>
+          <details className="game-info__question">
+            <summary>{t('Як гуляць у «Аліяс»?')}</summary>
+            <p>{t('Адзін гулец тлумачыць слова з экрана, а яго каманда адгадвае. За адгаданае слова каманда атрымлівае ачко; перамагае каманда, якая набярэ зададзеную колькасць ачкоў.')}</p>
+          </details>
+          <details className="game-info__question">
+            <summary>{t('Ці трэба спампоўваць або рэгістравацца?')}</summary>
+            <p>{t('Не. Гульня бясплатна працуе проста ў сучасным браўзеры без рэгістрацыі. Яе таксама можна дадаць на хатні экран тэлефона.')}</p>
+          </details>
+        </section>
+      </details>
 
       <footer className="site-links" aria-label={t('Карысныя спасылкі')}>
         <a href="https://itbeard.com/support/" target="_blank" rel="noreferrer">
@@ -189,12 +204,21 @@ export default function SetupScreen({ state, dispatch, onRules }) {
         <button type="button" className="btn btn--ghost" onClick={onRules}>
           {t('Правілы')}
         </button>
-        <button type="button" className="btn btn--primary" onClick={start}>
+        <button type="button" className="btn btn--primary" onClick={() => canContinue ? setPending({ type: 'start' }) : start()}>
           {t(canContinue ? 'Новая гульня' : 'Пачаць гульню')}
         </button>
       </div>
 
       {settingsOpen && <SettingsSheet settings={settings} onChange={set} onClose={() => setSettingsOpen(false)} />}
+      {pending && (
+        <ConfirmSheet
+          title={t(pending.type === 'teams' ? 'Змяніць каманды?' : 'Пачаць новую гульню?')}
+          text={t('Рахунак бягучай партыі будзе скінуты.')}
+          confirmLabel={t(pending.type === 'teams' ? 'Змяніць' : 'Пачаць нанова')}
+          onConfirm={confirmChange}
+          onClose={() => setPending(null)}
+        />
+      )}
     </div>
   )
 }
