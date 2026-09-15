@@ -1906,6 +1906,59 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
       </div>
     </div>
   </section>
+  <section
+    aria-labelledby="game-info-title"
+    class="panel game-info"
+  >
+    <h2
+      class="panel__title"
+      id="game-info-title"
+    >
+      Што такое «Аліяс па-беларуску»?
+    </h2>
+    <p
+      class="game-info__lead"
+    >
+      Гэта бясплатная браўзерная гульня, у якой трэба тлумачыць беларускія словы, не называючы іх. У гульні 886 слоў, тры ўзроўні складанасці і рэжымы для 1–5 каманд.
+    </p>
+    <ul
+      aria-label="Магчымасці гульні"
+      class="game-info__facts"
+    >
+      <li>
+        886 беларускіх слоў
+      </li>
+      <li>
+        Ад 1 да 5 каманд
+      </li>
+      <li>
+        Тры ўзроўні складанасці
+      </li>
+      <li>
+        Кірыліца і лацінка
+      </li>
+    </ul>
+    <details
+      class="game-info__question"
+    >
+      <summary>
+        Як гуляць у «Аліяс»?
+      </summary>
+      <p>
+        Адзін гулец тлумачыць слова з экрана, а яго каманда адгадвае. За адгаданае слова каманда атрымлівае ачко; перамагае каманда, якая набярэ зададзеную колькасць ачкоў.
+      </p>
+    </details>
+    <details
+      class="game-info__question"
+    >
+      <summary>
+        Ці трэба спампоўваць або рэгістравацца?
+      </summary>
+      <p>
+        Не. Гульня бясплатна працуе проста ў сучасным браўзеры без рэгістрацыі. Яе таксама можна дадаць на хатні экран тэлефона.
+      </p>
+    </details>
+  </section>
   <footer
     aria-label="Карысныя спасылкі"
     class="site-links"
@@ -2342,6 +2395,59 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
         </button>
       </div>
     </div>
+  </section>
+  <section
+    aria-labelledby="game-info-title"
+    class="panel game-info"
+  >
+    <h2
+      class="panel__title"
+      id="game-info-title"
+    >
+      Što takoje «Alijas pa-biełarusku»?
+    </h2>
+    <p
+      class="game-info__lead"
+    >
+      Heta biaspłatnaja braŭziernaja hulnia, u jakoj treba tłumačyć biełaruskija słovy, nie nazyvajučy ich. U hulni 886 słoŭ, try ŭzroŭni składanasci i režymy dla 1–5 kamand.
+    </p>
+    <ul
+      aria-label="Mahčymasci hulni"
+      class="game-info__facts"
+    >
+      <li>
+        886 biełaruskich słoŭ
+      </li>
+      <li>
+        Ad 1 da 5 kamand
+      </li>
+      <li>
+        Try ŭzroŭni składanasci
+      </li>
+      <li>
+        Kirylica i łacinka
+      </li>
+    </ul>
+    <details
+      class="game-info__question"
+    >
+      <summary>
+        Jak hulać u «Alijas»?
+      </summary>
+      <p>
+        Adzin hulec tłumačyć słova z ekrana, a jaho kamanda adhadvaje. Za adhadanaje słova kamanda atrymlivaje ačko; pieramahaje kamanda, jakaja nabiare zadadzienuju kolkasć ačkoŭ.
+      </p>
+    </details>
+    <details
+      class="game-info__question"
+    >
+      <summary>
+        Ci treba spampoŭvać abo rehistravacca?
+      </summary>
+      <p>
+        Nie. Hulnia biaspłatna pracuje prosta ŭ sučasnym braŭziery biez rehistracyi. Jaje taksama možna dadać na chatni ekran telefona.
+      </p>
+    </details>
   </section>
   <footer
     aria-label="Karysnyja spasyłki"

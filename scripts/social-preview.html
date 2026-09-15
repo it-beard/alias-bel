@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="be">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Social preview — Аліяс па-беларуску</title>
+    <style>
+      @font-face {
+        font-family: Manrope;
+        src: url('../node_modules/@fontsource-variable/manrope/files/manrope-cyrillic-wght-normal.woff2');
+        font-weight: 200 800;
+      }
+      @font-face {
+        font-family: Unbounded;
+        src: url('../node_modules/@fontsource-variable/unbounded/files/unbounded-cyrillic-wght-normal.woff2');
+        font-weight: 200 900;
+      }
+      * { box-sizing: border-box; }
+      html, body { width: 1200px; height: 630px; margin: 0; overflow: hidden; }
+      body {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 42px;
+        padding: 54px 64px;
+        background:
+          radial-gradient(circle at 88% 12%, rgba(207, 32, 51, .11), transparent 28%),
+          radial-gradient(circle at 8% 92%, rgba(43, 108, 196, .08), transparent 25%),
+          #f6f3ee;
+        color: #1d1a17;
+        font-family: Manrope, sans-serif;
+      }
+      .watermark {
+        position: absolute;
+        left: -150px;
+        bottom: -320px;
+        width: 580px;
+        height: 580px;
+        border: 44px solid rgba(207, 32, 51, .055);
+        transform: rotate(45deg);
+      }
+      .intro { position: relative; z-index: 1; align-self: center; }
+      .eyebrow { display: flex; align-items: center; gap: 14px; color: #ad1a2b; font-weight: 800; font-size: 20px; }
+      .mark { position: relative; width: 42px; height: 42px; border: 5px solid #cf2033; transform: rotate(45deg); }
+      .mark::after { content: ''; position: absolute; inset: 11px; background: #cf2033; }
+      h1 {
+        margin: 28px 0 16px;
+        font-family: Unbounded, sans-serif;
+        font-size: 66px;
+        line-height: 1.02;
+        letter-spacing: -3px;
+      }
+      h1 span { display: block; margin-top: 8px; font-size: 35px; letter-spacing: -1.6px; color: #5e5751; }
+      .tagline { max-width: 570px; margin: 0; font-size: 27px; line-height: 1.32; font-weight: 560; }
+      .facts { display: flex; flex-wrap: wrap; gap: 10px; margin: 34px 0 0; padding: 0; list-style: none; }
+      .facts li { padding: 10px 15px; border: 1px solid #ded7cd; border-radius: 999px; background: rgba(255,255,255,.76); font-size: 17px; font-weight: 750; }
+      .url { margin-top: 26px; color: #7a726a; font-size: 17px; font-weight: 650; letter-spacing: .03em; }
+      .device-wrap { position: relative; z-index: 1; align-self: center; justify-self: end; width: 430px; }
+      .device-wrap::before {
+        content: '';
+        position: absolute;
+        inset: 32px -20px -18px 32px;
+        border-radius: 48px;
+        background: rgba(29, 26, 23, .13);
+        filter: blur(28px);
+        transform: rotate(2deg);
+      }
+      .device {
+        position: relative;
+        height: 548px;
+        padding: 22px;
+        border: 8px solid #282421;
+        border-radius: 44px;
+        background: #f6f3ee;
+        box-shadow: 0 16px 40px rgba(49, 39, 31, .18), inset 0 0 0 1px rgba(255,255,255,.4);
+        transform: rotate(2deg);
+      }
+      .speaker { position: absolute; top: 10px; left: 50%; width: 74px; height: 6px; border-radius: 10px; background: #282421; transform: translateX(-50%); }
+      .playbar { display: flex; align-items: center; justify-content: space-between; margin: 14px 4px 12px; font-size: 15px; font-weight: 760; }
+      .team { display: flex; align-items: center; gap: 9px; color: #2f7345; }
+      .team-mark { width: 18px; height: 18px; background: #2f8a4b; clip-path: polygon(50% 0,61% 31%,100% 22%,72% 50%,100% 78%,61% 69%,50% 100%,39% 69%,0 78%,28% 50%,0 22%,39% 31%); }
+      .score { font-family: Unbounded, sans-serif; font-size: 16px; }
+      .timer { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 13px; margin: 0 4px 13px; }
+      .timer-track { height: 7px; overflow: hidden; border-radius: 99px; background: #ded8ce; }
+      .timer-fill { display: block; width: 70%; height: 100%; border-radius: inherit; background: #2f8a4b; }
+      .timer-value { color: #655e57; font-family: Unbounded, sans-serif; font-size: 18px; font-weight: 700; }
+      .card {
+        position: relative;
+        height: 288px;
+        display: grid;
+        place-items: center;
+        border: 1px solid #e7e2d9;
+        border-radius: 24px;
+        background: #fff;
+        box-shadow: 0 14px 32px -22px rgba(40,30,20,.45);
+      }
+      .card-mark { position: absolute; top: 19px; left: 20px; width: 26px; height: 26px; border: 3px solid #2f8a4b; transform: rotate(45deg); }
+      .word { font-family: Manrope, sans-serif; font-size: 48px; font-weight: 800; letter-spacing: -1.7px; }
+      .index { position: absolute; right: 18px; bottom: 14px; color: #8c847b; font-family: Unbounded, sans-serif; font-size: 11px; }
+      .swipe { margin: 8px 0 10px; color: #8c847b; text-align: center; font-size: 12px; letter-spacing: .04em; }
+      .answers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .answer { height: 76px; display: grid; place-items: center; border-radius: 17px; font-size: 17px; font-weight: 800; }
+      .skip { border: 2px solid rgba(207,32,51,.46); background: #fff; color: #cf2033; }
+      .ok { background: #2a7f4c; color: #fff; }
+    </style>
+  </head>
+  <body>
+    <div class="watermark" aria-hidden="true"></div>
+    <main class="intro">
+      <div class="eyebrow"><span class="mark" aria-hidden="true"></span> Гульня для сваёй кампаніі</div>
+      <h1>Аліяс<span>па-беларуску</span></h1>
+      <p class="tagline">Тлумач словы. Адгадвай. Гуляй кірыліцай або лацінкай.</p>
+      <ul class="facts">
+        <li>886 слоў</li>
+        <li>1–5 каманд</li>
+        <li>3 узроўні</li>
+      </ul>
+      <div class="url">alias.itbeard.com</div>
+    </main>
+    <div class="device-wrap" aria-label="Экран гульні">
+      <section class="device">
+        <div class="speaker" aria-hidden="true"></div>
+        <div class="playbar">
+          <span class="team"><span class="team-mark" aria-hidden="true"></span> Карона Вітаўта</span>
+          <span class="score">+7</span>
+        </div>
+        <div class="timer"><div class="timer-track"><span class="timer-fill"></span></div><span class="timer-value">42</span></div>
+        <div class="card">
+          <span class="card-mark" aria-hidden="true"></span>
+          <strong class="word">вандроўка</strong>
+          <span class="index">8</span>
+        </div>
+        <p class="swipe">свайпніце картку або націсніце кнопку</p>
+        <div class="answers"><div class="answer skip">← Пас</div><div class="answer ok">Адгадана →</div></div>
+      </section>
+    </div>
+  </body>
+</html>

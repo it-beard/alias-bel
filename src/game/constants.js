@@ -1,6 +1,9 @@
 /** Назва гульні і загаловак укладкі ў абодвух алфавітах. */
 export const APP_NAME = { cyr: 'Аліяс', lat: 'Alias' }
-export const APP_TITLE = { cyr: 'Аліяс па-беларуску', lat: 'Alias pa-biełarusku' }
+export const APP_TITLE = {
+  cyr: 'Аліяс па-беларуску — анлайн-гульня ў словы',
+  lat: 'Alias pa-biełarusku — anłajn-hulnia ŭ słovy',
+}
 
 export const MIN_TEAMS = 1
 export const MAX_TEAMS = 5

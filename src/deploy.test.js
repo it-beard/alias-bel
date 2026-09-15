@@ -4,6 +4,7 @@ import { resolve } from 'node:path'
 
 const root = resolve(import.meta.dirname, '..')
 const read = (path) => readFileSync(resolve(root, path), 'utf8')
+const readBuffer = (path) => readFileSync(resolve(root, path))
 
 describe('публікацыя на GitHub Pages', () => {
   it('CNAME трапляе ў зборку, інакш публікацыя сатрэ свой дамен', () => {
@@ -25,5 +26,31 @@ describe('публікацыя на GitHub Pages', () => {
     expect(dependabot).toMatch(/package-ecosystem: npm/)
     expect(dependabot).toMatch(/package-ecosystem: github-actions/)
     expect(existsSync(resolve(root, 'package-lock.json'))).toBe(true)
+  })
+
+  it('мае поўныя SEO- і social-метаданыя з кананічным даменам', () => {
+    const html = read('index.html')
+    expect(html).toContain('<link rel="canonical" href="https://alias.itbeard.com/" />')
+    expect(html).toContain('<meta name="robots" content="index, follow, max-image-preview:large" />')
+    expect(html).toContain('<meta property="og:image" content="https://alias.itbeard.com/og-image.png" />')
+    expect(html).toContain('<meta property="og:image:width" content="1200" />')
+    expect(html).toContain('<meta property="og:image:height" content="630" />')
+    expect(html).toContain('<meta name="twitter:card" content="summary_large_image" />')
+
+    const jsonLd = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1]
+    const graph = JSON.parse(jsonLd)['@graph']
+    expect(graph.some((item) => item['@type'] === 'WebApplication')).toBe(true)
+    expect(graph.find((item) => item['@type'] === 'FAQPage').mainEntity).toHaveLength(3)
+  })
+
+  it('аддае robots, sitemap, GEO-апісанне і social preview патрэбнага памеру', () => {
+    expect(read('public/robots.txt')).toContain('Sitemap: https://alias.itbeard.com/sitemap.xml')
+    expect(read('public/sitemap.xml')).toContain('<loc>https://alias.itbeard.com/</loc>')
+    expect(read('public/llms.txt')).toContain('886 унікальных беларускіх слоў')
+
+    const image = readBuffer('public/og-image.png')
+    expect(image.subarray(1, 4).toString()).toBe('PNG')
+    expect(image.readUInt32BE(16)).toBe(1200)
+    expect(image.readUInt32BE(20)).toBe(630)
   })
 })

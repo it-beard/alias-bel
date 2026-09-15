@@ -404,6 +404,48 @@
   border-radius: 2px;
 }
 
+/* ---------- кароткае апісанне для людзей і пошукавых/AI-сістэм ---------- */
+.game-info {
+  gap: 10px;
+}
+
+.game-info__lead {
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.game-info__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.game-info__facts li {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.game-info__question {
+  border-top: 1px solid var(--line);
+  padding-top: 9px;
+  font-size: 0.86rem;
+}
+
+.game-info__question summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.game-info__question p {
+  padding-top: 8px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
 .btn {
   flex: 1;
   min-height: 54px;

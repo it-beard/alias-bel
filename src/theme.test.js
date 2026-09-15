@@ -43,7 +43,7 @@ describe('тэма', () => {
   it('applyScript ставіць мову дакумента і загаловак укладкі', () => {
     applyScript('lat')
     expect(document.documentElement.getAttribute('lang')).toBe('be-Latn')
-    expect(document.title).toBe('Alias pa-biełarusku')
+    expect(document.title).toBe('Alias pa-biełarusku — anłajn-hulnia ŭ słovy')
     applyScript('cyr')
     expect(document.documentElement.getAttribute('lang')).toBe('be')
     expect(document.title).toBe(APP_TITLE.cyr)

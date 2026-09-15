@@ -44,6 +44,10 @@ describe('SetupScreen', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Падзякаваць' })).toHaveAttribute('href', 'https://itbeard.com/support/')
     expect(screen.getByRole('link', { name: 'Гульня на GitHub' })).toHaveAttribute('href', 'https://github.com/it-beard/alias-bel')
+    expect(screen.getByRole('heading', { name: 'Што такое «Аліяс па-беларуску»?' })).toBeInTheDocument()
+    expect(screen.getByText(/бясплатная браўзерная гульня/)).toHaveTextContent('886 слоў')
+    expect(screen.getByText('Як гуляць у «Аліяс»?')).toBeInTheDocument()
+    expect(screen.getByText('Ці трэба спампоўваць або рэгістравацца?')).toBeInTheDocument()
   })
 
   it('рэдкія налады схаваныя ў шторцы', () => {
@@ -154,6 +158,7 @@ describe('SetupScreen', () => {
     expect(screen.getByText('Prostyja štodzionnyja słovy · 340 słoŭ')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Padziakavać' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Hulnia na GitHub' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Što takoje «Alijas pa-biełarusku»?' })).toBeInTheDocument()
   })
 
 })
