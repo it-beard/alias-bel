@@ -16,6 +16,7 @@ describe('публікацыя на GitHub Pages', () => {
     const order = ['npm ci', 'npm run lint', 'npm test', 'npm run build', 'npx gh-pages'].map((step) => workflow.indexOf(step))
     order.forEach((index) => expect(index).toBeGreaterThan(-1))
     expect([...order].sort((a, b) => a - b)).toEqual(order)
+    expect(workflow).toContain('--user "github-actions-bot <support+actions@github.com>"')
   })
 
   it('CI для pull request і канфіг Dependabot на месцы', () => {

@@ -49,5 +49,5 @@ jobs:
           git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           npx gh-pages \
             --dist dist \
-            --user "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>" \
+            --user "github-actions-bot <support+actions@github.com>" \
             --message "Deploy ${GITHUB_SHA}"
