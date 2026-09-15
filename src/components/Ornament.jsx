@@ -1,6 +1,6 @@
 import { MOTIFS, pathFor, size } from '../ornament/motifs.js'
 
-/** Знак каманды — матыў арнаменту ў стылі вышыўкі; колер бярэцца з currentColor. */
+/** Піксельны знак каманды або матыў арнаменту; колер бярэцца з currentColor. */
 export function Motif({ name, size: px = 24, title, className = '' }) {
   const motif = MOTIFS[name] ?? MOTIFS.sun
   const { width, height } = size(motif.rows)

@@ -67,22 +67,28 @@ describe('loadSaved', () => {
     expect(loaded.settings).toMatchObject({ level: 'hard', script: 'cyr', theme: 'auto', roundSeconds: 60 })
   })
 
-  it('нармалізуе каманды: колеры і матывы з бягучай палітры, рахунак лікам', () => {
+  it('нармалізуе каманды: колеры з палітры, знакі паводле назваў, рахунак лікам', () => {
     const saved = {
       screen: 'ready',
       teams: [
-        { id: 0, name: 'Вусы Купалы', color: '#000', score: '4' },
-        { id: 1, name: 'Мары Глобуса', score: null },
+        { id: 0, name: 'Вусы Купалы', color: '#000', motif: 'sun', score: '4', roundsPlayed: 2 },
+        { id: 1, name: 'Мары Глобуса', motif: 'star', score: null },
         { id: 2, score: 1 },
       ],
       turnIndex: 7,
     }
-    const loaded = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify(saved) }))
+    const storage = memoryStorage({ [STORAGE_KEY]: JSON.stringify(saved) })
+    const loaded = loadSaved(storage)
     expect(loaded.teams).toHaveLength(3)
-    expect(loaded.teams[0]).toMatchObject({ id: 0, name: 'Вусы Купалы', color: TEAM_COLORS[0], motif: TEAM_MOTIFS[0], score: 4 })
-    expect(loaded.teams[1]).toMatchObject({ name: 'Мары Глобуса', score: 0, motif: TEAM_MOTIFS[1] })
+    expect(loaded.teams[0]).toMatchObject({ id: 0, name: 'Вусы Купалы', color: TEAM_COLORS[0], motif: 'kupala-mustache', score: 4, roundsPlayed: 2 })
+    expect(loaded.teams[1]).toMatchObject({ name: 'Мары Глобуса', score: 0, motif: 'dream' })
     expect(RANDOM_TEAM_NAMES).toContain(loaded.teams[2].name)
+    expect(loaded.teams[2].motif).toBe(TEAM_MOTIFS[loaded.teams[2].name])
     expect(loaded.turnIndex).toBe(2)
+    expect(loaded.screen).toBe('ready')
+
+    saveState(loaded, storage)
+    expect(loadSaved(storage).teams).toEqual(loaded.teams)
   })
 
   it('назвы не са спіса (старыя стандартныя, упісаныя, паўторы) замяняюцца назвамі са спіса', () => {
@@ -101,6 +107,7 @@ describe('loadSaved', () => {
     expect(names[1]).toBe('Вусы Купалы')
     names.forEach((name) => expect(RANDOM_TEAM_NAMES).toContain(name))
     expect(new Set(names).size).toBe(5)
+    loaded.teams.forEach((team) => expect(team.motif).toBe(TEAM_MOTIFS[team.name]))
     expect(loaded.teams.map((team) => team.score)).toEqual([3, 1, 0, 0, 2])
   })
 

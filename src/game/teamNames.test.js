@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { fillNames, pickRandomNames } from './teamNames.js'
+import { fillNames, motifForName, pickRandomNames } from './teamNames.js'
 import { makeTeams, reducer, initialState } from './gameState.js'
 import { MAX_TEAMS, RANDOM_TEAM_NAMES, TEAM_COLORS, TEAM_MOTIFS } from './constants.js'
 
@@ -35,6 +35,14 @@ describe('спіс выпадковых назваў', () => {
     initialState.teams.forEach((team) => expect(RANDOM_TEAM_NAMES).toContain(team.name))
     for (const legacy of ['Зубры', 'Буслы', 'Ваўкі', 'Вожыкі', 'Рысі']) {
       expect(RANDOM_TEAM_NAMES).not.toContain(legacy)
+    }
+  })
+})
+
+describe('motifForName', () => {
+  it('для невядомых назваў выкарыстоўвае сонца', () => {
+    for (const name of ['Свае', '', undefined, 'toString', '__proto__']) {
+      expect(motifForName(name)).toBe('sun')
     }
   })
 })
@@ -96,7 +104,7 @@ describe('fillNames', () => {
 })
 
 describe('reducer: randomizeTeamNames', () => {
-  it('раздае ўсім камандам розныя назвы са спіса, астатняе не чапае', () => {
+  it('раздае розныя назвы разам з іх знакамі, захоўвае колеры і рахунак', () => {
     const state = {
       ...initialState,
       teams: makeTeams(5).map((team, i) => ({ ...team, score: i * 3 })),
@@ -106,7 +114,8 @@ describe('reducer: randomizeTeamNames', () => {
     expect(new Set(names).size).toBe(5)
     names.forEach((name) => expect(RANDOM_TEAM_NAMES).toContain(name))
     next.teams.forEach((team, i) => {
-      expect(team).toMatchObject({ id: i, color: TEAM_COLORS[i], motif: TEAM_MOTIFS[i], score: i * 3 })
+      expect(team).toMatchObject({ id: i, color: TEAM_COLORS[i], motif: TEAM_MOTIFS[team.name], score: i * 3 })
+      expect(team.motif).not.toBe(state.teams[i].motif)
     })
   })
 
@@ -149,6 +158,6 @@ describe('makeTeams і назвы са спіса', () => {
   it('памяншэнне колькасці не мяняе назвы', () => {
     const rolled = reducer({ ...initialState, teams: makeTeams(4) }, { type: 'randomizeTeamNames' })
     const fewer = reducer(rolled, { type: 'setTeamCount', count: 2 })
-    expect(fewer.teams.map((team) => team.name)).toEqual(rolled.teams.slice(0, 2).map((team) => team.name))
+    expect(fewer.teams).toEqual(rolled.teams.slice(0, 2))
   })
 })

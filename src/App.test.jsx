@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import App from './App.jsx'
 import { initialState } from './game/gameState.js'
-import { ANSWER_LOCK_MS, COUNTDOWN_STEP_MS, DEFAULT_SETTINGS, RANDOM_TEAM_NAMES, STORAGE_KEY } from './game/constants.js'
+import { ANSWER_LOCK_MS, COUNTDOWN_STEP_MS, DEFAULT_SETTINGS, RANDOM_TEAM_NAMES, STORAGE_KEY, TEAM_MOTIFS } from './game/constants.js'
 import { THEME_BG } from './theme.js'
 import { fixedTeams } from './test/fixtures.js'
 import { toLatin } from './i18n/latin.js'
@@ -84,6 +84,8 @@ describe('App', () => {
 
   it('пераключае алфавіт на лацінку для ўсяго інтэрфейсу', () => {
     render(<App />)
+    const logos = [...screen.getByRole('list', { name: 'Каманды' }).querySelectorAll('[data-motif]')]
+      .map((svg) => svg.outerHTML)
     fireEvent.click(screen.getByRole('button', { name: 'Налады' }))
     expect(document.title).toBe('Аліяс па-беларуску — анлайн-гульня ў словы')
     fireEvent.click(screen.getByRole('radio', { name: 'Лацінка' }))
@@ -93,6 +95,8 @@ describe('App', () => {
     expect(document.title).toBe('Alias pa-biełarusku — anłajn-hulnia ŭ słovy')
     expect(saved().settings.script).toBe('lat')
     expect(teamNames('Kamandy')).toEqual(saved().teams.map((team) => toLatin(team.name)))
+    expect([...screen.getByRole('list', { name: 'Kamandy' }).querySelectorAll('[data-motif]')]
+      .map((svg) => svg.outerHTML)).toEqual(logos)
     teamNames('Kamandy').forEach((name) => expect(name).not.toMatch(/[\u0400-\u04ff]/))
     fireEvent.click(screen.getByRole('radio', { name: 'Kirylica' }))
     expect(screen.getByRole('heading', { level: 1, name: 'Аліяс' })).toBeInTheDocument()
@@ -112,7 +116,7 @@ describe('App', () => {
     expect(document.documentElement.hasAttribute('data-theme')).toBe(false)
   })
 
-  it('выпадковыя назвы трапляюць у палі, захоўваюцца і пераходзяць у гульню', () => {
+  it('выпадковыя назвы і іх лагатыпы захоўваюцца і пераходзяць у гульню', () => {
     render(<App />)
     fireEvent.click(screen.getByRole('button', { name: 'Выпадковыя назвы' }))
     const [first, second] = teamNames()
@@ -120,6 +124,10 @@ describe('App', () => {
     expect(RANDOM_TEAM_NAMES).toContain(second)
     expect(first).not.toBe(second)
     expect(saved().teams.map((t) => t.name)).toEqual([first, second])
+    const items = within(screen.getByRole('list', { name: 'Каманды' })).getAllByRole('listitem')
+    items.forEach((item) => {
+      expect(item.querySelector('svg')).toHaveAttribute('data-motif', TEAM_MOTIFS[item.textContent])
+    })
 
     fireEvent.click(screen.getByRole('radio', { name: '3' }))
     const third = teamNames()[2]
@@ -128,6 +136,7 @@ describe('App', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Пачаць гульню' }))
     expect(screen.getByRole('heading', { level: 2, name: first })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Знак каманды' })).toHaveAttribute('data-motif', TEAM_MOTIFS[first])
   })
 
   it('адкрывае і зачыняе правілы', () => {

@@ -34,7 +34,7 @@ describe('ReadyScreen', () => {
     setup()
     expect(screen.getByText('Раунд 2')).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 2, name: 'Вусы Мулявіна' })).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: 'Знак каманды' })).toHaveAttribute('data-motif', 'sun')
+    expect(screen.getByRole('img', { name: 'Знак каманды' })).toHaveAttribute('data-motif', 'mulavin-mustache')
     expect(screen.getByText('60 секунд')).toBeInTheDocument()
     expect(screen.getByText('Рахунак — да 30')).toBeInTheDocument()
     expect(screen.getByText('8')).toBeInTheDocument()

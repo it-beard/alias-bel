@@ -1,9 +1,9 @@
 import { createDeck, drawWord } from './deck.js'
-import { DEFAULT_SETTINGS, MAX_TEAMS, MIN_TEAMS, TEAM_COLORS, TEAM_MOTIFS } from './constants.js'
-import { fillNames, pickRandomNames } from './teamNames.js'
+import { DEFAULT_SETTINGS, MAX_TEAMS, MIN_TEAMS, TEAM_COLORS } from './constants.js'
+import { fillNames, motifForName, pickRandomNames } from './teamNames.js'
 
 /**
- * Каманды з колерамі і знакамі па парадку. Назвы бяруцца з `previous`,
+ * Каманды з колерамі па парадку і знакамі паводле назваў. Назвы бяруцца з `previous`,
  * а новыя каманды атрымліваюць выпадковыя назвы са спіса без паўтораў.
  */
 export function makeTeams(count, previous = []) {
@@ -12,7 +12,7 @@ export function makeTeams(count, previous = []) {
     id: i,
     name,
     color: TEAM_COLORS[i],
-    motif: TEAM_MOTIFS[i],
+    motif: motifForName(name),
     score: 0,
   }))
 }
@@ -67,7 +67,10 @@ export function reducer(state, action) {
         state.teams.length,
         state.teams.map((team) => team.name),
       )
-      return { ...state, teams: state.teams.map((team, i) => ({ ...team, name: names[i] })) }
+      return {
+        ...state,
+        teams: state.teams.map((team, i) => ({ ...team, name: names[i], motif: motifForName(names[i]) })),
+      }
     }
 
     case 'setSetting':

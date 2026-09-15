@@ -1,5 +1,10 @@
-import { RANDOM_TEAM_NAMES } from './constants.js'
+import { RANDOM_TEAM_NAMES, TEAM_MOTIFS } from './constants.js'
 import { shuffle } from './deck.js'
+
+/** Знак залежыць ад назвы, а не ад месца каманды; для невядомай назвы — сонца. */
+export function motifForName(name) {
+  return Object.hasOwn(TEAM_MOTIFS, name) ? TEAM_MOTIFS[name] : 'sun'
+}
 
 /**
  * Выбірае `count` розных назваў са спіса.

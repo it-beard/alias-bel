@@ -6,13 +6,13 @@ import { getWords } from '../data/words.js'
 const run = (actions, from = initialState) => actions.reduce(reducer, from)
 
 describe('makeTeams', () => {
-  it('стварае каманды з назвамі са спіса, колерамі і матывамі паводле парадку', () => {
+  it('стварае каманды з колерамі паводле парадку і знакамі паводле назваў', () => {
     const teams = makeTeams(5)
     expect(teams).toHaveLength(5)
     expect(new Set(teams.map((team) => team.name)).size).toBe(5)
     teams.forEach((team, i) => {
       expect(RANDOM_TEAM_NAMES).toContain(team.name)
-      expect(team).toEqual({ id: i, name: team.name, color: TEAM_COLORS[i], motif: TEAM_MOTIFS[i], score: 0 })
+      expect(team).toEqual({ id: i, name: team.name, color: TEAM_COLORS[i], motif: TEAM_MOTIFS[team.name], score: 0 })
     })
   })
 
@@ -21,6 +21,13 @@ describe('makeTeams', () => {
     const teams = makeTeams(2, previous)
     expect(teams[0]).toMatchObject({ name: 'Вусы Купалы', score: 0 })
     expect(RANDOM_TEAM_NAMES).toContain(teams[1].name)
+  })
+
+  it.each(RANDOM_TEAM_NAMES)('знак «%s» не залежыць ад месца ў спісе', (name) => {
+    const first = makeTeams(1, [{ name }])[0]
+    const last = makeTeams(5, [{}, {}, {}, {}, { name, motif: 'hooks' }])[4]
+    expect(last.motif).toBe(first.motif)
+    expect(last.motif).toBe(TEAM_MOTIFS[name])
   })
 })
 

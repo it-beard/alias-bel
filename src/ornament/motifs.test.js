@@ -1,17 +1,19 @@
 import { describe, expect, it } from 'vitest'
 import { MOTIFS, MOTIF_NAMES, cells, pathFor, size } from './motifs.js'
+import { TEAM_LOGOS } from './teamLogos.js'
 import { TEAM_MOTIFS } from '../game/constants.js'
 
+const ornaments = ['sun', 'star', 'field', 'tree', 'hooks']
 const rectangular = (rows) => rows.every((row) => row.length === rows[0].length)
 const onlyCells = (rows) => rows.every((row) => /^[X.]+$/.test(row))
 const mirrored = (rows) => rows.every((row) => row === [...row].reverse().join(''))
 
 describe('матывы', () => {
   it('набор матываў зафіксаваны', () => {
-    expect(MOTIF_NAMES).toEqual(['sun', 'star', 'field', 'tree', 'hooks'])
+    expect(MOTIF_NAMES).toEqual([...ornaments, ...Object.keys(TEAM_LOGOS)])
   })
 
-  it.each(MOTIF_NAMES)('%s — квадратная матрыца 9×9, сіметрычная па гарызанталі, з назвай', (name) => {
+  it.each(ornaments)('%s — квадратная матрыца 9×9, сіметрычная па гарызанталі, з назвай', (name) => {
     const { rows, title, meaning } = MOTIFS[name]
     expect(rows).toHaveLength(9)
     expect(rectangular(rows)).toBe(true)
@@ -23,9 +25,20 @@ describe('матывы', () => {
     expect(meaning).toBeTruthy()
   })
 
-  it('кожная каманда мае свой існуючы матыў', () => {
-    expect(new Set(TEAM_MOTIFS).size).toBe(TEAM_MOTIFS.length)
-    for (const name of TEAM_MOTIFS) expect(MOTIFS[name]).toBeDefined()
+  it('кожная назва каманды мае свой унікальны малюнак', () => {
+    const logos = Object.values(TEAM_MOTIFS).map((name) => MOTIFS[name])
+    expect(logos.every(Boolean)).toBe(true)
+    expect(new Set(logos.map(({ rows }) => pathFor(rows))).size).toBe(logos.length)
+  })
+
+  it.each(Object.keys(TEAM_LOGOS))('%s — піксельная матрыца 15×15 з назвай', (name) => {
+    const { rows, title } = MOTIFS[name]
+    expect(rows).toHaveLength(15)
+    expect(rows[0]).toHaveLength(15)
+    expect(rectangular(rows)).toBe(true)
+    expect(onlyCells(rows)).toBe(true)
+    expect(cells(rows).length).toBeGreaterThan(8)
+    expect(title).toBeTruthy()
   })
 })
 

@@ -1,7 +1,7 @@
 import { initialState, inProgress } from './gameState.js'
-import { DEFAULT_SETTINGS, MAX_TEAMS, RANDOM_TEAM_NAMES, ROUND_TIMES, SCRIPTS, STORAGE_KEY, TARGET_SCORES, TEAM_COLORS, TEAM_MOTIFS, THEMES } from './constants.js'
+import { DEFAULT_SETTINGS, MAX_TEAMS, RANDOM_TEAM_NAMES, ROUND_TIMES, SCRIPTS, STORAGE_KEY, TARGET_SCORES, TEAM_COLORS, THEMES } from './constants.js'
 import { getWords, LEVEL_ORDER } from '../data/words.js'
-import { fillNames } from './teamNames.js'
+import { fillNames, motifForName } from './teamNames.js'
 
 export const SCREENS = ['setup', 'ready', 'play', 'result', 'finish']
 
@@ -30,7 +30,7 @@ function integer(value, fallback = 0) {
  * Аднаўляе захаваны стан з localStorage.
  * Адказы не губляюцца пасля перазагрузкі. Актыўны раунд аднаўляецца на паўзе;
  * час у закрытай укладцы ўлічваецца, калі гульню не паставілі на паўзу загадзя.
- * Каманды нармалізуюцца: колер і матыў заўсёды бяруцца з бягучай палітры, а назвы не са спіса
+ * Каманды нармалізуюцца: колер бярэцца з палітры, знак — паводле назвы. Назвы не са спіса
  * (старыя стандартныя, упісаныя ўручную ў ранейшых версіях, паўторы) замяняюцца выпадковымі са спіса.
  */
 export function loadSaved(storage) {
@@ -57,7 +57,7 @@ export function loadSaved(storage) {
             id: i,
             name: names[i],
             color: TEAM_COLORS[i],
-            motif: TEAM_MOTIFS[i],
+            motif: motifForName(names[i]),
             score: integer(team?.score),
             ...(Number.isSafeInteger(team?.roundsPlayed) && team.roundsPlayed >= 0 ? { roundsPlayed: team.roundsPlayed } : {}),
           }))

@@ -15,7 +15,7 @@ describe('ScoreBoard', () => {
     expect(rows[0]).not.toHaveAttribute('aria-current')
     expect(screen.getByText('12')).toBeInTheDocument()
     expect(screen.getByText('45')).toBeInTheDocument()
-    expect(rows[0].querySelector('svg')).toHaveAttribute('data-motif', 'sun')
+    expect(rows[0].querySelector('svg')).toHaveAttribute('data-motif', 'mulavin-mustache')
   })
 
   it('шкала маштабуецца па лідары, калі ён вышэй за мэту', () => {

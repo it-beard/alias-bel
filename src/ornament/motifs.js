@@ -1,3 +1,5 @@
+import { TEAM_LOGOS } from './teamLogos.js'
+
 /**
  * Матывы беларускага арнаменту ў стылі вышыўкі крыжыкам.
  * Кожны матыў — матрыца радкоў: «X» — зашыты квадрацік, «.» — пустое месца.
@@ -80,6 +82,7 @@ export const MOTIFS = {
       '..X...X..',
     ],
   },
+  ...TEAM_LOGOS,
 }
 
 export const MOTIF_NAMES = Object.keys(MOTIFS)
