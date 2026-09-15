@@ -2140,7 +2140,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
           class="teamlist__input"
           enterkeyhint="done"
           maxlength="24"
-          value="Вусы Мулявіна"
+          value="Vusy Mulavina"
         />
       </li>
       <li
@@ -2167,7 +2167,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
           class="teamlist__input"
           enterkeyhint="done"
           maxlength="24"
-          value="Крынж Еўфрасінні"
+          value="Krynž Jeŭfrasinni"
         />
       </li>
     </ul>

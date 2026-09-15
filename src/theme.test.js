@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { THEME_BG, applyScript, applyTheme, prefersDark, resolveTheme } from './theme.js'
+import { APP_TITLE } from './game/constants.js'
 
 describe('тэма', () => {
   beforeEach(() => {
@@ -39,11 +40,17 @@ describe('тэма', () => {
     expect(() => applyTheme('dark')).not.toThrow()
   })
 
-  it('applyScript ставіць мову дакумента', () => {
+  it('applyScript ставіць мову дакумента і загаловак укладкі', () => {
     applyScript('lat')
     expect(document.documentElement.getAttribute('lang')).toBe('be-Latn')
+    expect(document.title).toBe('Alias pa-biełarusku')
     applyScript('cyr')
     expect(document.documentElement.getAttribute('lang')).toBe('be')
+    expect(document.title).toBe(APP_TITLE.cyr)
     expect(() => applyScript('lat', null)).not.toThrow()
+  })
+
+  it('колеры радка стану супадаюць з фонам тэм', () => {
+    expect(THEME_BG).toEqual({ light: '#f6f3ee', dark: '#141215' })
   })
 })

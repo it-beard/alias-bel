@@ -141,13 +141,26 @@ describe('SetupScreen', () => {
     expect(dispatch).toHaveBeenCalledWith({ type: 'startGame' })
   })
 
-  it('у рэжыме лацінкі інтэрфейс на лацінцы, а назвы камандаў рэдагуюцца як ёсць', () => {
+  it('у рэжыме лацінкі інтэрфейс і назвы камандаў на лацінцы', () => {
     setup({ ...base, settings: { ...initialState.settings, script: 'lat' } }, 'lat')
     expect(screen.getByRole('heading', { level: 1, name: 'Alias' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Pačać hulniu' })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: 'Lohki' })).toHaveAttribute('aria-checked', 'true')
-    expect(screen.getByLabelText('Nazva kamandy 1')).toHaveValue('Вусы Мулявіна')
+    expect(screen.getByLabelText('Nazva kamandy 1')).toHaveValue('Vusy Mulavina')
+    expect(screen.getByLabelText('Nazva kamandy 2')).toHaveValue('Krynž Jeŭfrasinni')
     expect(screen.getByRole('button', { name: 'Vypadkovyja nazvy' })).toBeInTheDocument()
     expect(screen.getByText('Prostyja štodzionnyja słovy · 340 słoŭ')).toBeInTheDocument()
+  })
+
+  it('у рэжыме лацінкі назва рэдагуецца так, як яе бачаць, а кірыліца адразу паказваецца лацінкай', () => {
+    const teams = [
+      { ...base.teams[0], name: 'Суседзі' },
+      { ...base.teams[1], name: 'Vusy Kupały' },
+    ]
+    const { dispatch } = setup({ ...base, teams, settings: { ...initialState.settings, script: 'lat' } }, 'lat')
+    expect(screen.getByLabelText('Nazva kamandy 1')).toHaveValue('Susiedzi')
+    expect(screen.getByLabelText('Nazva kamandy 2')).toHaveValue('Vusy Kupały')
+    fireEvent.change(screen.getByLabelText('Nazva kamandy 1'), { target: { value: 'Susiedzi z dvara' } })
+    expect(dispatch).toHaveBeenCalledWith({ type: 'renameTeam', id: 0, name: 'Susiedzi z dvara' })
   })
 })

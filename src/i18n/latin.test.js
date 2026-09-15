@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { isCyrillic, toLatin } from './latin.js'
 import { EASY, HARD, MEDIUM } from '../data/words.js'
-import { RANDOM_TEAM_NAMES } from '../game/constants.js'
+import { APP_NAME, APP_TITLE, RANDOM_TEAM_NAMES } from '../game/constants.js'
 
 const cases = [
   // базавыя літары
@@ -163,5 +163,13 @@ describe('выпадковыя назвы камандаў на лацінцы',
 
   it('праверана кожная назва са спіса', () => {
     for (const name of RANDOM_TEAM_NAMES) expect(toLatin(name), name).not.toMatch(/[\u0400-\u04ff]/)
+  })
+})
+
+describe('назва гульні на лацінцы', () => {
+  it('загаловак адпавядае транслітарацыі, а «Аліяс» пішацца міжнародна як Alias', () => {
+    expect(APP_TITLE.cyr.startsWith(APP_NAME.cyr)).toBe(true)
+    expect(APP_TITLE.lat.startsWith(APP_NAME.lat)).toBe(true)
+    expect(APP_TITLE.lat).toBe(toLatin(APP_TITLE.cyr).replace(toLatin(APP_NAME.cyr), APP_NAME.lat))
   })
 })

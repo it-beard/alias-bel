@@ -5,6 +5,7 @@ import { initialState } from './game/gameState.js'
 import { ANSWER_LOCK_MS, COUNTDOWN_STEP_MS, DEFAULT_SETTINGS, RANDOM_TEAM_NAMES, STORAGE_KEY } from './game/constants.js'
 import { THEME_BG } from './theme.js'
 import { fixedTeams } from './test/fixtures.js'
+import { toLatin } from './i18n/latin.js'
 import { advance } from './test/timers.js'
 
 const NOW = new Date('2026-09-15T12:00:00Z').getTime()
@@ -78,13 +79,21 @@ describe('App', () => {
   it('пераключае алфавіт на лацінку для ўсяго інтэрфейсу', () => {
     render(<App />)
     fireEvent.click(screen.getByRole('button', { name: 'Налады' }))
+    expect(document.title).toBe('Аліяс па-беларуску')
     fireEvent.click(screen.getByRole('radio', { name: 'Лацінка' }))
     expect(screen.getByRole('heading', { level: 1, name: 'Alias' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Pačać hulniu' })).toBeInTheDocument()
     expect(document.documentElement.getAttribute('lang')).toBe('be-Latn')
+    expect(document.title).toBe('Alias pa-biełarusku')
     expect(saved().settings.script).toBe('lat')
+    saved().teams.forEach((team, i) => {
+      expect(screen.getByLabelText(`Nazva kamandy ${i + 1}`)).toHaveValue(toLatin(team.name))
+      expect(screen.getByLabelText(`Nazva kamandy ${i + 1}`).value).not.toMatch(/[\u0400-\u04ff]/)
+    })
     fireEvent.click(screen.getByRole('radio', { name: 'Kirylica' }))
     expect(screen.getByRole('heading', { level: 1, name: 'Аліяс' })).toBeInTheDocument()
+    expect(document.title).toBe('Аліяс па-беларуску')
+    expect(screen.getByLabelText('Назва каманды 1')).toHaveValue(saved().teams[0].name)
   })
 
   it('пераключае тэму і абнаўляе колер радка стану', () => {

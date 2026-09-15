@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { LEVELS, LEVEL_ORDER } from '../data/words.js'
-import { MAX_TEAMS, MIN_TEAMS, ROUND_TIMES, TARGET_SCORES, TEAM_NAME_MAX } from '../game/constants.js'
+import { APP_NAME, MAX_TEAMS, MIN_TEAMS, ROUND_TIMES, TARGET_SCORES, TEAM_NAME_MAX } from '../game/constants.js'
 import { unlockAudio, vibrate } from '../game/feedback.js'
 import { inProgress } from '../game/gameState.js'
 import { words } from '../game/plural.js'
@@ -41,7 +41,7 @@ export default function SetupScreen({ state, dispatch, onRules }) {
         <div className="brand__row">
           <h1 className="brand__title">
             <Mark className="brand__mark" />
-            {script === 'lat' ? 'Alias' : 'Аліяс'}
+            {script === 'lat' ? APP_NAME.lat : APP_NAME.cyr}
           </h1>
           <button type="button" className="iconbtn" onClick={() => setSettingsOpen(true)} aria-label={t('Налады')}>
             <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -111,7 +111,7 @@ export default function SetupScreen({ state, dispatch, onRules }) {
               <input
                 key={rolls}
                 className={`teamlist__input${rolls > 0 ? ' is-rolled' : ''}`}
-                value={team.name}
+                value={t(team.name)}
                 maxLength={TEAM_NAME_MAX}
                 autoComplete="off"
                 enterKeyHint="done"
