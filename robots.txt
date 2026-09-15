@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://alias.itbeard.com/sitemap.xml
