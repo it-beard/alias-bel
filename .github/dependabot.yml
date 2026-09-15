@@ -20,6 +20,13 @@ updates:
           - react-dom
           - "@types/react"
           - "@types/react-dom"
+      # vitest і @vitest/* спасылаюцца адно на аднаго дакладнымі peer-версіямі
+      # (напр. vitest@5 патрабуе роўна @vitest/coverage-v8@5), таму паасобку
+      # ламаюць npm ci. Трымаем разам, у тым ліку мажорныя версіі.
+      vitest:
+        patterns:
+          - vitest
+          - "@vitest/*"
       # астатнія дробныя абнаўленні — адным PR; мажорныя прыходзяць паасобку
       minor-and-patch:
         patterns:
