@@ -1696,6 +1696,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
       </button>
     </div>
     <ul
+      aria-label="Каманды"
       class="teamlist"
     >
       <li
@@ -1716,14 +1717,11 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
             fill="currentColor"
           />
         </svg>
-        <input
-          aria-label="Назва каманды 1"
-          autocomplete="off"
-          class="teamlist__input"
-          enterkeyhint="done"
-          maxlength="24"
-          value="Вусы Мулявіна"
-        />
+        <span
+          class="teamlist__name"
+        >
+          Вусы Мулявіна
+        </span>
       </li>
       <li
         class="teamlist__item"
@@ -1743,14 +1741,11 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
             fill="currentColor"
           />
         </svg>
-        <input
-          aria-label="Назва каманды 2"
-          autocomplete="off"
-          class="teamlist__input"
-          enterkeyhint="done"
-          maxlength="24"
-          value="Крынж Еўфрасінні"
-        />
+        <span
+          class="teamlist__name"
+        >
+          Крынж Еўфрасінні
+        </span>
       </li>
     </ul>
   </section>
@@ -1911,6 +1906,30 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
       </div>
     </div>
   </section>
+  <footer
+    aria-label="Карысныя спасылкі"
+    class="site-links"
+  >
+    <a
+      href="https://itbeard.com/support/"
+      rel="noreferrer"
+      target="_blank"
+    >
+      Падзякаваць
+    </a>
+    <span
+      aria-hidden="true"
+    >
+      ·
+    </span>
+    <a
+      href="https://github.com/it-beard/alias-bel"
+      rel="noreferrer"
+      target="_blank"
+    >
+      Гульня на GitHub
+    </a>
+  </footer>
   <div
     class="actions actions--sticky"
   >
@@ -2114,6 +2133,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
       </button>
     </div>
     <ul
+      aria-label="Kamandy"
       class="teamlist"
     >
       <li
@@ -2134,14 +2154,11 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
             fill="currentColor"
           />
         </svg>
-        <input
-          aria-label="Nazva kamandy 1"
-          autocomplete="off"
-          class="teamlist__input"
-          enterkeyhint="done"
-          maxlength="24"
-          value="Vusy Mulavina"
-        />
+        <span
+          class="teamlist__name"
+        >
+          Vusy Mulavina
+        </span>
       </li>
       <li
         class="teamlist__item"
@@ -2161,14 +2178,11 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
             fill="currentColor"
           />
         </svg>
-        <input
-          aria-label="Nazva kamandy 2"
-          autocomplete="off"
-          class="teamlist__input"
-          enterkeyhint="done"
-          maxlength="24"
-          value="Krynž Jeŭfrasinni"
-        />
+        <span
+          class="teamlist__name"
+        >
+          Krynž Jeŭfrasinni
+        </span>
       </li>
     </ul>
   </section>
@@ -2329,6 +2343,30 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
       </div>
     </div>
   </section>
+  <footer
+    aria-label="Karysnyja spasyłki"
+    class="site-links"
+  >
+    <a
+      href="https://itbeard.com/support/"
+      rel="noreferrer"
+      target="_blank"
+    >
+      Padziakavać
+    </a>
+    <span
+      aria-hidden="true"
+    >
+      ·
+    </span>
+    <a
+      href="https://github.com/it-beard/alias-bel"
+      rel="noreferrer"
+      target="_blank"
+    >
+      Hulnia na GitHub
+    </a>
+  </footer>
   <div
     class="actions actions--sticky"
   >

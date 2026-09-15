@@ -154,6 +154,16 @@ export default function SetupScreen({ state, dispatch, onRules }) {
         </div>
       </section>
 
+      <footer className="site-links" aria-label={t('Карысныя спасылкі')}>
+        <a href="https://itbeard.com/support/" target="_blank" rel="noreferrer">
+          {t('Падзякаваць')}
+        </a>
+        <span aria-hidden="true">·</span>
+        <a href="https://github.com/it-beard/alias-bel" target="_blank" rel="noreferrer">
+          {t('Гульня на GitHub')}
+        </a>
+      </footer>
+
       <div className="actions actions--sticky">
         <button type="button" className="btn btn--ghost" onClick={onRules}>
           {t('Правілы')}

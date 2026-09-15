@@ -42,6 +42,8 @@ describe('SetupScreen', () => {
     expect(screen.queryByText(/Сола-рэжым/)).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Працягнуць' })).not.toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Падзякаваць' })).toHaveAttribute('href', 'https://itbeard.com/support/')
+    expect(screen.getByRole('link', { name: 'Гульня на GitHub' })).toHaveAttribute('href', 'https://github.com/it-beard/alias-bel')
   })
 
   it('рэдкія налады схаваныя ў шторцы', () => {
@@ -150,6 +152,8 @@ describe('SetupScreen', () => {
     expect(teamNames('Kamandy')).toEqual(['Vusy Mulavina', 'Krynž Jeŭfrasinni'])
     expect(screen.getByRole('button', { name: 'Vypadkovyja nazvy' })).toBeInTheDocument()
     expect(screen.getByText('Prostyja štodzionnyja słovy · 340 słoŭ')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Padziakavać' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Hulnia na GitHub' })).toBeInTheDocument()
   })
 
 })

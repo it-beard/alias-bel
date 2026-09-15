@@ -379,6 +379,31 @@
   background: linear-gradient(to top, var(--bg) 60%, transparent);
 }
 
+.site-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 8px;
+  padding: 2px 4px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.site-links a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
+.site-links a:hover {
+  color: var(--text);
+}
+
+.site-links a:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
 .btn {
   flex: 1;
   min-height: 54px;
