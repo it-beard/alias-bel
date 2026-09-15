@@ -19,6 +19,7 @@ describe('спіс выпадковых назваў', () => {
       'Смочкі Барадуліна',
       'Вусы Купалы',
       'Мары Глобуса',
+      'Каханкі Арыёна',
     ])
   })
 
@@ -65,7 +66,7 @@ describe('pickRandomNames', () => {
   })
 
   it('калі новых не хапае, дабірае з ужо ўжытых без паўтораў', () => {
-    const avoid = RANDOM_TEAM_NAMES.slice(0, 11)
+    const avoid = RANDOM_TEAM_NAMES.slice(0, -2)
     const names = pickRandomNames(4, avoid)
     expect(new Set(names).size).toBe(4)
     expect(names.slice(0, 2).every((name) => !avoid.includes(name))).toBe(true)
