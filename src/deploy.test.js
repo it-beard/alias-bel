@@ -11,17 +11,31 @@ describe('публікацыя на GitHub Pages', () => {
     expect(read('public/CNAME').trim()).toBe('alias.itbeard.com')
   })
 
-  it('воркфлоў дэплою запускаецца пры пушы ў main і публікуе толькі пасля тэстаў', () => {
+  it('воркфлоў дэплою запускаецца пры пушы ў main і публікуе толькі пасля праверак', () => {
     const workflow = read('.github/workflows/deploy.yml')
     expect(workflow).toMatch(/push:\s*\n\s*branches: \[main\]/)
-    const order = ['npm ci', 'npm run lint', 'npm test', 'npm run build', 'npx gh-pages'].map((step) => workflow.indexOf(step))
+    // Самі крокі жывуць у агульным checks.yml; сюды ён прыходзіць выклікам.
+    expect(workflow).toContain('uses: ./.github/workflows/checks.yml')
+    expect(workflow).toContain('upload-pages-artifact: true')
+    // Публікацыя чакае праверак — без гэтага сайт абнаўляўся б і на чырвоных тэстах.
+    expect(workflow).toMatch(/needs: check/)
+    expect(workflow).toContain('actions/deploy-pages@')
+    // Без гэтых дазволаў deploy-pages падае.
+    expect(workflow).toMatch(/pages: write/)
+    expect(workflow).toMatch(/id-token: write/)
+  })
+
+  it('агульныя праверкі ідуць па чарзе і выкладаюць dist/ для Pages', () => {
+    const checks = read('.github/workflows/checks.yml')
+    const order = ['npm ci', 'npm run lint', 'npm test', 'npm run build', 'actions/upload-pages-artifact'].map((step) => checks.indexOf(step))
     order.forEach((index) => expect(index).toBeGreaterThan(-1))
     expect([...order].sort((a, b) => a - b)).toEqual(order)
-    expect(workflow).toContain('--user "github-actions-bot <support+actions@github.com>"')
+    expect(checks).toContain('path: dist')
   })
 
   it('CI для pull request і канфіг Dependabot на месцы', () => {
     expect(read('.github/workflows/ci.yml')).toMatch(/pull_request:/)
+    expect(read('.github/workflows/ci.yml')).toContain('uses: ./.github/workflows/checks.yml')
     const dependabot = read('.github/dependabot.yml')
     expect(dependabot).toMatch(/package-ecosystem: npm/)
     expect(dependabot).toMatch(/package-ecosystem: github-actions/)
