@@ -36,7 +36,12 @@ updates:
           - patch
 
   - package-ecosystem: github-actions
-    directory: /
+    # Са `/` Dependabot бачыць толькі .github/workflows і action.yml у корані.
+    # Composite action у .github/actions/ трэба назваць асобна, інакш экшны
+    # ўнутры яго (setup-node) застануцца без абнаўленняў.
+    directories:
+      - /
+      - /.github/actions/checks
     schedule:
       interval: weekly
       day: monday
