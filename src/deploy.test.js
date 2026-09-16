@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const root = resolve(import.meta.dirname, '..')
@@ -14,9 +14,12 @@ describe('публікацыя на GitHub Pages', () => {
   it('воркфлоў дэплою запускаецца пры пушы ў main і публікуе толькі пасля праверак', () => {
     const workflow = read('.github/workflows/deploy.yml')
     expect(workflow).toMatch(/push:\s*\n\s*branches: \[main\]/)
-    // Самі крокі жывуць у агульным checks.yml; сюды ён прыходзіць выклікам.
-    expect(workflow).toContain('uses: ./.github/workflows/checks.yml')
-    expect(workflow).toContain('upload-pages-artifact: true')
+    // Крокі праверак жывуць у composite action; перад ім абавязкова checkout —
+    // інакш файла на раннеры яшчэ няма. Артэфакт выкладаецца толькі пасля іх.
+    const order = ['actions/checkout@', 'uses: ./.github/actions/checks', 'actions/upload-pages-artifact@'].map((step) => workflow.indexOf(step))
+    order.forEach((index) => expect(index).toBeGreaterThan(-1))
+    expect([...order].sort((a, b) => a - b)).toEqual(order)
+    expect(workflow).toContain('path: dist')
     // Публікацыя чакае праверак — без гэтага сайт абнаўляўся б і на чырвоных тэстах.
     expect(workflow).toMatch(/needs: check/)
     expect(workflow).toContain('actions/deploy-pages@')
@@ -25,20 +28,28 @@ describe('публікацыя на GitHub Pages', () => {
     expect(workflow).toMatch(/id-token: write/)
   })
 
-  it('агульныя праверкі ідуць па чарзе і выкладаюць dist/ для Pages', () => {
-    const checks = read('.github/workflows/checks.yml')
-    const order = ['npm ci', 'npm run lint', 'npm test', 'npm run build', 'actions/upload-pages-artifact'].map((step) => checks.indexOf(step))
+  it('агульныя праверкі ідуць па чарзе: Node, залежнасці, лінтар, тэсты, зборка', () => {
+    const checks = read('.github/actions/checks/action.yml')
+    expect(checks).toMatch(/using: composite/)
+    const order = ['actions/setup-node@', 'npm ci', 'npm run lint', 'npm test', 'npm run build'].map((step) => checks.indexOf(step))
     order.forEach((index) => expect(index).toBeGreaterThan(-1))
     expect([...order].sort((a, b) => a - b)).toEqual(order)
-    expect(checks).toContain('path: dist')
+  })
+
+  it('у .github/workflows няма файлаў толькі пад workflow_call — кожны такі відзён у спісе Actions', () => {
+    for (const file of readdirSync(resolve(root, '.github/workflows'))) {
+      expect(read(`.github/workflows/${file}`), file).not.toMatch(/workflow_call/)
+    }
   })
 
   it('CI для pull request і канфіг Dependabot на месцы', () => {
     expect(read('.github/workflows/ci.yml')).toMatch(/pull_request:/)
-    expect(read('.github/workflows/ci.yml')).toContain('uses: ./.github/workflows/checks.yml')
+    expect(read('.github/workflows/ci.yml')).toContain('uses: ./.github/actions/checks')
     const dependabot = read('.github/dependabot.yml')
     expect(dependabot).toMatch(/package-ecosystem: npm/)
     expect(dependabot).toMatch(/package-ecosystem: github-actions/)
+    // Са `/` Dependabot не бачыць composite action — каталог трэба назваць асобна.
+    expect(dependabot).toContain('/.github/actions/checks')
     expect(existsSync(resolve(root, 'package-lock.json'))).toBe(true)
   })
 

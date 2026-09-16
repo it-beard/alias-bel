@@ -4,7 +4,7 @@ name: Deploy
 # Калі лінтар або тэсты падаюць, сайт не абнаўляецца.
 #
 # Публікацыя ідзе праз actions/deploy-pages: dist/ едзе артэфактам напрамую ў Pages,
-# без прамежкавай галіны gh-pages. Таму тут ужо не трэба `contents: write`.
+# без прамежкавай галіны gh-pages. Таму тут не трэба `contents: write`.
 on:
   push:
     branches: [main]
@@ -22,10 +22,21 @@ concurrency:
 
 jobs:
   check:
-    name: Праверкі
-    uses: ./.github/workflows/checks.yml
-    with:
-      upload-pages-artifact: true
+    name: Лінтар, тэсты, зборка
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Атрымаць код
+        uses: actions/checkout@v7
+
+      - name: Праверкі
+        uses: ./.github/actions/checks
+
+      # Vite капіюе public/CNAME у dist/, таму ўласны дамен едзе разам з артэфактам.
+      - name: Выкласці dist/ для Pages
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
 
   publish:
     name: Апублікаваць
