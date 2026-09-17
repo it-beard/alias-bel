@@ -1,5 +1,6 @@
 import { SCRIPTS, THEMES } from '../game/constants.js'
 import { canVibrate, vibrate } from '../game/feedback.js'
+import { useSheetDrag } from '../hooks/useSheetDrag.js'
 import { useT } from '../i18n/script.js'
 import Segmented from './Segmented.jsx'
 import Toggle from './Toggle.jsx'
@@ -8,6 +9,7 @@ import Dialog from './Dialog.jsx'
 /** Шторка з наладамі, якія мяняюць рэдка: алфавіт, тэма, правілы падліку, падказкі, гук. */
 export default function SettingsSheet({ settings, onChange, onClose }) {
   const t = useT()
+  const dragRef = useSheetDrag(onClose)
   const set = (key) => (value) => onChange(key, value)
   // пробны імпульс адразу паказвае, ці даходзіць вібрацыя да тэлефона
   const setVibration = (value) => {
@@ -18,7 +20,7 @@ export default function SettingsSheet({ settings, onChange, onClose }) {
   return (
     <Dialog label={t('Налады')} onClose={onClose}>
       <div className="sheet__backdrop" onClick={onClose} />
-      <div className="sheet__body">
+      <div className="sheet__body" ref={dragRef}>
         <div className="sheet__grip" aria-hidden="true" />
         <h2 className="sheet__title">{t('Налады')}</h2>
 

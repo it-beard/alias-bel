@@ -1,12 +1,14 @@
+import { useSheetDrag } from '../hooks/useSheetDrag.js'
 import { useT } from '../i18n/script.js'
 import Dialog from './Dialog.jsx'
 
 export default function RulesSheet({ onClose }) {
   const t = useT()
+  const dragRef = useSheetDrag(onClose)
   return (
     <Dialog label={t('Правілы гульні')} onClose={onClose}>
       <div className="sheet__backdrop" onClick={onClose} />
-      <div className="sheet__body">
+      <div className="sheet__body" ref={dragRef}>
         <div className="sheet__grip" aria-hidden="true" />
         <h2 className="sheet__title">{t('Правілы')}</h2>
         <ol className="rules">
@@ -21,7 +23,9 @@ export default function RulesSheet({ onClose }) {
             <b>{t('Адгадана')}</b>
             {t(' (ці свайпніце направа): +1 ачко. Не ведаеце слова — ')}
             <b>{t('Пас')}</b>
-            {t(' (свайп налева): −1 ачко, калі ўключаны штраф.')}
+            {t(' (свайп налева): −1 ачко, калі ўключаны штраф. Каля рэдкіх слоў ёсць кнопка ')}
+            <b>?</b>
+            {t(' — яна паказвае пераклад.')}
           </li>
           <li>{t('Раунд доўжыцца зададзены час. Пасля сігналу можна дагуляць апошняе слова, калі правіла ўключана.')}</li>
           <li>{t('Пасля раунда паказваецца спіс словаў — спрэчныя адзнакі можна выправіць націскам.')}</li>

@@ -1448,7 +1448,11 @@ exports[`снапшоты экранаў > rules (cyr) 1`] = `
         <b>
           Пас
         </b>
-         (свайп налева): −1 ачко, калі ўключаны штраф.
+         (свайп налева): −1 ачко, калі ўключаны штраф. Каля рэдкіх слоў ёсць кнопка 
+        <b>
+          ?
+        </b>
+         — яна паказвае пераклад.
       </li>
       <li>
         Раунд доўжыцца зададзены час. Пасля сігналу можна дагуляць апошняе слова, калі правіла ўключана.
@@ -1515,7 +1519,11 @@ exports[`снапшоты экранаў > rules (lat) 1`] = `
         <b>
           Pas
         </b>
-         (svajp naleva): −1 ačko, kali ŭklučany štraf.
+         (svajp naleva): −1 ačko, kali ŭklučany štraf. Kala redkich słoŭ josć knopka 
+        <b>
+          ?
+        </b>
+         — jana pakazvaje pierakład.
       </li>
       <li>
         Raund doŭžycca zadadzieny čas. Pasla sihnału možna dahulać apošniaje słova, kali praviła ŭklučana.

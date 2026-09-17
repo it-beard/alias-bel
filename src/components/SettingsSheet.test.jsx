@@ -1,9 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import SettingsSheet from './SettingsSheet.jsx'
 import { DEFAULT_SETTINGS } from '../game/constants.js'
 import { ScriptContext } from '../i18n/script.js'
 import { canVibrate, vibrate } from '../game/feedback.js'
+import { CLOSE_MS } from '../hooks/useSheetDrag.js'
+import { swipeDown } from '../test/touch.js'
 
 vi.mock('../game/feedback.js', () => ({ canVibrate: vi.fn(() => true), vibrate: vi.fn() }))
 
@@ -86,6 +88,15 @@ describe('SettingsSheet', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Гатова' }))
     fireEvent.click(container.querySelector('.sheet__backdrop'))
     expect(onClose).toHaveBeenCalledTimes(2)
+  })
+
+  it('зачыняецца змахам уніз, нічога не мяняючы ў наладах', () => {
+    vi.useFakeTimers()
+    const { onChange, onClose, container } = setup()
+    swipeDown(container.querySelector('.sheet__body'), 160)
+    act(() => vi.advanceTimersByTime(CLOSE_MS))
+    expect(onClose).toHaveBeenCalledTimes(1)
+    expect(onChange).not.toHaveBeenCalled()
   })
 
   it('у рэжыме лацінкі', () => {

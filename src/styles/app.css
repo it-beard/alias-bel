@@ -1481,6 +1481,9 @@ dialog::backdrop {
   position: absolute;
   inset: 0;
   background: rgba(20, 14, 10, 0.5);
+  /* --sheet-* выстаўляе useSheetDrag, пакуль шторку цягнуць уніз */
+  opacity: calc(1 - var(--sheet-fade, 0));
+  transition: opacity var(--sheet-ease, 0s) ease;
 }
 
 .sheet__body {
@@ -1496,6 +1499,8 @@ dialog::backdrop {
   background: var(--paper);
   animation: rise 0.22s ease;
   overscroll-behavior: contain;
+  transform: translateY(var(--sheet-drag, 0px));
+  transition: transform var(--sheet-ease, 0s) ease;
 }
 
 .sheet__body > * {

@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import RulesSheet from './RulesSheet.jsx'
 import { ScriptContext } from '../i18n/script.js'
+import { CLOSE_MS } from '../hooks/useSheetDrag.js'
+import { swipeDown } from '../test/touch.js'
 
 describe('RulesSheet', () => {
   it('паказвае сем правілаў і зачыняецца кнопкай або фонам', () => {
@@ -13,6 +15,21 @@ describe('RulesSheet', () => {
     expect(onClose).toHaveBeenCalledTimes(1)
     fireEvent.click(container.querySelector('.sheet__backdrop'))
     expect(onClose).toHaveBeenCalledTimes(2)
+  })
+
+  it('зачыняецца змахам уніз', () => {
+    vi.useFakeTimers()
+    const onClose = vi.fn()
+    const { container } = render(<RulesSheet onClose={onClose} />)
+    swipeDown(container.querySelector('.sheet__body'), 160)
+    act(() => vi.advanceTimersByTime(CLOSE_MS))
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('побач са свайпамі сказана пра кнопку падказкі', () => {
+    const { container } = render(<RulesSheet onClose={() => {}} />)
+    const rule = [...container.querySelectorAll('.rules li')].find((li) => li.textContent.includes('свайп налева'))
+    expect(rule).toHaveTextContent('Каля рэдкіх слоў ёсць кнопка ? — яна паказвае пераклад.')
   })
 
   it('у рэжыме лацінкі правілы транслітаруюцца', () => {
