@@ -151,7 +151,7 @@ describe('SetupScreen', () => {
     const tile = screen.getByRole('button', { name: /Рэжым для дарослых/ })
     expect(tile).toHaveAttribute('aria-pressed', 'true')
     expect(tile).toHaveClass('is-on')
-    expect(screen.getByText('Ад заляцанняў да любошчаў · 66 слоў')).toBeInTheDocument()
+    expect(screen.getByText('Ад заляцанняў да любошчаў · 108 слоў')).toBeInTheDocument()
     screen.getAllByRole('radio', { name: /Лёгкі|Сярэдні|Складаны|Усе/ }).forEach((radio) => {
       expect(radio).toHaveAttribute('aria-checked', 'false')
     })
