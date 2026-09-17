@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { isCyrillic, toLatin } from './latin.js'
-import { EASY, HARD, MEDIUM } from '../data/words.js'
+import { ADULT, EASY, HARD, MEDIUM } from '../data/words.js'
 import { ADULT_TEAM_NAMES, APP_NAME, APP_TITLE, RANDOM_TEAM_NAMES } from '../game/constants.js'
 
 const cases = [
@@ -124,11 +124,23 @@ describe('toLatin', () => {
   })
 
   it('пераводзіць увесь слоўнік без рэштак кірыліцы', () => {
-    for (const word of [...EASY, ...MEDIUM, ...HARD]) {
+    for (const word of [...EASY, ...MEDIUM, ...HARD, ...ADULT]) {
       const latin = toLatin(word)
       expect(latin, word).not.toMatch(/[Ѐ-ӿ]/)
       expect(latin.length, word).toBeGreaterThan(0)
     }
+  })
+
+  it.each([
+    ['кліны падбіваць', 'kliny padbivać'],
+    ['марцовы кот', 'marcovy kot'],
+    ['шмаравідла', 'šmaravidła'],
+    ['улялюшчыцца', 'ulaluščycca'],
+    ['залёты', 'zaloty'],
+    ['цнатлівасць', 'cnatlivasć'],
+    ['юр', 'jur'],
+  ])('слова рэжыму 18+: %s → %s', (input, expected) => {
+    expect(toLatin(input)).toBe(expected)
   })
 
   it('пераводзіць слоўнік дэтэрмінавана', () => {
@@ -169,7 +181,7 @@ describe('выпадковыя назвы камандаў на лацінцы',
     ['Дудка Багушэвіча', 'Dudka Bahuševiča'],
     ['Паўстанне Каліноўскага', 'Paŭstannie Kalinoŭskaha'],
     ['Першы раз Скарыны', 'Pieršy raz Skaryny'],
-    ['Аголеныя Шагалы', 'Aholenaja Šahała'],
+    ['Аголеныя Шагалы', 'Aholenyja Šahały'],
     ['Папараць-кветка Купалы', 'Paparać-kvietka Kupały'],
     ['Пяць мужчын у леснічоўцы', 'Piać mužčyn u lesničoŭcy'],
   ]

@@ -148,6 +148,23 @@ describe('SetupScreen', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
+  it('стрэлкамі ў рэжым 18+ таксама не трапіць без пацвярджэння ўзросту', () => {
+    const { dispatch } = setup({ ...base, settings: { ...initialState.settings, level: 'all' } })
+    fireEvent.keyDown(screen.getByRole('radio', { name: 'Усе' }), { key: 'ArrowRight' })
+    expect(dispatch).not.toHaveBeenCalled()
+    expect(screen.getByRole('dialog', { name: 'Вам дакладна ёсць 18 гадоў?' })).toBeInTheDocument()
+    fireEvent(screen.getByRole('dialog'), new Event('cancel', { cancelable: true }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(dispatch).not.toHaveBeenCalled()
+    expect(screen.getByRole('radio', { name: 'Усе' })).toHaveAttribute('aria-checked', 'true')
+
+    // з «Лёгкага» стрэлка ўлева па крузе вядзе да 18+ — і зноў праз пытанне
+    fireEvent.keyDown(screen.getByRole('radio', { name: 'Лёгкі' }), { key: 'ArrowLeft' })
+    fireEvent.click(screen.getByRole('button', { name: 'Так, мне ёсць 18' }))
+    expect(dispatch).toHaveBeenCalledTimes(1)
+    expect(dispatch).toHaveBeenCalledWith({ type: 'setSetting', key: 'level', value: 'adult' })
+  })
+
   it('уключаны рэжым 18+ паўторна пра ўзрост не пытаецца і выключаецца выбарам іншага ўзроўню', () => {
     const { dispatch } = setup({ ...base, settings: { ...initialState.settings, level: 'adult' } })
     const adult = screen.getByRole('radio', { name: '18+' })

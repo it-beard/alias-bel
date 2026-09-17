@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { THEME_BG, applyScript, applyTheme, prefersDark, resolveTheme } from './theme.js'
 import { APP_TITLE } from './game/constants.js'
@@ -78,5 +80,29 @@ describe('тэма', () => {
 
   it('колеры радка стану супадаюць з фонам тэм', () => {
     expect(THEME_BG).toEqual({ light: '#f6f3ee', dark: '#141215' })
+  })
+})
+
+describe('палітра', () => {
+  const css = readFileSync(resolve(process.cwd(), 'src/index.css'), 'utf8')
+  // тры блокі токенаў: светлы, цёмны сістэмны і цёмны выбраны ўручную
+  const blocks = css.split(/(?=^\s*:root)/m).filter((block) => block.includes('--bg:'))
+  const token = (block, name) => block.match(new RegExp(`--${name}:\\s*(#[0-9a-f]{6})`, 'i'))?.[1]
+  const luminance = (hex) => {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+  }
+  const contrast = (a, b) => {
+    const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x)
+    return (hi + 0.05) / (lo + 0.05)
+  }
+
+  it('надпіс «18+» у перамыкачы чытаецца і ў светлай, і ў цёмнай тэме (WCAG AA)', () => {
+    expect(blocks).toHaveLength(3)
+    for (const block of blocks) {
+      expect(token(block, 'adult'), block.slice(0, 40)).toBeTruthy()
+      expect(contrast(token(block, 'adult'), token(block, 'surface-2'))).toBeGreaterThanOrEqual(4.5)
+    }
+    expect(token(blocks[1], 'adult')).toBe(token(blocks[2], 'adult'))
   })
 })

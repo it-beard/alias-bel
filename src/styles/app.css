@@ -300,7 +300,7 @@
   font-family: var(--font-display);
   font-size: 0.78rem;
   font-weight: 800;
-  color: color-mix(in srgb, var(--hot-deep) 80%, var(--muted));
+  color: var(--adult);
 }
 
 .seg__btn--adult.is-on {

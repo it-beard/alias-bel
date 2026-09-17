@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, createEvent, fireEvent, render, screen, within } from '@testing-library/react'
 import App from './App.jsx'
 import { initialState } from './game/gameState.js'
+import { ADULT } from './data/words.js'
 import { ADULT_TEAM_NAMES, ANSWER_LOCK_MS, COUNTDOWN_STEP_MS, DEFAULT_SETTINGS, RANDOM_TEAM_NAMES, STORAGE_KEY, TEAM_MOTIFS } from './game/constants.js'
 import { THEME_BG } from './theme.js'
 import { fixedTeams } from './test/fixtures.js'
@@ -71,6 +72,41 @@ describe('App', () => {
 
     fireEvent.click(screen.getByRole('radio', { name: 'Лёгкі' }))
     teamNames().forEach((name) => expect(RANDOM_TEAM_NAMES).toContain(name))
+  })
+
+  it('пераход на 18+ пасярод партыі захоўвае рахунак і дае дарослыя словы', () => {
+    seed({
+      ...initialState,
+      settings: { ...DEFAULT_SETTINGS, sound: false, vibration: false },
+      teams: fixedTeams(2, [12, 7]),
+      screen: 'ready',
+      roundNo: 3,
+      deckLevel: 'easy',
+      deck: ['хлеб', 'соль'],
+    })
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'Налады' }))
+    fireEvent.click(screen.getByRole('radio', { name: '18+' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Так, мне ёсць 18' }))
+    expect(saved().teams.map((team) => team.score)).toEqual([12, 7])
+    saved().teams.forEach((team) => expect(ADULT_TEAM_NAMES).toContain(team.name))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Працягнуць' }))
+    expect(screen.getByText(/^Раунд 3/)).toHaveTextContent('Раунд 3 18+')
+    expect(saved().deckLevel).toBe('adult')
+    startRound()
+    expect(ADULT).toContain(saved().current)
+    expect(screen.getByText(saved().current)).toBeInTheDocument()
+    expect(document.querySelector('.card__adult')).toBeInTheDocument()
+    saved().deck.forEach((word) => expect(ADULT).toContain(word))
+  })
+
+  it('захаваны рэжым 18+ аднаўляецца без паўторнага пытання пра ўзрост', () => {
+    seed({ ...initialState, settings: { ...DEFAULT_SETTINGS, level: 'adult' }, teams: [{ name: 'Мара Глобуса', score: 0 }, { name: 'Дудка Багушэвіча', score: 0 }] })
+    render(<App />)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: '18+' })).toHaveAttribute('aria-checked', 'true')
+    expect(teamNames()).toEqual(['Мара Глобуса', 'Дудка Багушэвіча'])
   })
 
   it('старыя стандартныя назвы з захаванай гульні замяняюцца назвамі са спіса', () => {
