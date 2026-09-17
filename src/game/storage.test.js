@@ -152,6 +152,13 @@ describe('loadSaved', () => {
     expect(loaded.teams).toHaveLength(5)
   })
 
+  it('падказкі да слоў: у старых захаваннях налады няма — яна ўключаная, выключаная захоўваецца', () => {
+    const load = (settings) => loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ screen: 'setup', settings }) })).settings.hints
+    expect(load({ level: 'medium' })).toBe(true)
+    expect(load({ hints: false })).toBe(false)
+    expect(load({ hints: 'false' })).toBe(true)
+  })
+
   it('правярае налады, нумары і словы, каб сапсаванае сховішча не ламала гульню', () => {
     const saved = {
       screen: 'ready', turnIndex: 0.5, roundNo: 'Infinity',

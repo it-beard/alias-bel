@@ -23,6 +23,7 @@ describe('SettingsSheet', () => {
     expect(screen.getByRole('radio', { name: 'Аўта' })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('switch', { name: /Штраф за пас/ })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('switch', { name: /Апошняе слова/ })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('switch', { name: /Падказкі да слоў/ })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('switch', { name: 'Гук' })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('switch', { name: 'Вібрацыя' })).toHaveAttribute('aria-checked', 'true')
   })
@@ -33,6 +34,7 @@ describe('SettingsSheet', () => {
     fireEvent.click(screen.getByRole('radio', { name: 'Цёмная' }))
     fireEvent.click(screen.getByRole('switch', { name: /Штраф за пас/ }))
     fireEvent.click(screen.getByRole('switch', { name: /Апошняе слова/ }))
+    fireEvent.click(screen.getByRole('switch', { name: /Падказкі да слоў/ }))
     fireEvent.click(screen.getByRole('switch', { name: 'Гук' }))
     fireEvent.click(screen.getByRole('switch', { name: 'Вібрацыя' }))
     expect(onChange.mock.calls).toEqual([
@@ -40,9 +42,20 @@ describe('SettingsSheet', () => {
       ['theme', 'dark'],
       ['skipPenalty', false],
       ['lastWordRule', false],
+      ['hints', false],
       ['sound', false],
       ['vibration', false],
     ])
+  })
+
+  it('падказкі да слоў па змаўчанні ўключаныя; выключаныя — уключаюцца назад', () => {
+    expect(DEFAULT_SETTINGS.hints).toBe(true)
+    const { onChange } = setup({ ...DEFAULT_SETTINGS, hints: false })
+    const toggle = screen.getByRole('switch', { name: /Падказкі да слоў/ })
+    expect(toggle).toHaveAttribute('aria-checked', 'false')
+    expect(toggle).toHaveTextContent('Кнопка «?» паказвае пераклад рэдкага слова')
+    fireEvent.click(toggle)
+    expect(onChange).toHaveBeenCalledWith('hints', true)
   })
 
   it('зачыняецца кнопкай або фонам', () => {
@@ -57,5 +70,6 @@ describe('SettingsSheet', () => {
     expect(screen.getByRole('dialog', { name: 'Nałady' })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: 'Łacinka' })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('switch', { name: /Štraf za pas/ })).toBeInTheDocument()
+    expect(screen.getByRole('switch', { name: /Padkazki da słoŭ/ })).toBeInTheDocument()
   })
 })

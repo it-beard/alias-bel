@@ -23,7 +23,7 @@ export default function PlayScreen({ state, dispatch }) {
   const lockUntil = useRef(0)
   // нумар карткі, на якой адкрылі падказку: з новым словам яна закрываецца сама
   const [hintAt, setHintAt] = useState(null)
-  const hint = getHint(current)
+  const hint = settings.hints ? getHint(current) : null
   const hintOpen = hint !== null && !paused && hintAt === results.length
 
   const left = useCountdown(endsAt, () => {

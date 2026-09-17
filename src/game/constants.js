@@ -75,6 +75,7 @@ export const DEFAULT_SETTINGS = {
   targetScore: 30,
   skipPenalty: true,
   lastWordRule: true,
+  hints: true,
   sound: true,
   vibration: true,
   script: 'cyr',

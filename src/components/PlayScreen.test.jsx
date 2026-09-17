@@ -354,6 +354,19 @@ describe('PlayScreen', () => {
       expect(dispatch).not.toHaveBeenCalled()
     })
 
+    it('з выключанай наладай падказак кнопкі няма нават на рэдкім слове, клавішы маўчаць', () => {
+      const off = { settings: { ...initialState.settings, hints: false } }
+      const { container, dispatch, update } = setup(hinted(off))
+      expect(hintButton()).not.toBeInTheDocument()
+      fireEvent.keyDown(window, { key: 'ArrowUp' })
+      fireEvent.keyDown(window, { key: '?' })
+      expect(container.querySelector('.card__hint')).not.toBeInTheDocument()
+      expect(dispatch).not.toHaveBeenCalled()
+      // налада ўключаная назад — кнопка вяртаецца, падказка закрытая
+      update(hinted())
+      expect(hintButton()).toHaveAttribute('aria-expanded', 'false')
+    })
+
     it('ва «Усе разам» кнопка ёсць толькі на словах з падказкай', () => {
       const all = { settings: { ...initialState.settings, level: 'all' } }
       const { update } = setup(hinted(all))

@@ -4,7 +4,7 @@ import Segmented from './Segmented.jsx'
 import Toggle from './Toggle.jsx'
 import Dialog from './Dialog.jsx'
 
-/** Шторка з наладамі, якія мяняюць рэдка: алфавіт, тэма, правілы падліку, гук. */
+/** Шторка з наладамі, якія мяняюць рэдка: алфавіт, тэма, правілы падліку, падказкі, гук. */
 export default function SettingsSheet({ settings, onChange, onClose }) {
   const t = useT()
   const set = (key) => (value) => onChange(key, value)
@@ -47,6 +47,12 @@ export default function SettingsSheet({ settings, onChange, onClose }) {
             hint={t('Пасля сігналу дазваляецца дагуляць слова на экране')}
             value={settings.lastWordRule}
             onChange={set('lastWordRule')}
+          />
+          <Toggle
+            label={t('Падказкі да слоў')}
+            hint={t('Кнопка «?» паказвае пераклад рэдкага слова')}
+            value={settings.hints}
+            onChange={set('hints')}
           />
           <Toggle label={t('Гук')} value={settings.sound} onChange={set('sound')} />
           <Toggle label={t('Вібрацыя')} value={settings.vibration} onChange={set('vibration')} />
