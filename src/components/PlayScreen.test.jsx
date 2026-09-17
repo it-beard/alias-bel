@@ -312,6 +312,7 @@ describe('PlayScreen', () => {
       const { container, dispatch } = setup(hinted())
       const names = [...container.querySelectorAll('.answers button')].map((button) => button.getAttribute('aria-label') ?? button.textContent)
       expect(names).toEqual(['✕Пас', 'Падказка', '✓Адгадана'])
+      expect(container.querySelector('.answers')).toHaveClass('answers--hint')
       expect(hintButton()).toHaveTextContent('?')
       expect(hintButton()).toHaveAttribute('aria-expanded', 'false')
       expect(container.querySelector('.card__hint')).not.toBeInTheDocument()
@@ -339,15 +340,10 @@ describe('PlayScreen', () => {
       expect(vibrate).not.toHaveBeenCalled()
     })
 
-    it('для слоў без падказкі кнопкі няма, і клавішы падказкі нічога не робяць', () => {
-      // «кавярня» — часта ўжыванае слова, «парадокс» па-расейску пішацца гэтаксама
-      for (const current of ['кавярня', 'парадокс']) {
-        setup({ ...playing(), current })
-        expect(hintButton()).not.toBeInTheDocument()
-        cleanup()
-      }
+    it('на лёгкім узроўні кнопкі няма зусім, і клавішы падказкі нічога не робяць', () => {
       const { container, dispatch } = setup()
       expect(hintButton()).not.toBeInTheDocument()
+      expect(container.querySelector('.answers')).not.toHaveClass('answers--hint')
       fireEvent.keyDown(window, { key: 'ArrowUp' })
       fireEvent.keyDown(window, { key: '?' })
       expect(container.querySelector('.card__hint')).not.toBeInTheDocument()
@@ -358,6 +354,7 @@ describe('PlayScreen', () => {
       const off = { settings: { ...initialState.settings, hints: false } }
       const { container, dispatch, update } = setup(hinted(off))
       expect(hintButton()).not.toBeInTheDocument()
+      expect(container.querySelector('.answers')).not.toHaveClass('answers--hint')
       fireEvent.keyDown(window, { key: 'ArrowUp' })
       fireEvent.keyDown(window, { key: '?' })
       expect(container.querySelector('.card__hint')).not.toBeInTheDocument()
@@ -367,14 +364,30 @@ describe('PlayScreen', () => {
       expect(hintButton()).toHaveAttribute('aria-expanded', 'false')
     })
 
+    it('на слове без падказкі кнопкі няма — застаюцца дзве шырокія', () => {
+      // «кавярня» — часта ўжыванае слова, «парадокс» па-расейску пішацца гэтаксама
+      for (const [level, current] of [['medium', 'кавярня'], ['hard', 'парадокс'], ['adult', 'каханне']]) {
+        const { container, dispatch } = setup({ ...playing(), current, settings: { ...initialState.settings, level } })
+        expect(hintButton()).not.toBeInTheDocument()
+        expect(container.querySelector('.answers')).not.toHaveClass('answers--hint')
+        expect(container.querySelectorAll('.answers button')).toHaveLength(2)
+        fireEvent.keyDown(window, { key: 'ArrowUp' })
+        expect(container.querySelector('.card__hint')).not.toBeInTheDocument()
+        expect(dispatch).not.toHaveBeenCalled()
+        cleanup()
+      }
+    })
+
     it('ва «Усе разам» кнопка ёсць толькі на словах з падказкай', () => {
       const all = { settings: { ...initialState.settings, level: 'all' } }
-      const { update } = setup(hinted(all))
+      const { container, update } = setup(hinted(all))
       expect(hintButton()).toBeInTheDocument()
+      expect(hintButton()).toBeEnabled()
       update({ ...hinted(all), current: 'хлеб', results: [{ word: 'рыдлёўка', guessed: true }] })
       expect(hintButton()).not.toBeInTheDocument()
+      expect(container.querySelector('.answers')).not.toHaveClass('answers--hint')
       update({ ...hinted(all), current: 'кудмень', results: [{ word: 'рыдлёўка', guessed: true }, { word: 'хлеб', guessed: true }] })
-      expect(hintButton()).toBeInTheDocument()
+      expect(hintButton()).toBeEnabled()
     })
 
     it('без прамога перакладу паказвае сціплае тлумачэнне па-беларуску', () => {
@@ -498,11 +511,13 @@ describe('PlayScreen', () => {
       expect(base).not.toMatch(/display:\s*none/)
     })
 
-    it('кнопка падказкі ляжыць паверх стыку кнопак і не ўдзельнічае ў сетцы', () => {
+    it('кнопка падказкі — асобны слупок паміж кнопкамі: вузейшая за іх, але на ўсю вышыню', () => {
+      const columns = css.match(/^\.answers--hint \{[^}]*\}/m)[0]
+      expect(columns).toMatch(/grid-template-columns: minmax\(0, 1fr\) minmax\(56px, 0\.55fr\) minmax\(0, 1fr\)/)
       const rule = css.match(/^\.hintbtn \{[^}]*\}/m)[0]
-      expect(rule).toMatch(/position: absolute/)
-      expect(rule).toMatch(/left: 50%/)
-      expect(css.match(/^\.answers \{[^}]*\}/m)[0]).toMatch(/position: relative/)
+      expect(rule).not.toMatch(/position: absolute/)
+      expect(rule).toMatch(/min-height: 84px/)
+      expect(css.match(/^\.answer \{[^}]*\}/m)[0]).toMatch(/min-height: 84px/)
     })
   })
 })

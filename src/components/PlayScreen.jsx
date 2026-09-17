@@ -163,7 +163,7 @@ export default function PlayScreen({ state, dispatch }) {
         </p>
       </div>
 
-      <div className="answers">
+      <div className={`answers${hint ? ' answers--hint' : ''}`}>
         <button type="button" className="answer answer--skip" onClick={() => answer(false)} disabled={paused}>
           <span className="answer__icon" aria-hidden="true">
             ✕

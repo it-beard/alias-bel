@@ -525,7 +525,7 @@ exports[`снапшоты экранаў > play (cyr) 1`] = `
     </p>
   </div>
   <div
-    class="answers"
+    class="answers answers--hint"
   >
     <button
       class="answer answer--skip"
@@ -713,7 +713,7 @@ exports[`снапшоты экранаў > play (lat) 1`] = `
     </p>
   </div>
   <div
-    class="answers"
+    class="answers answers--hint"
   >
     <button
       class="answer answer--skip"
