@@ -1015,6 +1015,12 @@
   opacity: 0.9;
 }
 
+/* падказка вісіць пад словам па-за патокам — слова не скача, калі яна адкрываецца */
+.card__body {
+  position: relative;
+  width: 100%;
+}
+
 .card__word {
   font-weight: 800;
   line-height: 1.1;
@@ -1050,6 +1056,48 @@
   from {
     opacity: 0;
     transform: translateY(8px) scale(0.96);
+  }
+}
+
+.card__hint {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  animation: hintin 0.2s ease-out;
+}
+
+.card__hint-lang {
+  display: inline-block;
+  vertical-align: 0.12em;
+  margin-right: 8px;
+  padding: 1px 5px;
+  border-radius: 6px;
+  border: 1px solid var(--surface-3);
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.card__hint-note {
+  font-style: italic;
+  text-wrap: balance;
+}
+
+@keyframes hintin {
+  from {
+    opacity: 0;
   }
 }
 
@@ -1095,10 +1143,55 @@
   text-align: center;
 }
 
+/* на тэлефоне стрэлкі толькі займаюць месца: пад пальцам кнопкі і свайп */
+@media (max-width: 699px) {
+  .card__swipe {
+    display: none;
+  }
+}
+
 .answers {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+}
+
+/* круглая кнопка паверх стыку кнопак: не забірае ў іх шырыню і не зрушвае іх,
+   калі ў слова падказкі няма */
+.hintbtn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1px solid var(--surface-3);
+  box-shadow: 0 0 0 4px var(--bg);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    opacity 0.15s;
+}
+
+.hintbtn[aria-expanded='true'] {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+}
+
+.hintbtn:disabled {
+  opacity: 0.5;
 }
 
 .answer {
@@ -1178,6 +1271,19 @@
   .answer--ok {
     grid-area: ok;
     min-height: 0;
+  }
+
+  /* кнопкі раз'ехаліся па баках — падказка пераязджае ў верхні правы кут карткі */
+  .hintbtn {
+    position: relative;
+    top: auto;
+    left: auto;
+    grid-area: card;
+    align-self: start;
+    justify-self: end;
+    margin: 12px;
+    transform: none;
+    box-shadow: none;
   }
 
   .card__swipe {

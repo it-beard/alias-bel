@@ -11,7 +11,7 @@ describe('слоўнікі', () => {
     expect(MEDIUM).toHaveLength(304)
     expect(HARD).toHaveLength(242)
     expect(getWords('all')).toHaveLength(886)
-    expect(ADULT).toHaveLength(108)
+    expect(ADULT).toHaveLength(106)
   })
 
   it.each(LEVEL_ORDER)('узровень %s без паўтораў, пустых радкоў і лішніх прабелаў', (id) => {
@@ -34,8 +34,7 @@ describe('слоўнікі', () => {
     expect(getWords(ADULT_LEVEL)).toEqual(ADULT)
     const hard = new Set(HARD)
     for (const word of ADULT) {
-      // выразы з некалькіх слоў («кліны падбіваць») пішуцца праз прабел
-      for (const part of word.split(' ')) expect(part, word).toMatch(BELARUSIAN)
+      expect(word, word).toMatch(BELARUSIAN)
       expect(word, word).toBe(word.toLowerCase())
       expect(hard.has(word), word).toBe(false)
     }

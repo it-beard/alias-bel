@@ -23,7 +23,7 @@ const noop = () => {}
 const states = {
   setup: { ...initialState, teams: fixedTeams(2) },
   ready: { ...initialState, screen: 'ready', teams, roundNo: 2, turnIndex: 1 },
-  play: { ...initialState, screen: 'play', teams, current: 'вясёлка', deck: ['соль'], endsAt: NOW + 42_000, results: [{ word: 'хлеб', guessed: true }] },
+  play: { ...initialState, screen: 'play', teams, current: 'рыдлёўка', deck: ['соль'], endsAt: NOW + 42_000, results: [{ word: 'хлеб', guessed: true }] },
   result: { ...initialState, screen: 'result', teams, results: [{ word: 'хлеб', guessed: true }, { word: 'соль', guessed: false }] },
   finish: { ...initialState, screen: 'finish', teams, roundNo: 3 },
 }

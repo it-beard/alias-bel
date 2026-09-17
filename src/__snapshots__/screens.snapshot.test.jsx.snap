@@ -484,12 +484,16 @@ exports[`снапшоты экранаў > play (cyr) 1`] = `
           fill="currentColor"
         />
       </svg>
-      <p
-        class="card__word"
-        data-len="s"
+      <div
+        class="card__body"
       >
-        вясёлка
-      </p>
+        <p
+          class="card__word"
+          data-len="m"
+        >
+          рыдлёўка
+        </p>
+      </div>
       <p
         class="card__index"
       >
@@ -534,6 +538,15 @@ exports[`снапшоты экранаў > play (cyr) 1`] = `
         ✕
       </span>
       Пас
+    </button>
+    <button
+      aria-controls="word-hint"
+      aria-expanded="false"
+      aria-label="Падказка"
+      class="hintbtn"
+      type="button"
+    >
+      ?
     </button>
     <button
       class="answer answer--ok"
@@ -659,12 +672,16 @@ exports[`снапшоты экранаў > play (lat) 1`] = `
           fill="currentColor"
         />
       </svg>
-      <p
-        class="card__word"
-        data-len="m"
+      <div
+        class="card__body"
       >
-        viasiołka
-      </p>
+        <p
+          class="card__word"
+          data-len="m"
+        >
+          rydloŭka
+        </p>
+      </div>
       <p
         class="card__index"
       >
@@ -709,6 +726,15 @@ exports[`снапшоты экранаў > play (lat) 1`] = `
         ✕
       </span>
       Pas
+    </button>
+    <button
+      aria-controls="word-hint"
+      aria-expanded="false"
+      aria-label="Padkazka"
+      class="hintbtn"
+      type="button"
+    >
+      ?
     </button>
     <button
       class="answer answer--ok"
@@ -1940,7 +1966,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
     >
       Пра гульню
       <span>
-        886 слоў · 18+: 108 слоў · кірыліца і лацінка
+        886 слоў · 18+: 106 слоў · кірыліца і лацінка
       </span>
     </summary>
     <section
@@ -1961,7 +1987,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
       <p
         class="game-info__lead"
       >
-        Ёсць і асобны рэжым 18+ — 108 слоў беларускай секс-лексікі. Дарослыя словы не змешваюцца з астатнімі: у рэжыме «Усе» іх няма.
+        Ёсць і асобны рэжым 18+ — 106 слоў беларускай секс-лексікі. Дарослыя словы не змешваюцца з астатнімі: у рэжыме «Усе» іх няма.
       </p>
       <ul
         aria-label="Магчымасці гульні"
@@ -1977,7 +2003,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
           Тры ўзроўні складанасці
         </li>
         <li>
-          Рэжым 18+: 108 слоў
+          Рэжым 18+: 106 слоў
         </li>
         <li>
           Кірыліца і лацінка
@@ -2488,7 +2514,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
     >
       Pra hulniu
       <span>
-        886 słoŭ · 18+: 108 słoŭ · kirylica i łacinka
+        886 słoŭ · 18+: 106 słoŭ · kirylica i łacinka
       </span>
     </summary>
     <section
@@ -2509,7 +2535,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
       <p
         class="game-info__lead"
       >
-        Josć i asobny režym 18+ — 108 słoŭ biełaruskaj sieks-leksiki. Darosłyja słovy nie zmiešvajucca z astatnimi: u režymie «Usie» ich niama.
+        Josć i asobny režym 18+ — 106 słoŭ biełaruskaj sieks-leksiki. Darosłyja słovy nie zmiešvajucca z astatnimi: u režymie «Usie» ich niama.
       </p>
       <ul
         aria-label="Mahčymasci hulni"
@@ -2525,7 +2551,7 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
           Try ŭzroŭni składanasci
         </li>
         <li>
-          Režym 18+: 108 słoŭ
+          Režym 18+: 106 słoŭ
         </li>
         <li>
           Kirylica i łacinka

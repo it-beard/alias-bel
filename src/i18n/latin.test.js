@@ -132,8 +132,8 @@ describe('toLatin', () => {
   })
 
   it.each([
-    ['кліны падбіваць', 'kliny padbivać'],
-    ['марцовы кот', 'marcovy kot'],
+    ['пяшчота', 'piaščota'],
+    ['любошчы', 'luboščy'],
     ['шмаравідла', 'šmaravidła'],
     ['улялюшчыцца', 'ulaluščycca'],
     ['залёты', 'zaloty'],

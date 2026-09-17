@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, createEvent, fireEvent, render, screen } from '@testing-library/react'
 import PlayScreen from './PlayScreen.jsx'
@@ -26,15 +28,21 @@ const playing = () => ({
   results: [],
 })
 
+// рэдкае слова сярэдняга ўзроўню — з перакладам у падказцы
+const hinted = (extra = {}) => ({ ...playing(), current: 'рыдлёўка', ...extra })
+
 function setup(state = playing(), script = 'cyr') {
   const dispatch = vi.fn()
-  const view = render(
+  const ui = (next) => (
     <ScriptContext.Provider value={script}>
-      <PlayScreen state={state} dispatch={dispatch} />
-    </ScriptContext.Provider>,
+      <PlayScreen state={next} dispatch={dispatch} />
+    </ScriptContext.Provider>
   )
-  return { dispatch, ...view }
+  const view = render(ui(state))
+  return { dispatch, ...view, update: (next) => view.rerender(ui(next)) }
 }
+
+const hintButton = () => screen.queryByRole('button', { name: 'Падказка' })
 
 describe('PlayScreen', () => {
   beforeEach(() => {
@@ -297,5 +305,191 @@ describe('PlayScreen', () => {
     expect(container.querySelector('.card')).toHaveAttribute('lang', 'be-Latn')
     expect(screen.getByRole('button', { name: 'Adhadana' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Pas' })).toBeInTheDocument()
+  })
+
+  describe('падказка да слова', () => {
+    it('кнопка з пытальнікам стаіць паміж «Пас» і «Адгадана» і адкрывае пераклады', () => {
+      const { container, dispatch } = setup(hinted())
+      const names = [...container.querySelectorAll('.answers button')].map((button) => button.getAttribute('aria-label') ?? button.textContent)
+      expect(names).toEqual(['✕Пас', 'Падказка', '✓Адгадана'])
+      expect(hintButton()).toHaveTextContent('?')
+      expect(hintButton()).toHaveAttribute('aria-expanded', 'false')
+      expect(container.querySelector('.card__hint')).not.toBeInTheDocument()
+
+      fireEvent.click(hintButton())
+      expect(hintButton()).toHaveAttribute('aria-expanded', 'true')
+      const hint = container.querySelector('.card__hint')
+      expect(hint).toHaveAttribute('id', hintButton().getAttribute('aria-controls'))
+      const [ru, en] = hint.querySelectorAll('.card__hint-row')
+      expect(ru).toHaveAttribute('lang', 'ru')
+      expect(ru).toHaveTextContent('RUлопата')
+      expect(en).toHaveAttribute('lang', 'en')
+      expect(en).toHaveTextContent('ENspade')
+      // слова застаецца на месцы, падказка — у той самай картцы
+      expect(container.querySelector('.card .card__word')).toHaveTextContent('рыдлёўка')
+      expect(container.querySelector('.card')).toContainElement(hint)
+
+      fireEvent.click(hintButton())
+      expect(container.querySelector('.card__hint')).not.toBeInTheDocument()
+      expect(hintButton()).toHaveAttribute('aria-expanded', 'false')
+      // падказка нічога не мяняе ў гульні: ні адказу, ні паўзы, ні гуку
+      expect(dispatch).not.toHaveBeenCalled()
+      expect(sounds.correct).not.toHaveBeenCalled()
+      expect(sounds.skip).not.toHaveBeenCalled()
+      expect(vibrate).not.toHaveBeenCalled()
+    })
+
+    it('для слоў без падказкі кнопкі няма, і клавішы падказкі нічога не робяць', () => {
+      // «кавярня» — часта ўжыванае слова, «парадокс» па-расейску пішацца гэтаксама
+      for (const current of ['кавярня', 'парадокс']) {
+        setup({ ...playing(), current })
+        expect(hintButton()).not.toBeInTheDocument()
+        cleanup()
+      }
+      const { container, dispatch } = setup()
+      expect(hintButton()).not.toBeInTheDocument()
+      fireEvent.keyDown(window, { key: 'ArrowUp' })
+      fireEvent.keyDown(window, { key: '?' })
+      expect(container.querySelector('.card__hint')).not.toBeInTheDocument()
+      expect(dispatch).not.toHaveBeenCalled()
+    })
+
+    it('ва «Усе разам» кнопка ёсць толькі на словах з падказкай', () => {
+      const all = { settings: { ...initialState.settings, level: 'all' } }
+      const { update } = setup(hinted(all))
+      expect(hintButton()).toBeInTheDocument()
+      update({ ...hinted(all), current: 'хлеб', results: [{ word: 'рыдлёўка', guessed: true }] })
+      expect(hintButton()).not.toBeInTheDocument()
+      update({ ...hinted(all), current: 'кудмень', results: [{ word: 'рыдлёўка', guessed: true }, { word: 'хлеб', guessed: true }] })
+      expect(hintButton()).toBeInTheDocument()
+    })
+
+    it('без прамога перакладу паказвае сціплае тлумачэнне па-беларуску', () => {
+      const { container } = setup(hinted({ current: 'талака' }))
+      fireEvent.click(hintButton())
+      expect(container.querySelector('.card__hint-note')).toHaveTextContent('звязана з калектыўнай дапамогай задарма')
+      expect(container.querySelector('.card__hint-row')).not.toBeInTheDocument()
+      expect(container.querySelector('.card__hint').textContent).not.toMatch(/талак/i)
+    })
+
+    it('у лацінцы расейскі пераклад застаецца кірыліцай, а тлумачэнне транслітаруецца', () => {
+      const view = setup(hinted(), 'lat')
+      fireEvent.click(screen.getByRole('button', { name: 'Padkazka' }))
+      expect(screen.getByText('rydloŭka')).toBeInTheDocument()
+      expect(view.container.querySelector('.card__hint-row[lang="ru"]')).toHaveTextContent('лопата')
+      expect(view.container.querySelector('.card__hint-row[lang="en"]')).toHaveTextContent('spade')
+      cleanup()
+
+      const note = setup(hinted({ current: 'Дзяды' }), 'lat')
+      fireEvent.click(screen.getByRole('button', { name: 'Padkazka' }))
+      expect(note.container.querySelector('.card__hint-note')).toHaveTextContent('zviazana z paminalnym abradam')
+    })
+
+    it('з новым словам падказка закрываецца сама — і пасля адказу, і пасля паса', () => {
+      const { container, update } = setup(hinted())
+      fireEvent.click(hintButton())
+      expect(container.querySelector('.card__hint')).toBeInTheDocument()
+
+      update(hinted({ current: 'ланцуг', results: [{ word: 'рыдлёўка', guessed: true }] }))
+      expect(screen.getByText('ланцуг')).toBeInTheDocument()
+      expect(container.querySelector('.card__hint')).not.toBeInTheDocument()
+      expect(hintButton()).toHaveAttribute('aria-expanded', 'false')
+
+      fireEvent.click(hintButton())
+      expect(container.querySelector('.card__hint-row[lang="ru"]')).toHaveTextContent('цепь')
+      update(hinted({ current: 'збан', results: [{ word: 'рыдлёўка', guessed: true }, { word: 'ланцуг', guessed: false }] }))
+      expect(container.querySelector('.card__hint')).not.toBeInTheDocument()
+    })
+
+    it('тое самае слова запар (калода ператасавалася) таксама прыходзіць без падказкі', () => {
+      const { container, update } = setup(hinted())
+      fireEvent.click(hintButton())
+      update(hinted({ results: [{ word: 'рыдлёўка', guessed: false }] }))
+      expect(container.querySelector('.card__hint')).not.toBeInTheDocument()
+    })
+
+    it('клавіятура: ↑ і ? пераключаюць падказку', () => {
+      const { container, dispatch } = setup(hinted())
+      fireEvent.keyDown(window, { key: 'ArrowUp' })
+      expect(container.querySelector('.card__hint')).toBeInTheDocument()
+      fireEvent.keyDown(window, { key: '?', shiftKey: true })
+      expect(container.querySelector('.card__hint')).not.toBeInTheDocument()
+      fireEvent.keyDown(window, { key: '?', shiftKey: true })
+      expect(container.querySelector('.card__hint')).toBeInTheDocument()
+      expect(dispatch).not.toHaveBeenCalled()
+    })
+
+    it('з адкрытай падказкай адказы, свайп і паўза працуюць як звычайна', () => {
+      const { container, dispatch } = setup(hinted())
+      fireEvent.click(hintButton())
+      fireEvent.click(screen.getByRole('button', { name: 'Адгадана' }))
+      expect(dispatch).toHaveBeenLastCalledWith({ type: 'answer', guessed: true })
+      act(() => vi.advanceTimersByTime(ANSWER_LOCK_MS))
+      const card = container.querySelector('.card')
+      fireEvent.pointerDown(card, { clientX: 200, clientY: 0, pointerId: 1, button: 0 })
+      fireEvent.pointerUp(card, { clientX: 60, clientY: 0, pointerId: 1 })
+      expect(dispatch).toHaveBeenLastCalledWith({ type: 'answer', guessed: false })
+      fireEvent.keyDown(window, { key: ' ' })
+      expect(dispatch).toHaveBeenLastCalledWith({ type: 'pause' })
+    })
+
+    it('націск на падказку не лічыцца адказам і не ставіць блакаванне ад падвойнага націску', () => {
+      const { dispatch } = setup(hinted())
+      fireEvent.click(hintButton())
+      fireEvent.click(screen.getByRole('button', { name: 'Пас' }))
+      expect(dispatch).toHaveBeenCalledTimes(1)
+      expect(dispatch).toHaveBeenCalledWith({ type: 'answer', guessed: false })
+    })
+
+    it('на паўзе падказка схаваная разам са словам, кнопка заблакаваная; пасля паўзы вяртаецца', () => {
+      const { container, update } = setup(hinted())
+      fireEvent.click(hintButton())
+      update(hinted({ endsAt: null, pausedLeft: 30_000 }))
+      expect(container.querySelector('.card__hint')).not.toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Падказка', hidden: true })).toBeDisabled()
+      fireEvent.keyDown(window, { key: 'ArrowUp' })
+      expect(container.querySelector('.card__hint')).not.toBeInTheDocument()
+
+      update(hinted({ endsAt: NOW + 30_000 }))
+      expect(container.querySelector('.card__hint')).toBeInTheDocument()
+      expect(hintButton()).toBeEnabled()
+    })
+
+    it('на апошнім слове падказка даступная, у рэжыме 18+ — таксама', () => {
+      const { container } = setup(hinted({ endsAt: null, lastWord: true }))
+      fireEvent.click(hintButton())
+      expect(container.querySelector('.card__hint')).toBeInTheDocument()
+      cleanup()
+
+      const adult = setup({ ...playing(), current: 'шмаравідла', settings: { ...initialState.settings, level: 'adult' } })
+      fireEvent.click(hintButton())
+      expect(adult.container.querySelector('.card__hint-row[lang="ru"]')).toHaveTextContent('смазка, лубрикант')
+      expect(adult.container.querySelector('.card__adult')).toBeInTheDocument()
+    })
+
+    it('без бягучага слова кнопкі няма', () => {
+      setup({ ...playing(), current: null })
+      expect(hintButton()).not.toBeInTheDocument()
+    })
+  })
+
+  describe('стылі экрана гульні', () => {
+    const css = readFileSync(resolve(process.cwd(), 'src/styles/app.css'), 'utf8')
+
+    it('на мабільных экранах падказка са стрэлкамі схаваная, на шырокіх — застаецца', () => {
+      setup()
+      expect(screen.getByText('← пас · адгадана →')).toHaveClass('card__swipe')
+      expect(css).toMatch(/@media \(max-width: 699px\) \{\s*\.card__swipe \{\s*display: none;\s*\}\s*\}/)
+      // па-за медыя-запытамі радок бачны
+      const base = css.match(/^\.card__swipe \{[^}]*\}/m)[0]
+      expect(base).not.toMatch(/display:\s*none/)
+    })
+
+    it('кнопка падказкі ляжыць паверх стыку кнопак і не ўдзельнічае ў сетцы', () => {
+      const rule = css.match(/^\.hintbtn \{[^}]*\}/m)[0]
+      expect(rule).toMatch(/position: absolute/)
+      expect(rule).toMatch(/left: 50%/)
+      expect(css.match(/^\.answers \{[^}]*\}/m)[0]).toMatch(/position: relative/)
+    })
   })
 })

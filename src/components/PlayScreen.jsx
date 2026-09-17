@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useCountdown } from '../hooks/useCountdown.js'
 import { useWakeLock } from '../hooks/useWakeLock.js'
 import { useSwipe } from '../hooks/useSwipe.js'
@@ -8,6 +8,7 @@ import { roundScore } from '../game/gameState.js'
 import { ANSWER_LOCK_MS } from '../game/constants.js'
 import { wordSize } from '../game/wordSize.js'
 import { ADULT_LEVEL } from '../data/words.js'
+import { getHint } from '../data/hints.js'
 import { useScript, useT } from '../i18n/script.js'
 import { Motif } from './Ornament.jsx'
 import Dialog from './Dialog.jsx'
@@ -20,6 +21,10 @@ export default function PlayScreen({ state, dispatch }) {
   const paused = pausedLeft !== null
   const lastTick = useRef(null)
   const lockUntil = useRef(0)
+  // нумар карткі, на якой адкрылі падказку: з новым словам яна закрываецца сама
+  const [hintAt, setHintAt] = useState(null)
+  const hint = getHint(current)
+  const hintOpen = hint !== null && !paused && hintAt === results.length
 
   const left = useCountdown(endsAt, () => {
     if (settings.sound) sounds.timeUp()
@@ -56,8 +61,23 @@ export default function PlayScreen({ state, dispatch }) {
     dispatch({ type: paused ? 'resume' : 'pause' })
   }
 
+  const toggleHint = () => {
+    if (paused || !hint) return
+    setHintAt(hintOpen ? null : results.length)
+  }
+
   const swipe = useSwipe({ onRight: () => answer(true), onLeft: () => answer(false), enabled: !paused })
-  useKeys({ ArrowRight: () => answer(true), ArrowLeft: () => answer(false), ' ': togglePause, Escape: togglePause }, !paused)
+  useKeys(
+    {
+      ArrowRight: () => answer(true),
+      ArrowLeft: () => answer(false),
+      ArrowUp: toggleHint,
+      '?': toggleHint,
+      ' ': togglePause,
+      Escape: togglePause,
+    },
+    !paused,
+  )
 
   const shownLeft = paused ? Math.ceil(pausedLeft / 1000) : left
   const progress = lastWord ? 0 : Math.max(0, Math.min(1, shownLeft / settings.roundSeconds))
@@ -106,9 +126,29 @@ export default function PlayScreen({ state, dispatch }) {
           {...swipe.handlers}
         >
           <Motif name={team.motif} size={18} className="card__motif" />
-          <p className="card__word" key={results.length} data-len={wordSize(word)}>
-            {word}
-          </p>
+          <div className="card__body">
+            <p className="card__word" key={results.length} data-len={wordSize(word)}>
+              {word}
+            </p>
+            {hintOpen && (
+              <div className="card__hint" id="word-hint">
+                {hint.note ? (
+                  <p className="card__hint-note">{t(hint.note)}</p>
+                ) : (
+                  <>
+                    <p className="card__hint-row" lang="ru">
+                      <span className="card__hint-lang">RU</span>
+                      {hint.ru}
+                    </p>
+                    <p className="card__hint-row" lang="en">
+                      <span className="card__hint-lang">EN</span>
+                      {hint.en}
+                    </p>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
           <p className="card__index">{results.length + 1}</p>
           {settings.level === ADULT_LEVEL && <span className="tag18 card__adult">18+</span>}
           <span className="card__stamp card__stamp--ok" style={{ opacity: Math.max(0, lean) }} aria-hidden="true">
@@ -130,6 +170,19 @@ export default function PlayScreen({ state, dispatch }) {
           </span>
           {t('Пас')}
         </button>
+        {hint && (
+          <button
+            type="button"
+            className="hintbtn"
+            onClick={toggleHint}
+            aria-label={t('Падказка')}
+            aria-expanded={hintOpen}
+            aria-controls="word-hint"
+            disabled={paused}
+          >
+            ?
+          </button>
+        )}
         <button type="button" className="answer answer--ok" onClick={() => answer(true)} disabled={paused}>
           <span className="answer__icon" aria-hidden="true">
             ✓
