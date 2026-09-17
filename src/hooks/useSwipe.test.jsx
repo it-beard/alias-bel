@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, renderHook, screen } from '@testing-library/react'
 import { useSwipe } from './useSwipe.js'
 
 function Card(props) {
@@ -113,6 +113,28 @@ describe('useSwipe', () => {
     fireEvent.pointerMove(card, pointer(100))
     fireEvent.lostPointerCapture(card)
     expect(card.dataset.dragging).toBe('false')
+    expect(card.dataset.offset).toBe('0')
+  })
+
+  it('жэст, пачаты апрацоўшчыкам з мінулага рэндэру, пасля выключэння не дае адказу', () => {
+    const onRight = vi.fn()
+    const { result, rerender } = renderHook((props) => useSwipe(props), { initialProps: { onRight, enabled: true } })
+    const stale = result.current.handlers
+    rerender({ onRight, enabled: false })
+    act(() => stale.onPointerDown({ ...pointer(0), currentTarget: {} }))
+    act(() => result.current.handlers.onPointerUp(pointer(200)))
+    expect(onRight).not.toHaveBeenCalled()
+    expect(result.current.dragging).toBe(false)
+    expect(result.current.offset).toBe(0)
+  })
+
+  it('без апрацоўшчыкаў свайп проста вяртае картку на месца', () => {
+    render(<Card />)
+    const card = screen.getByTestId('card')
+    fireEvent.pointerDown(card, pointer(0))
+    expect(() => fireEvent.pointerUp(card, pointer(200))).not.toThrow()
+    fireEvent.pointerDown(card, pointer(200))
+    expect(() => fireEvent.pointerUp(card, pointer(0))).not.toThrow()
     expect(card.dataset.offset).toBe('0')
   })
 })

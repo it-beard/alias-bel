@@ -153,6 +153,85 @@ describe('loadSaved', () => {
     expect(loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify(saved) })).pausedLeft).toBe(12_300)
   })
 
+  it('каманды не масівам замяняюцца камандамі па змаўчанні', () => {
+    const loaded = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ screen: 'setup', teams: { 0: { name: 'Вусы Купалы' } } }) }))
+    expect(loaded.teams).toEqual(initialState.teams)
+  })
+
+  it('масіў замест аб’екта стану лічыцца сапсаваным запісам', () => {
+    expect(loadSaved(memoryStorage({ [STORAGE_KEY]: '[]' }))).toBeNull()
+    expect(loadSaved(memoryStorage({ [STORAGE_KEY]: '"setup"' }))).toBeNull()
+  })
+
+  it('раунд без сапраўднага слова вяртаецца да выніку, а без адказаў — да гатоўнасці', () => {
+    const results = [{ word: 'хлеб', guessed: true }]
+    const broken = { ...initialState, screen: 'play', current: 'not-a-word', endsAt: Date.now() + 25_000 }
+    const withAnswers = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ ...broken, results }) }))
+    expect(withAnswers).toMatchObject({ screen: 'result', current: null, results, pausedLeft: null, gameActive: true })
+    const empty = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ ...broken, current: null }) }))
+    expect(empty).toMatchObject({ screen: 'ready', current: null, results: [], pausedLeft: null, gameActive: true })
+  })
+
+  it('слова з іншага ўзроўню не аднаўляецца як бягучае', () => {
+    const saved = { ...initialState, screen: 'play', current: 'хлеб', endsAt: Date.now() + 25_000, settings: { ...initialState.settings, level: 'hard' } }
+    const loaded = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify(saved) }))
+    expect(loaded.screen).toBe('ready')
+    expect(loaded.current).toBeNull()
+  })
+
+  it.each([true, false])('раунд без адзнак часу лічыцца скончаным (lastWordRule=%s)', (lastWordRule) => {
+    const saved = { ...initialState, screen: 'play', current: 'хлеб', endsAt: null, pausedLeft: null, settings: { ...initialState.settings, lastWordRule } }
+    const loaded = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify(saved) }))
+    expect(loaded.screen).toBe(lastWordRule ? 'play' : 'result')
+    expect(loaded.lastWord).toBe(lastWordRule)
+    expect(loaded.current).toBe(lastWordRule ? 'хлеб' : null)
+    expect(loaded.pausedLeft).toBeNull()
+  })
+
+  it('захаванае апошняе слова аднаўляецца як апошняе слова', () => {
+    const saved = { ...initialState, screen: 'play', current: 'хлеб', lastWord: true, endsAt: null }
+    expect(loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify(saved) }))).toMatchObject({ screen: 'play', current: 'хлеб', lastWord: true, pausedLeft: null })
+  })
+
+  it('рэшта часу не можа перавышаць даўжыню раунда', () => {
+    const saved = { ...initialState, screen: 'play', current: 'хлеб', pausedLeft: 999_000 }
+    expect(loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify(saved) })).pausedLeft).toBe(60_000)
+  })
+
+  it('адказы захоўваюцца толькі для раунда і выніку, смецце ў іх адкідаецца', () => {
+    const results = [{ word: 'хлеб', guessed: true, extra: 1 }, { word: ' ', guessed: true }, { word: 'соль' }, null, { word: 'мора', guessed: false }]
+    const result = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ ...initialState, screen: 'result', results }) }))
+    expect(result.results).toEqual([{ word: 'хлеб', guessed: true }, { word: 'мора', guessed: false }])
+    const ready = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ ...initialState, screen: 'ready', results }) }))
+    expect(ready.results).toEqual([])
+    const notArray = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ ...initialState, screen: 'result', results: 'oops' }) }))
+    expect(notArray.results).toEqual([])
+  })
+
+  it('на экране наладаў памятае, ці была партыя пачатая', () => {
+    const load = (extra) => loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ ...initialState, ...extra }) }))
+    expect(load({ gameActive: true }).gameActive).toBe(true)
+    expect(load({ gameActive: false, roundNo: 3 }).gameActive).toBe(false)
+    // старыя захаванні без сцяжка: мяркуем па ходзе гульні
+    expect(load({ roundNo: 3 }).gameActive).toBe(true)
+    expect(load({}).gameActive).toBe(false)
+    expect(load({ screen: 'finish', gameActive: true }).gameActive).toBe(false)
+  })
+
+  it('колькасць згуляных раундаў аднаўляецца толькі як неадмоўны цэлы лік', () => {
+    const teams = [{ name: 'Вусы Купалы', roundsPlayed: 2 }, { name: 'Мары Глобуса', roundsPlayed: -1 }, { name: 'Вусы Скарыны', roundsPlayed: '3' }]
+    const loaded = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ screen: 'ready', teams }) }))
+    expect(loaded.teams[0].roundsPlayed).toBe(2)
+    expect(loaded.teams[1]).not.toHaveProperty('roundsPlayed')
+    expect(loaded.teams[2]).not.toHaveProperty('roundsPlayed')
+  })
+
+  it('ход не выходзіць за межы спіса камандаў', () => {
+    const load = (turnIndex) => loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ ...initialState, screen: 'ready', turnIndex }) }))
+    expect(load(7).turnIndex).toBe(1)
+    expect(load(-2).turnIndex).toBe(0)
+  })
+
   it('не падае, калі браўзер забараняе нават доступ да localStorage', () => {
     const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
     Object.defineProperty(globalThis, 'localStorage', { configurable: true, get() { throw new Error('SecurityError') } })

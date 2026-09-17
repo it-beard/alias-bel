@@ -37,4 +37,33 @@ describe('Segmented', () => {
     expect(onChange).toHaveBeenLastCalledWith(60)
     expect(last).toHaveFocus()
   })
+
+  it('стрэлка назад з першага сегмента вядзе на апошні, Home — на першы', () => {
+    const onChange = vi.fn()
+    render(<Segmented options={options} value={30} onChange={onChange} />)
+    const first = screen.getByRole('radio', { name: '30 с' })
+    const last = screen.getByRole('radio', { name: '60 с' })
+    fireEvent.keyDown(first, { key: 'ArrowLeft' })
+    expect(onChange).toHaveBeenLastCalledWith(60)
+    expect(last).toHaveFocus()
+    fireEvent.keyDown(last, { key: 'Home' })
+    expect(onChange).toHaveBeenLastCalledWith(30)
+    expect(first).toHaveFocus()
+  })
+
+  it('іншыя клавішы выбар не мяняюць', () => {
+    const onChange = vi.fn()
+    render(<Segmented options={options} value={30} onChange={onChange} />)
+    const first = screen.getByRole('radio', { name: '30 с' })
+    expect(fireEvent.keyDown(first, { key: 'Tab' })).toBe(true)
+    fireEvent.keyDown(first, { key: 'a' })
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('калі значэння няма сярод сегментаў, Tab трапляе на першы', () => {
+    render(<Segmented options={options} value={45} onChange={() => {}} />)
+    expect(screen.getByRole('radio', { name: '30 с' }).tabIndex).toBe(0)
+    expect(screen.getByRole('radio', { name: '60 с' }).tabIndex).toBe(-1)
+    screen.getAllByRole('radio').forEach((radio) => expect(radio).toHaveAttribute('aria-checked', 'false'))
+  })
 })

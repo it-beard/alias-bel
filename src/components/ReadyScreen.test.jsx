@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, createEvent, fireEvent, render, screen } from '@testing-library/react'
 import ReadyScreen from './ReadyScreen.jsx'
 import { initialState } from '../game/gameState.js'
 import { fixedTeams } from '../test/fixtures.js'
@@ -18,12 +18,12 @@ const ready = { ...initialState, screen: 'ready', teams: fixedTeams(2, [5, 8]), 
 function setup(state = ready, script = 'cyr') {
   const dispatch = vi.fn()
   const onRules = vi.fn()
-  render(
+  const view = render(
     <ScriptContext.Provider value={script}>
       <ReadyScreen state={state} dispatch={dispatch} onRules={onRules} />
     </ScriptContext.Provider>,
   )
-  return { dispatch, onRules }
+  return { dispatch, onRules, ...view }
 }
 
 describe('ReadyScreen', () => {
@@ -65,6 +65,35 @@ describe('ReadyScreen', () => {
     act(() => vi.advanceTimersByTime(COUNTDOWN_STEP_MS * 4))
     expect(screen.queryByText('3')).not.toBeInTheDocument()
     expect(dispatch).not.toHaveBeenCalled()
+  })
+
+  it('Escape скасоўвае адлік, і яго можна пачаць нанова', () => {
+    const { dispatch } = setup()
+    fireEvent.click(screen.getByRole('button', { name: /Пачаць раунд/ }))
+    act(() => vi.advanceTimersByTime(COUNTDOWN_STEP_MS))
+    const dialog = screen.getByRole('dialog', { name: 'Пачатак раунда' })
+    expect(dialog).toHaveTextContent('Вусы Мулявіна')
+    const cancel = createEvent('cancel', dialog, { cancelable: true })
+    fireEvent(dialog, cancel)
+    expect(cancel.defaultPrevented).toBe(true)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    act(() => vi.advanceTimersByTime(COUNTDOWN_STEP_MS * 4))
+    expect(dispatch).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: /Пачаць раунд/ }))
+    expect(screen.getByText('3')).toBeInTheDocument()
+    act(() => vi.advanceTimersByTime(COUNTDOWN_STEP_MS))
+    act(() => vi.advanceTimersByTime(COUNTDOWN_STEP_MS))
+    act(() => vi.advanceTimersByTime(COUNTDOWN_STEP_MS))
+    expect(dispatch).toHaveBeenCalledTimes(1)
+    expect(dispatch).toHaveBeenCalledWith({ type: 'startTurn' })
+  })
+
+  it('паказвае таго, чый ход, і яго колер', () => {
+    const { container } = setup({ ...ready, turnIndex: 1 })
+    expect(screen.getByRole('heading', { level: 2, name: 'Крынж Еўфрасінні' })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Знак каманды' })).toHaveAttribute('data-motif', 'facepalm')
+    expect(container.querySelector('.screen').style.getPropertyValue('--team')).toBe(ready.teams[1].color)
   })
 
   it('без гуку і вібрацыі адлік ціхі', () => {

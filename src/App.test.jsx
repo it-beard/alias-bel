@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, fireEvent, render, screen, within } from '@testing-library/react'
+import { act, createEvent, fireEvent, render, screen, within } from '@testing-library/react'
 import App from './App.jsx'
 import { initialState } from './game/gameState.js'
 import { ANSWER_LOCK_MS, COUNTDOWN_STEP_MS, DEFAULT_SETTINGS, RANDOM_TEAM_NAMES, STORAGE_KEY, TEAM_MOTIFS } from './game/constants.js'
@@ -116,6 +116,50 @@ describe('App', () => {
     expect(document.documentElement.hasAttribute('data-theme')).toBe(false)
   })
 
+  it('у рэжыме «аўта» сочыць за сістэмнай тэмай і перастае, калі тэма выбраная ўручную', () => {
+    const listeners = new Set()
+    const query = {
+      matches: false,
+      addEventListener: vi.fn((type, listener) => listeners.add(listener)),
+      removeEventListener: vi.fn((type, listener) => listeners.delete(listener)),
+    }
+    vi.spyOn(window, 'matchMedia').mockReturnValue(query)
+    const meta = () => document.querySelector('meta[name="theme-color"]').getAttribute('content')
+
+    render(<App />)
+    expect(window.matchMedia).toHaveBeenCalledWith('(prefers-color-scheme: dark)')
+    expect(query.addEventListener).toHaveBeenCalledWith('change', expect.any(Function))
+    expect(meta()).toBe(THEME_BG.light)
+
+    query.matches = true
+    act(() => listeners.forEach((listener) => listener({ matches: true })))
+    expect(meta()).toBe(THEME_BG.dark)
+    expect(document.documentElement.hasAttribute('data-theme')).toBe(false)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Налады' }))
+    fireEvent.click(screen.getByRole('radio', { name: 'Светлая' }))
+    expect(listeners.size).toBe(0)
+    expect(meta()).toBe(THEME_BG.light)
+  })
+
+  it('без matchMedia тэма «аўта» проста светлая', () => {
+    vi.stubGlobal('matchMedia', undefined)
+    try {
+      expect(() => render(<App />)).not.toThrow()
+      expect(document.querySelector('meta[name="theme-color"]').getAttribute('content')).toBe(THEME_BG.light)
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it('захаваныя тэма і алфавіт дзейнічаюць адразу пры запуску', () => {
+    seed({ ...initialState, settings: { ...DEFAULT_SETTINGS, theme: 'dark', script: 'lat' } })
+    render(<App />)
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
+    expect(document.documentElement.getAttribute('lang')).toBe('be-Latn')
+    expect(screen.getByRole('heading', { level: 1, name: 'Alias' })).toBeInTheDocument()
+  })
+
   it('выпадковыя назвы і іх лагатыпы захоўваюцца і пераходзяць у гульню', () => {
     render(<App />)
     fireEvent.click(screen.getByRole('button', { name: 'Выпадковыя назвы' }))
@@ -145,6 +189,30 @@ describe('App', () => {
     expect(screen.getByRole('dialog', { name: 'Правілы гульні' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Зразумела' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('правілы даступныя і перад раундам, а Escape іх зачыняе', () => {
+    seed({ ...initialState, screen: 'ready', settings: { ...DEFAULT_SETTINGS, sound: false } })
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'Правілы' }))
+    const dialog = screen.getByRole('dialog', { name: 'Правілы гульні' })
+    fireEvent(dialog, createEvent('cancel', dialog, { cancelable: true }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Пачаць раунд/ })).toBeInTheDocument()
+  })
+
+  it('экран з main адпавядае этапу гульні', () => {
+    seed({ ...initialState, settings: { ...DEFAULT_SETTINGS, sound: false, vibration: false } })
+    render(<App />)
+    const main = screen.getByRole('main')
+    expect(main).toHaveAttribute('data-screen', 'setup')
+    fireEvent.click(screen.getByRole('button', { name: 'Пачаць гульню' }))
+    expect(main).toHaveAttribute('data-screen', 'ready')
+    startRound()
+    expect(main).toHaveAttribute('data-screen', 'play')
+    fireEvent.click(screen.getByRole('button', { name: 'Паўза' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Спыніць раунд' }))
+    expect(main).toHaveAttribute('data-screen', 'result')
   })
 
   it('поўная партыя: дзве каманды да 20 ачкоў', () => {

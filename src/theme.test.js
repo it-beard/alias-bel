@@ -40,6 +40,32 @@ describe('тэма', () => {
     expect(() => applyTheme('dark')).not.toThrow()
   })
 
+  it('па-за браўзерам (без document і window) нічога не робіць і не падае', () => {
+    const root = document.documentElement
+    vi.stubGlobal('document', undefined)
+    vi.stubGlobal('window', undefined)
+    try {
+      expect(() => applyTheme('dark')).not.toThrow()
+      expect(() => applyScript('lat')).not.toThrow()
+      expect(prefersDark()).toBe(false)
+      expect(resolveTheme('auto')).toBe('light')
+    } finally {
+      vi.unstubAllGlobals()
+    }
+    expect(root.hasAttribute('data-theme')).toBe(false)
+  })
+
+  it('аўта бярэ колер радка стану з сістэмнай тэмы', () => {
+    const meta = document.querySelector('meta[name="theme-color"]')
+    vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: true })
+    applyTheme('auto')
+    expect(meta.getAttribute('content')).toBe(THEME_BG.dark)
+    expect(document.documentElement.hasAttribute('data-theme')).toBe(false)
+    vi.mocked(window.matchMedia).mockReturnValue({ matches: false })
+    applyTheme('auto')
+    expect(meta.getAttribute('content')).toBe(THEME_BG.light)
+  })
+
   it('applyScript ставіць мову дакумента і загаловак укладкі', () => {
     applyScript('lat')
     expect(document.documentElement.getAttribute('lang')).toBe('be-Latn')

@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, createEvent, fireEvent, render, screen } from '@testing-library/react'
 import PlayScreen from './PlayScreen.jsx'
 import { initialState } from '../game/gameState.js'
 import { fixedTeams } from '../test/fixtures.js'
 import { ANSWER_LOCK_MS } from '../game/constants.js'
-import { sounds, vibrate } from '../game/feedback.js'
+import { sounds, unlockAudio, vibrate } from '../game/feedback.js'
 import { ScriptContext } from '../i18n/script.js'
 import { advance } from '../test/timers.js'
 
@@ -146,6 +146,114 @@ describe('PlayScreen', () => {
     expect(vibrate).toHaveBeenCalledWith([120, 60, 120])
     expect(dispatch).toHaveBeenCalledWith({ type: 'timeUp' })
     expect(dispatch).toHaveBeenCalledTimes(1)
+  })
+
+  it('Escape таксама ставіць паўзу, а на паўзе — працягвае, разблакаваўшы аўдыя', () => {
+    const { dispatch } = setup()
+    fireEvent.keyDown(window, { key: 'Escape' })
+    expect(dispatch).toHaveBeenLastCalledWith({ type: 'pause' })
+    expect(unlockAudio).not.toHaveBeenCalled()
+    cleanup()
+
+    const paused = setup({ ...playing(), endsAt: null, pausedLeft: 30_000 })
+    const dialog = screen.getByRole('dialog', { name: 'Паўза' })
+    const cancel = createEvent('cancel', dialog, { cancelable: true })
+    fireEvent(dialog, cancel)
+    expect(cancel.defaultPrevented).toBe(true)
+    expect(unlockAudio).toHaveBeenCalledTimes(1)
+    expect(paused.dispatch).toHaveBeenLastCalledWith({ type: 'resume' })
+  })
+
+  it('без гуку працяг пасля паўзы не чапае аўдыя', () => {
+    const state = { ...playing(), endsAt: null, pausedLeft: 30_000 }
+    state.settings = { ...state.settings, sound: false }
+    const { dispatch } = setup(state)
+    fireEvent.click(screen.getByRole('button', { name: 'Працягнуць' }))
+    expect(dispatch).toHaveBeenCalledWith({ type: 'resume' })
+    expect(unlockAudio).not.toHaveBeenCalled()
+  })
+
+  it('на паўзе картка схаваная ад чытачоў экрана і не рэагуе на свайп', () => {
+    const { dispatch, container } = setup({ ...playing(), endsAt: null, pausedLeft: 30_000 })
+    const card = container.querySelector('.card')
+    expect(card).toHaveAttribute('aria-hidden', 'true')
+    fireEvent.pointerDown(card, { clientX: 0, clientY: 0, pointerId: 1, button: 0 })
+    fireEvent.pointerUp(card, { clientX: 200, clientY: 0, pointerId: 1 })
+    expect(dispatch).not.toHaveBeenCalled()
+    expect(sounds.tick).not.toHaveBeenCalled()
+  })
+
+  it('адказ пасля выхаду часу без правіла апошняга слова завяршае раунд, а не лічыцца', () => {
+    const state = playing()
+    state.settings = { ...state.settings, lastWordRule: false }
+    const { dispatch } = setup(state)
+    // укладка была ў фоне: гадзіннік пайшоў наперад, а таймер яшчэ не цікнуў
+    vi.setSystemTime(NOW + 61_000)
+    fireEvent.click(screen.getByRole('button', { name: 'Адгадана' }))
+    expect(dispatch).toHaveBeenCalledTimes(1)
+    expect(dispatch).toHaveBeenCalledWith({ type: 'timeUp' })
+    expect(sounds.correct).not.toHaveBeenCalled()
+    expect(vibrate).not.toHaveBeenCalled()
+  })
+
+  it('з правілам апошняга слова запознены адказ яшчэ залічваецца', () => {
+    const { dispatch } = setup()
+    vi.setSystemTime(NOW + 61_000)
+    fireEvent.click(screen.getByRole('button', { name: 'Пас' }))
+    expect(dispatch).toHaveBeenCalledTimes(1)
+    expect(dispatch).toHaveBeenCalledWith({ type: 'answer', guessed: false })
+  })
+
+  it('кожная з апошніх секунд цікае адзін раз, нават калі экран перамалёўваецца', () => {
+    const state = { ...playing(), endsAt: NOW + 4_000 }
+    const { rerender } = setup(state)
+    expect(sounds.tick).toHaveBeenCalledTimes(1)
+    rerender(
+      <ScriptContext.Provider value="cyr">
+        <PlayScreen state={{ ...state, settings: { ...state.settings, vibration: false } }} dispatch={vi.fn()} />
+      </ScriptContext.Provider>,
+    )
+    rerender(
+      <ScriptContext.Provider value="cyr">
+        <PlayScreen state={{ ...state, settings: { ...state.settings, sound: false } }} dispatch={vi.fn()} />
+      </ScriptContext.Provider>,
+    )
+    rerender(
+      <ScriptContext.Provider value="cyr">
+        <PlayScreen state={state} dispatch={vi.fn()} />
+      </ScriptContext.Provider>,
+    )
+    expect(sounds.tick).toHaveBeenCalledTimes(1)
+  })
+
+  it('без гуку і вібрацыі канец часу ціхі', () => {
+    const state = playing()
+    state.settings = { ...state.settings, sound: false, vibration: false }
+    const { dispatch } = setup({ ...state, endsAt: NOW + 3_000 })
+    advance(3_000)
+    expect(dispatch).toHaveBeenCalledWith({ type: 'timeUp' })
+    expect(sounds.tick).not.toHaveBeenCalled()
+    expect(sounds.timeUp).not.toHaveBeenCalled()
+    expect(vibrate).not.toHaveBeenCalled()
+  })
+
+  it('без бягучага слова картка пустая, але экран не падае', () => {
+    const { container } = setup({ ...playing(), current: null })
+    expect(container.querySelector('.card__word')).toBeEmptyDOMElement()
+  })
+
+  it('палоска часу адлюстроўвае долю раунда, а на апошнім слове пустая', () => {
+    const { container } = setup({ ...playing(), endsAt: NOW + 30_000 })
+    expect(container.querySelector('.timer__fill').style.transform).toBe('scaleX(0.5)')
+    cleanup()
+    const paused = setup({ ...playing(), endsAt: null, pausedLeft: 15_000 })
+    expect(paused.container.querySelector('.timer__fill').style.transform).toBe('scaleX(0.25)')
+    expect(screen.getByRole('timer')).toHaveTextContent('15')
+    cleanup()
+    const last = setup({ ...playing(), endsAt: null, lastWord: true })
+    expect(last.container.querySelector('.timer__fill').style.transform).toBe('scaleX(0)')
+    expect(last.container.querySelector('.timer')).toHaveClass('is-last')
+    expect(last.container.querySelector('.timer')).not.toHaveClass('is-urgent')
   })
 
   it('апошняе слова: таймер спынены, паўза недаступная', () => {

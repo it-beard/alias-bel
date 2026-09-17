@@ -114,6 +114,11 @@ describe('toLatin', () => {
     expect(toLatin(42)).toBe(42)
   })
 
+  it('кірылічныя знакі па-за беларускім алфавітам застаюцца як ёсць', () => {
+    expect(toLatin('ђак')).toBe('ђak')
+    expect(toLatin('слова Ѣ')).toBe('słova Ѣ')
+  })
+
   it('пакідае апостраф-лапкі, якія не стаяць паміж літарамі', () => {
     expect(toLatin("'цытата'")).toBe("'cytata'")
   })
@@ -143,7 +148,7 @@ describe('isCyrillic', () => {
 })
 
 describe('выпадковыя назвы камандаў на лацінцы', () => {
-  it.each([
+  const expectedNames = [
     ['Вусы Мулявіна', 'Vusy Mulavina'],
     ['Крынж Еўфрасінні', 'Krynž Jeŭfrasinni'],
     ['Каласы пад сярпом ШІ', 'Kałasy pad siarpom ŠI'],
@@ -157,11 +162,15 @@ describe('выпадковыя назвы камандаў на лацінцы',
     ['Смочкі Барадуліна', 'Smočki Baradulina'],
     ['Вусы Купалы', 'Vusy Kupały'],
     ['Мары Глобуса', 'Mary Hłobusa'],
-  ])('%s → %s', (input, expected) => {
+    ['Каханкі Пясецкага', 'Kachanki Piasieckaha'],
+  ]
+
+  it.each(expectedNames)('%s → %s', (input, expected) => {
     expect(toLatin(input)).toBe(expected)
   })
 
   it('праверана кожная назва са спіса', () => {
+    expect(expectedNames.map(([name]) => name)).toEqual(RANDOM_TEAM_NAMES)
     for (const name of RANDOM_TEAM_NAMES) expect(toLatin(name), name).not.toMatch(/[\u0400-\u04ff]/)
   })
 })

@@ -291,6 +291,58 @@ describe('reducer: ход гульні', () => {
     expect(reducer(paused, { type: 'timeUp' })).toBe(paused)
   })
 
+  it('startTurn працуе толькі з экрана гатоўнасці', () => {
+    expect(reducer(initialState, { type: 'startTurn' })).toBe(initialState)
+    const play = run([{ type: 'startGame' }, { type: 'startTurn' }, { type: 'answer', guessed: true }])
+    vi.advanceTimersByTime(5_000)
+    expect(reducer(play, { type: 'startTurn' })).toBe(play)
+    const result = reducer(play, { type: 'endRound' })
+    expect(reducer(result, { type: 'startTurn' })).toBe(result)
+  })
+
+  it.each([true, false])('паўза пасля дэдлайну не вяртае час, а завяршае раунд (lastWordRule=%s)', (lastWordRule) => {
+    const playing = run([{ type: 'setSetting', key: 'lastWordRule', value: lastWordRule }, { type: 'startGame' }, { type: 'startTurn' }])
+    vi.setSystemTime(playing.endsAt)
+    const next = reducer(playing, { type: 'pause' })
+    expect(next).toEqual(reducer(playing, { type: 'timeUp' }))
+    expect(next.pausedLeft).toBeNull()
+    expect(next.endsAt).toBeNull()
+    expect(next.screen).toBe(lastWordRule ? 'play' : 'result')
+    expect(next.lastWord).toBe(lastWordRule)
+  })
+
+  it('паўза без адзнакі часу не выдумляе рэшту', () => {
+    const playing = { ...run([{ type: 'startGame' }, { type: 'startTurn' }]), endsAt: null }
+    expect(reducer(playing, { type: 'pause' })).toMatchObject({ pausedLeft: 0, endsAt: null, screen: 'play' })
+  })
+
+  it('pause, resume і timeUp па-за раундам нічога не робяць', () => {
+    const ready = reducer(initialState, { type: 'startGame' })
+    for (const type of ['pause', 'resume', 'timeUp']) expect(reducer(ready, { type })).toBe(ready)
+    expect(reducer(ready, { type: 'answer', guessed: true })).toBe(ready)
+  })
+
+  it('каманды са старога захавання без roundsPlayed лічаць раунды ад нумара раунда', () => {
+    const legacy = {
+      ...initialState,
+      teams: makeTeams(2).map((team, i) => ({ ...team, score: [6, 4][i] })),
+      screen: 'result',
+      roundNo: 3,
+      turnIndex: 1,
+      results: [{ word: 'а', guessed: true }],
+    }
+    const next = reducer(legacy, { type: 'commitRound' })
+    expect(next.teams[1]).toMatchObject({ score: 5, roundsPlayed: 3 })
+    expect(next.teams[0].roundsPlayed).toBeUndefined()
+    expect(next.roundNo).toBe(4)
+  })
+
+  it('setTeamCount адкідае няправільную колькасць', () => {
+    for (const count of [0, 6, 2.5, '3', undefined]) {
+      expect(reducer(initialState, { type: 'setTeamCount', count })).toBe(initialState)
+    }
+  })
+
   it.each([true, false])('адказ пасля дэдлайну не выдае дадатковае слова (lastWordRule=%s)', (lastWordRule) => {
     const playing = run([{ type: 'setSetting', key: 'lastWordRule', value: lastWordRule }, { type: 'startGame' }, { type: 'startTurn' }])
     vi.setSystemTime(playing.endsAt + 1)

@@ -72,6 +72,13 @@ describe('SetupScreen', () => {
     expect(document.querySelector('input, textarea, [contenteditable]')).toBeNull()
   })
 
+  it('паўторны выбар той жа колькасці камандаў нічога не робіць', () => {
+    const { dispatch } = setup()
+    fireEvent.click(screen.getByRole('radio', { name: '2' }))
+    expect(dispatch).not.toHaveBeenCalled()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
   it('кнопка «Выпадковыя назвы» раздае назвы з вібрацыяй', () => {
     vi.mocked(vibrate).mockClear()
     const { dispatch } = setup()
@@ -113,6 +120,14 @@ describe('SetupScreen', () => {
     expect(screen.getByRole('radio', { name: 'Усе' })).toHaveAttribute('aria-checked', 'true')
   })
 
+  it('з невядомым узроўнем падказка бярэцца ад лёгкага', () => {
+    setup({ ...base, settings: { ...initialState.settings, level: 'wat' } })
+    expect(screen.getByText(/^Простыя штодзённыя словы · /)).toBeInTheDocument()
+    screen.getAllByRole('radio', { name: /Лёгкі|Сярэдні|Складаны|Усе/ }).forEach((radio) => {
+      expect(radio).toHaveAttribute('aria-checked', 'false')
+    })
+  })
+
   it('пачынае гульню, разблакаваўшы аўдыя, і адкрывае правілы', () => {
     const { dispatch, onRules } = setup()
     fireEvent.click(screen.getByRole('button', { name: 'Пачаць гульню' }))
@@ -149,6 +164,25 @@ describe('SetupScreen', () => {
     expect(dispatch).not.toHaveBeenCalledWith({ type: 'startGame' })
     fireEvent.click(screen.getByRole('button', { name: 'Пачаць нанова' }))
     expect(dispatch).toHaveBeenCalledWith({ type: 'startGame' })
+  })
+
+  it('працяг гульні без гуку не чапае аўдыя, а новую гульню можна не пацвярджаць', () => {
+    vi.mocked(unlockAudio).mockClear()
+    const { dispatch } = setup({ ...base, gameActive: true, settings: { ...initialState.settings, sound: false } })
+    fireEvent.click(screen.getByRole('button', { name: 'Працягнуць' }))
+    expect(dispatch).toHaveBeenCalledWith({ type: 'continueGame' })
+    expect(unlockAudio).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Новая гульня' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Не, вярнуцца' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(dispatch).not.toHaveBeenCalledWith({ type: 'startGame' })
+  })
+
+  it('працяг гульні з гукам разблакоўвае аўдыя', () => {
+    vi.mocked(unlockAudio).mockClear()
+    setup({ ...base, gameActive: true })
+    fireEvent.click(screen.getByRole('button', { name: 'Працягнуць' }))
+    expect(unlockAudio).toHaveBeenCalledTimes(1)
   })
 
   it('скід рахунку пры змене каманд можна скасаваць', () => {
