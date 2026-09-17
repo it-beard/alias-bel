@@ -11,13 +11,19 @@ const BELARUSIAN = /^[абвгґдеёжзійклмнопрстуўфхцчшы
 
 describe('падказкі да слоў', () => {
   it('колькасць падказак зафіксаваная', () => {
-    expect(HINTED).toHaveLength(93)
+    expect(HINTED).toHaveLength(227)
   })
 
-  it('ёсць толькі да слоў сярэдняга, складанага ўзроўню і 18+', () => {
-    const known = new Set([...MEDIUM, ...HARD, ...ADULT])
+  it('ёсць толькі да слоў са слоўнікаў гульні', () => {
+    const known = new Set([...EASY, ...MEDIUM, ...HARD, ...ADULT])
     expect(HINTED.filter((word) => !known.has(word))).toEqual([])
-    expect(EASY.filter((word) => getHint(word))).toEqual([])
+  })
+
+  it('на лёгкім узроўні падказкі — толькі да зусім непадобных да расейскіх слоў, і іх меншасць', () => {
+    const hinted = EASY.filter((word) => getHint(word))
+    for (const word of ['пэндзаль', 'слоік', 'дыван', 'трус', 'склеп', 'шкарпэткі']) expect(hinted, word).toContain(word)
+    for (const word of ['хлеб', 'малако', 'бульба', 'хата', 'сябар', 'цягнік', 'гадзіннік']) expect(getHint(word), word).toBeNull()
+    expect(hinted.length / EASY.length).toBeLessThan(0.2)
   })
 
   it('пераклад — расейская кірыліцай і ангельская; беларускіх літар у расейскай няма', () => {
@@ -45,7 +51,7 @@ describe('падказкі да слоў', () => {
 
   it('тлумачэнне — толькі там, дзе перакладу няма: па-беларуску, сцісла і без самога слова', () => {
     const notes = HINTED.filter((word) => getHint(word).note)
-    expect(notes).toEqual(['талака', 'Дзяды', 'варыўня', 'мачэта'])
+    expect(notes).toEqual(['талака', 'Дзяды', 'варыўня', 'застрэшак', 'мачэта'])
     for (const word of notes) {
       const { note } = getHint(word)
       expect(note, word).toMatch(BELARUSIAN)

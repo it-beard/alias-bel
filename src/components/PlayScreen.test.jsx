@@ -425,7 +425,7 @@ describe('PlayScreen', () => {
       expect(vibrate).not.toHaveBeenCalled()
     })
 
-    it('на лёгкім узроўні кнопкі няма зусім, і клавішы падказкі нічога не робяць', () => {
+    it('на слове без падказкі кнопкі няма зусім, і клавішы падказкі нічога не робяць', () => {
       const { container, dispatch } = setup()
       expect(hintButton()).not.toBeInTheDocument()
       expect(container.querySelector('.answers')).not.toHaveClass('answers--hint')
