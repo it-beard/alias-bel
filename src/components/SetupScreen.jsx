@@ -57,7 +57,7 @@ export default function SetupScreen({ state, dispatch, onRules }) {
     setAgeGate(false)
   }
   const randomizeNames = () => {
-    if (settings.vibration) vibrate(12)
+    if (settings.vibration) vibrate(30)
     setRolls((n) => n + 1)
     dispatch({ type: 'randomizeTeamNames' })
   }

@@ -1,4 +1,5 @@
 import { SCRIPTS, THEMES } from '../game/constants.js'
+import { canVibrate, vibrate } from '../game/feedback.js'
 import { useT } from '../i18n/script.js'
 import Segmented from './Segmented.jsx'
 import Toggle from './Toggle.jsx'
@@ -8,6 +9,11 @@ import Dialog from './Dialog.jsx'
 export default function SettingsSheet({ settings, onChange, onClose }) {
   const t = useT()
   const set = (key) => (value) => onChange(key, value)
+  // пробны імпульс адразу паказвае, ці даходзіць вібрацыя да тэлефона
+  const setVibration = (value) => {
+    if (value) vibrate(60)
+    onChange('vibration', value)
+  }
 
   return (
     <Dialog label={t('Налады')} onClose={onClose}>
@@ -55,7 +61,12 @@ export default function SettingsSheet({ settings, onChange, onClose }) {
             onChange={set('hints')}
           />
           <Toggle label={t('Гук')} value={settings.sound} onChange={set('sound')} />
-          <Toggle label={t('Вібрацыя')} value={settings.vibration} onChange={set('vibration')} />
+          <Toggle
+            label={t('Вібрацыя')}
+            hint={t(canVibrate() ? 'Не працуе ў бязгучным рэжыме і пры эканоміі зараду' : 'Гэты браўзер не падтрымлівае вібрацыю')}
+            value={settings.vibration}
+            onChange={setVibration}
+          />
         </div>
 
         <button type="button" className="btn btn--primary" onClick={onClose}>

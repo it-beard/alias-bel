@@ -30,7 +30,7 @@ export default function PlayScreen({ state, dispatch }) {
 
   const left = useCountdown(endsAt, () => {
     if (settings.sound) sounds.timeUp()
-    if (settings.vibration) vibrate([120, 60, 120])
+    if (settings.vibration) vibrate([200, 100, 200])
     dispatch({ type: 'timeUp' })
   })
 
@@ -53,7 +53,7 @@ export default function PlayScreen({ state, dispatch }) {
     if (now < lockUntil.current) return
     lockUntil.current = now + ANSWER_LOCK_MS
     if (settings.sound) (guessed ? sounds.correct : sounds.skip)()
-    if (settings.vibration) vibrate(guessed ? 30 : [20, 40, 20])
+    if (settings.vibration) vibrate(guessed ? 50 : [40, 60, 40])
     dispatch({ type: 'answer', guessed })
   }
 

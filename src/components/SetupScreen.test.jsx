@@ -14,6 +14,7 @@ vi.mock('../game/feedback.js', () => ({
   unlockAudio: vi.fn(),
   sounds: {},
   vibrate: vi.fn(),
+  canVibrate: vi.fn(() => true),
 }))
 
 const base = { ...initialState, teams: fixedTeams(2) }
@@ -126,7 +127,7 @@ describe('SetupScreen', () => {
     expect(screen.getByText('Вусы Мулявіна')).not.toHaveClass('is-rolled')
     fireEvent.click(screen.getByRole('button', { name: 'Выпадковыя назвы' }))
     expect(dispatch).toHaveBeenCalledWith({ type: 'randomizeTeamNames' })
-    expect(vibrate).toHaveBeenCalledWith(12)
+    expect(vibrate).toHaveBeenCalledWith(30)
     expect(screen.getByText('Вусы Мулявіна')).toHaveClass('is-rolled')
   })
 

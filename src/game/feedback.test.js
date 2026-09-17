@@ -163,6 +163,13 @@ describe('feedback (гук і вібрацыя)', () => {
     expect(() => mod.vibrate(10)).not.toThrow()
   })
 
+  it('canVibrate паказвае, ці ёсць у браўзера Vibration API', () => {
+    vi.stubGlobal('navigator', { userAgent: 'test' })
+    expect(mod.canVibrate()).toBe(false)
+    vi.stubGlobal('navigator', { userAgent: 'test', vibrate: vi.fn() })
+    expect(mod.canVibrate()).toBe(true)
+  })
+
   it('адмова браўзера ў аўдыя і вібрацыі не перарывае гульню', () => {
     vi.stubGlobal('AudioContext', class { constructor() { throw new Error('denied') } })
     vi.stubGlobal('navigator', { vibrate() { throw new Error('denied') } })

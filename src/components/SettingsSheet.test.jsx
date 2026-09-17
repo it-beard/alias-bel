@@ -3,6 +3,9 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import SettingsSheet from './SettingsSheet.jsx'
 import { DEFAULT_SETTINGS } from '../game/constants.js'
 import { ScriptContext } from '../i18n/script.js'
+import { canVibrate, vibrate } from '../game/feedback.js'
+
+vi.mock('../game/feedback.js', () => ({ canVibrate: vi.fn(() => true), vibrate: vi.fn() }))
 
 function setup(settings = DEFAULT_SETTINGS, script = 'cyr') {
   const onChange = vi.fn()
@@ -25,7 +28,7 @@ describe('SettingsSheet', () => {
     expect(screen.getByRole('switch', { name: /Апошняе слова/ })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('switch', { name: /Падказкі да слоў/ })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('switch', { name: 'Гук' })).toHaveAttribute('aria-checked', 'true')
-    expect(screen.getByRole('switch', { name: 'Вібрацыя' })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('switch', { name: /Вібрацыя/ })).toHaveAttribute('aria-checked', 'true')
   })
 
   it('перадае змены наверх', () => {
@@ -36,7 +39,7 @@ describe('SettingsSheet', () => {
     fireEvent.click(screen.getByRole('switch', { name: /Апошняе слова/ }))
     fireEvent.click(screen.getByRole('switch', { name: /Падказкі да слоў/ }))
     fireEvent.click(screen.getByRole('switch', { name: 'Гук' }))
-    fireEvent.click(screen.getByRole('switch', { name: 'Вібрацыя' }))
+    fireEvent.click(screen.getByRole('switch', { name: /Вібрацыя/ }))
     expect(onChange.mock.calls).toEqual([
       ['script', 'lat'],
       ['theme', 'dark'],
@@ -56,6 +59,26 @@ describe('SettingsSheet', () => {
     expect(toggle).toHaveTextContent('Кнопка «?» паказвае пераклад рэдкага слова')
     fireEvent.click(toggle)
     expect(onChange).toHaveBeenCalledWith('hints', true)
+  })
+
+  it('уключэнне вібрацыі дае пробны імпульс', () => {
+    vi.mocked(vibrate).mockClear()
+    const { onChange } = setup({ ...DEFAULT_SETTINGS, vibration: false })
+    const toggle = screen.getByRole('switch', { name: /Вібрацыя/ })
+    expect(toggle).toHaveTextContent('Не працуе ў бязгучным рэжыме і пры эканоміі зараду')
+    fireEvent.click(toggle)
+    expect(vibrate).toHaveBeenCalledWith(60)
+    expect(onChange).toHaveBeenCalledWith('vibration', true)
+  })
+
+  it('выключэнне вібрацыі не вібруе; без падтрымкі браўзера пра гэта сказана', () => {
+    vi.mocked(vibrate).mockClear()
+    vi.mocked(canVibrate).mockReturnValueOnce(false)
+    setup()
+    const toggle = screen.getByRole('switch', { name: /Вібрацыя/ })
+    expect(toggle).toHaveTextContent('Гэты браўзер не падтрымлівае вібрацыю')
+    fireEvent.click(toggle)
+    expect(vibrate).not.toHaveBeenCalled()
   })
 
   it('зачыняецца кнопкай або фонам', () => {

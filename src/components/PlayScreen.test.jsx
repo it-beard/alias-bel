@@ -66,12 +66,12 @@ describe('PlayScreen', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Адгадана' }))
     expect(dispatch).toHaveBeenCalledWith({ type: 'answer', guessed: true })
     expect(sounds.correct).toHaveBeenCalledTimes(1)
-    expect(vibrate).toHaveBeenCalledWith(30)
+    expect(vibrate).toHaveBeenCalledWith(50)
     act(() => vi.advanceTimersByTime(ANSWER_LOCK_MS + 10))
     fireEvent.click(screen.getByRole('button', { name: 'Пас' }))
     expect(dispatch).toHaveBeenCalledWith({ type: 'answer', guessed: false })
     expect(sounds.skip).toHaveBeenCalledTimes(1)
-    expect(vibrate).toHaveBeenLastCalledWith([20, 40, 20])
+    expect(vibrate).toHaveBeenLastCalledWith([40, 60, 40])
   })
 
   it('абараняе ад падвойнага націску', () => {
@@ -236,7 +236,7 @@ describe('PlayScreen', () => {
     advance(6_000)
     expect(sounds.tick).toHaveBeenCalledTimes(5)
     expect(sounds.timeUp).toHaveBeenCalledTimes(1)
-    expect(vibrate).toHaveBeenCalledWith([120, 60, 120])
+    expect(vibrate).toHaveBeenCalledWith([200, 100, 200])
     expect(dispatch).toHaveBeenCalledWith({ type: 'timeUp' })
     expect(dispatch).toHaveBeenCalledTimes(1)
   })

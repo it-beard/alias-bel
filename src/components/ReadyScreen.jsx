@@ -23,7 +23,7 @@ export default function ReadyScreen({ state, dispatch, onRules }) {
   useEffect(() => {
     if (count === null) return
     if (settings.sound) sounds.tick()
-    if (settings.vibration) vibrate(15)
+    if (settings.vibration) vibrate(40)
     const id = setTimeout(() => {
       if (count > 1) {
         setCount(count - 1)

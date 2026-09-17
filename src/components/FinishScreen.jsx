@@ -16,7 +16,7 @@ export default function FinishScreen({ state, dispatch }) {
 
   useEffect(() => {
     if (sound) sounds.win()
-    if (vibration) vibrate([60, 40, 60, 40, 120])
+    if (vibration) vibrate([100, 60, 100, 60, 250])
   }, [sound, vibration])
 
   const eyebrow = draw ? 'Нічыя' : solo ? (reached ? 'Мэта дасягнута' : 'Вынік') : 'Перамога'

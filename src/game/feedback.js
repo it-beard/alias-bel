@@ -55,9 +55,18 @@ export const sounds = {
   },
 }
 
+/** Ці ўмее браўзер вібраваць: на iPhone і ў Firefox для Android Vibration API няма. */
+export function canVibrate() {
+  return typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function'
+}
+
+/**
+ * Імпульсы карацейшыя за ~30 мс на большасці тэлефонаў не адчуваюцца, таму ўзоры ў гульні даўжэйшыя.
+ * Android да таго ж глушыць вэб-вібрацыю ў бязгучным рэжыме і пры эканоміі зараду.
+ */
 export function vibrate(pattern) {
   try {
-    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(pattern)
+    if (canVibrate()) navigator.vibrate(pattern)
   } catch {
     /* Вібрацыя можа быць забаронена наладамі браўзера. */
   }

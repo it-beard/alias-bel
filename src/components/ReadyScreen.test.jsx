@@ -55,7 +55,7 @@ describe('ReadyScreen', () => {
     expect(unlockAudio).toHaveBeenCalled()
     expect(screen.getByText('3')).toBeInTheDocument()
     expect(sounds.tick).toHaveBeenCalledTimes(1)
-    expect(vibrate).toHaveBeenCalledWith(15)
+    expect(vibrate).toHaveBeenCalledWith(40)
     act(() => vi.advanceTimersByTime(COUNTDOWN_STEP_MS))
     expect(screen.getByText('2')).toBeInTheDocument()
     act(() => vi.advanceTimersByTime(COUNTDOWN_STEP_MS))
