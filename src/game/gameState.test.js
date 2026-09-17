@@ -242,6 +242,22 @@ describe('reducer: ход гульні', () => {
     expect(reducer(play, { type: 'toSetup' })).toMatchObject({ screen: 'setup', current: null, endsAt: null })
   })
 
+  it('finishNow з паўзы пасярод раунда: рахунак застаецца, словы раунда не залічваюцца', () => {
+    const teams = initialState.teams.map((team, i) => ({ ...team, score: [12, 7][i] ?? 0, roundsPlayed: 2 }))
+    const play = run([{ type: 'continueGame' }, { type: 'startTurn' }, { type: 'answer', guessed: true }, { type: 'answer', guessed: true }, { type: 'pause' }], { ...initialState, teams, gameActive: true, roundNo: 3 })
+    expect(play.results).toHaveLength(2)
+    expect(play.pausedLeft).not.toBeNull()
+
+    const done = reducer(play, { type: 'finishNow' })
+    expect(done).toMatchObject({ screen: 'finish', gameActive: false, current: null, endsAt: null, pausedLeft: null, lastWord: false, results: [] })
+    expect(done.teams.map((team) => team.score)).toEqual(teams.map((team) => team.score))
+    expect(done.teams.map((team) => team.roundsPlayed)).toEqual(teams.map((team) => team.roundsPlayed))
+    expect(inProgress(done)).toBe(false)
+    // завершаная гульня не ажывае ад запозненых падзей раунда
+    for (const type of ['resume', 'pause', 'timeUp', 'commitRound']) expect(reducer(done, { type })).toBe(done)
+    expect(reducer(done, { type: 'answer', guessed: true })).toBe(done)
+  })
+
   it('continueGame вяртае да экрана гатоўнасці, захоўваючы калоду таго ж узроўню', () => {
     const state = { ...run([{ type: 'startGame' }, { type: 'toSetup' }]) }
     const next = reducer(state, { type: 'continueGame' })

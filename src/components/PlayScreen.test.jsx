@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, cleanup, createEvent, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, createEvent, fireEvent, render, screen, within } from '@testing-library/react'
 import PlayScreen from './PlayScreen.jsx'
 import { initialState } from '../game/gameState.js'
 import { fixedTeams } from '../test/fixtures.js'
@@ -142,6 +142,91 @@ describe('PlayScreen', () => {
     expect(view.dispatch).toHaveBeenCalledWith({ type: 'endRound' })
     fireEvent.keyDown(window, { key: 'ArrowRight' })
     expect(view.dispatch).not.toHaveBeenCalledWith({ type: 'answer', guessed: true })
+  })
+
+  describe('скончыць гульню з паўзы', () => {
+    const pausedState = () => ({ ...playing(), endsAt: null, pausedLeft: 30_000, results: [{ word: 'соль', guessed: true }] })
+    const confirmDialog = () => screen.queryByRole('dialog', { name: 'Скончыць гульню?' })
+
+    it('кнопка ёсць толькі ў попапе паўзы і спачатку пытаецца', () => {
+      const { dispatch, update } = setup()
+      expect(screen.queryByRole('button', { name: 'Скончыць гульню' })).not.toBeInTheDocument()
+      update(pausedState())
+      const buttons = within(screen.getByRole('dialog', { name: 'Паўза' })).getAllByRole('button').map((button) => button.textContent)
+      expect(buttons).toEqual(['Працягнуць', 'Спыніць раунд', 'Скончыць гульню'])
+      expect(confirmDialog()).not.toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: 'Скончыць гульню' }))
+      expect(confirmDialog()).toHaveTextContent('Пераможца вызначыцца па бягучым рахунку. Словы гэтага раунда не залічацца.')
+      expect(dispatch).not.toHaveBeenCalled()
+    })
+
+    it('пацверджанне адпраўляе finishNow адзін раз — без resume і endRound', () => {
+      const { dispatch } = setup(pausedState())
+      fireEvent.click(screen.getByRole('button', { name: 'Скончыць гульню' }))
+      fireEvent.click(within(confirmDialog()).getByRole('button', { name: 'Скончыць' }))
+      expect(dispatch.mock.calls).toEqual([[{ type: 'finishNow' }]])
+      expect(unlockAudio).not.toHaveBeenCalled()
+    })
+
+    it('адмова, фон і Escape вяртаюць да паўзы: гульня не працягваецца і не сканчаецца', () => {
+      const { dispatch, container } = setup(pausedState())
+      const open = () => fireEvent.click(screen.getByRole('button', { name: 'Скончыць гульню' }))
+
+      open()
+      fireEvent.click(within(confirmDialog()).getByRole('button', { name: 'Не, вярнуцца' }))
+      expect(confirmDialog()).not.toBeInTheDocument()
+
+      open()
+      fireEvent.click(container.querySelector('.sheet__backdrop'))
+      expect(confirmDialog()).not.toBeInTheDocument()
+
+      open()
+      const cancel = createEvent('cancel', confirmDialog(), { cancelable: true })
+      fireEvent(confirmDialog(), cancel)
+      expect(cancel.defaultPrevented).toBe(true)
+      expect(confirmDialog()).not.toBeInTheDocument()
+
+      expect(screen.getByRole('dialog', { name: 'Паўза' })).toBeInTheDocument()
+      expect(dispatch).not.toHaveBeenCalled()
+    })
+
+    it('Escape, які дайшоў да акна паўзы пад пацверджаннем, гульню не працягвае', () => {
+      const { dispatch } = setup(pausedState())
+      fireEvent.click(screen.getByRole('button', { name: 'Скончыць гульню' }))
+      // Chrome групуе дыялогі, адкрытыя без дзеяння карыстальніка: cancel прыходзіць абодвум запар
+      act(() => {
+        for (const dialog of [confirmDialog(), screen.getByRole('dialog', { name: 'Паўза' })]) {
+          dialog.dispatchEvent(new Event('cancel', { cancelable: true }))
+        }
+      })
+      expect(confirmDialog()).not.toBeInTheDocument()
+      expect(screen.getByRole('dialog', { name: 'Паўза' })).toBeInTheDocument()
+      expect(dispatch).not.toHaveBeenCalled()
+      expect(unlockAudio).not.toHaveBeenCalled()
+      // без пацверджання Escape зноў здымае паўзу
+      fireEvent(screen.getByRole('dialog', { name: 'Паўза' }), createEvent('cancel', screen.getByRole('dialog', { name: 'Паўза' }), { cancelable: true }))
+      expect(dispatch.mock.calls).toEqual([[{ type: 'resume' }]])
+    })
+
+    it('пасля працягу і новай паўзы пацверджанне не ўсплывае само', () => {
+      const { dispatch, update } = setup(pausedState())
+      fireEvent.click(screen.getByRole('button', { name: 'Скончыць гульню' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Працягнуць' }))
+      expect(dispatch).toHaveBeenLastCalledWith({ type: 'resume' })
+      update({ ...playing(), endsAt: NOW + 30_000 })
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      update(pausedState())
+      expect(screen.getByRole('dialog', { name: 'Паўза' })).toBeInTheDocument()
+      expect(confirmDialog()).not.toBeInTheDocument()
+    })
+
+    it('у лацінцы', () => {
+      setup(pausedState(), 'lat')
+      fireEvent.click(screen.getByRole('button', { name: 'Skončyć hulniu' }))
+      expect(screen.getByRole('dialog', { name: 'Skončyć hulniu?' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Skončyć' })).toBeInTheDocument()
+    })
   })
 
   it('калі час выйшаў — сігнал, вібрацыя і timeUp; апошнія 5 секунд цікаюць', () => {

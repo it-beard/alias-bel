@@ -12,6 +12,7 @@ import { getHint } from '../data/hints.js'
 import { useScript, useT } from '../i18n/script.js'
 import { Motif } from './Ornament.jsx'
 import Dialog from './Dialog.jsx'
+import ConfirmSheet from './ConfirmSheet.jsx'
 
 export default function PlayScreen({ state, dispatch }) {
   const t = useT()
@@ -24,6 +25,7 @@ export default function PlayScreen({ state, dispatch }) {
   // нумар карткі, на якой адкрылі падказку: з новым словам яна закрываецца сама
   const [hintAt, setHintAt] = useState(null)
   const hint = settings.hints ? getHint(current) : null
+  const [confirmEnd, setConfirmEnd] = useState(false)
   const hintOpen = hint !== null && !paused && hintAt === results.length
 
   const left = useCountdown(endsAt, () => {
@@ -58,6 +60,7 @@ export default function PlayScreen({ state, dispatch }) {
   const togglePause = () => {
     if (lastWord) return
     if (paused && settings.sound) unlockAudio()
+    setConfirmEnd(false)
     dispatch({ type: paused ? 'resume' : 'pause' })
   }
 
@@ -192,7 +195,9 @@ export default function PlayScreen({ state, dispatch }) {
       </div>
 
       {paused && (
-        <Dialog className="overlay" label={t('Паўза')} onClose={togglePause}>
+        // Escape зачыняе толькі верхняе акно: пакуль адкрытае пацверджанне, паўза не здымаецца,
+        // нават калі браўзер даслаў cancel адразу абодвум дыялогам
+        <Dialog className="overlay" label={t('Паўза')} onClose={confirmEnd ? () => setConfirmEnd(false) : togglePause}>
           <div className="overlay__box">
             <h2 className="overlay__title">{t('Паўза')}</h2>
             <p className="overlay__text">
@@ -204,8 +209,22 @@ export default function PlayScreen({ state, dispatch }) {
             <button type="button" className="btn btn--ghost" onClick={() => dispatch({ type: 'endRound' })}>
               {t('Спыніць раунд')}
             </button>
+            <button type="button" className="btn btn--ghost" onClick={() => setConfirmEnd(true)}>
+              {t('Скончыць гульню')}
+            </button>
           </div>
         </Dialog>
+      )}
+
+      {paused && confirmEnd && (
+        <ConfirmSheet
+          title={t('Скончыць гульню?')}
+          text={t('Пераможца вызначыцца па бягучым рахунку. Словы гэтага раунда не залічацца.')}
+          confirmLabel={t('Скончыць')}
+          danger
+          onConfirm={() => dispatch({ type: 'finishNow' })}
+          onClose={() => setConfirmEnd(false)}
+        />
       )}
     </div>
   )

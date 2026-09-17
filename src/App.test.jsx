@@ -329,6 +329,27 @@ describe('App', () => {
     expect(screen.getByText('Пакуль няма адказаў.')).toBeInTheDocument()
   })
 
+  it('гульню можна скончыць з паўзы: словы раунда не залічваюцца, перамога — па рахунку', () => {
+    const teams = fixedTeams(2, [12, 7]).map((team) => ({ ...team, roundsPlayed: 2 }))
+    seed({ ...initialState, settings: { ...DEFAULT_SETTINGS, sound: false, vibration: false }, teams, screen: 'ready', roundNo: 3, turnIndex: 1, gameActive: true })
+    render(<App />)
+    startRound()
+    answer('Адгадана', 3)
+    fireEvent.click(screen.getByRole('button', { name: 'Паўза' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Скончыць гульню' }))
+    expect(saved().screen).toBe('play')
+    fireEvent.click(within(screen.getByRole('dialog', { name: 'Скончыць гульню?' })).getByRole('button', { name: 'Скончыць' }))
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByText('Перамога')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Вусы Мулявіна' })).toBeInTheDocument()
+    expect(saved()).toMatchObject({ screen: 'finish', gameActive: false, results: [], current: null, pausedLeft: null, endsAt: null })
+    expect(saved().teams.map((team) => team.score)).toEqual([12, 7])
+    // таймер спыненага раунда больш нічога не робіць
+    advance(120_000, 1000)
+    expect(saved().screen).toBe('finish')
+  })
+
   it('незавершаную гульню можна завяршыць проста з наладаў', () => {
     const teams = fixedTeams(2, [12, 7]).map((team) => ({ ...team, roundsPlayed: 2 }))
     seed({ ...initialState, settings: { ...DEFAULT_SETTINGS, sound: false, vibration: false }, teams, screen: 'ready', roundNo: 3, gameActive: true })
