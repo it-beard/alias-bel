@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { loadSaved, saveState } from './storage.js'
 import { initialState } from './gameState.js'
-import { RANDOM_TEAM_NAMES, STORAGE_KEY, TEAM_COLORS, TEAM_MOTIFS } from './constants.js'
+import { ADULT_TEAM_NAMES, RANDOM_TEAM_NAMES, STORAGE_KEY, TEAM_COLORS, TEAM_MOTIFS } from './constants.js'
 
 function memoryStorage(initial = {}) {
   const map = new Map(Object.entries(initial))
@@ -75,12 +75,31 @@ describe('loadSaved', () => {
     expect(loaded.deck).toEqual(['чэлес', 'любошчы'])
   })
 
+  it('юрлівыя назвы захоўваюцца толькі ў рэжыме 18+', () => {
+    const teams = [{ name: 'Мара Глобуса', score: 2 }, { name: 'Вусы Купалы', score: 5 }]
+    const load = (level, extra = {}) =>
+      loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ screen: 'setup', settings: { level }, teams, ...extra }) }))
+
+    const family = load('easy')
+    expect(RANDOM_TEAM_NAMES).toContain(family.teams[0].name)
+    expect(family.teams[1]).toMatchObject({ name: 'Вусы Купалы', score: 5 })
+
+    const adult = load('adult')
+    expect(adult.teams[0]).toMatchObject({ name: 'Мара Глобуса', motif: 'dream', score: 2 })
+    expect(ADULT_TEAM_NAMES).toContain(adult.teams[1].name)
+    expect(adult.teams[1].score).toBe(5)
+
+    const empty = load('adult', { teams: [] })
+    expect(empty.teams).toHaveLength(2)
+    empty.teams.forEach((team) => expect(ADULT_TEAM_NAMES).toContain(team.name))
+  })
+
   it('нармалізуе каманды: колеры з палітры, знакі паводле назваў, рахунак лікам', () => {
     const saved = {
       screen: 'ready',
       teams: [
         { id: 0, name: 'Вусы Купалы', color: '#000', motif: 'sun', score: '4', roundsPlayed: 2 },
-        { id: 1, name: 'Мары Глобуса', motif: 'star', score: null },
+        { id: 1, name: 'Карона Вітаўта', motif: 'star', score: null },
         { id: 2, score: 1 },
       ],
       turnIndex: 7,
@@ -89,7 +108,7 @@ describe('loadSaved', () => {
     const loaded = loadSaved(storage)
     expect(loaded.teams).toHaveLength(3)
     expect(loaded.teams[0]).toMatchObject({ id: 0, name: 'Вусы Купалы', color: TEAM_COLORS[0], motif: 'kupala-mustache', score: 4, roundsPlayed: 2 })
-    expect(loaded.teams[1]).toMatchObject({ name: 'Мары Глобуса', score: 0, motif: 'dream' })
+    expect(loaded.teams[1]).toMatchObject({ name: 'Карона Вітаўта', score: 0, motif: 'crown' })
     expect(RANDOM_TEAM_NAMES).toContain(loaded.teams[2].name)
     expect(loaded.teams[2].motif).toBe(TEAM_MOTIFS[loaded.teams[2].name])
     expect(loaded.turnIndex).toBe(2)
@@ -227,7 +246,7 @@ describe('loadSaved', () => {
   })
 
   it('колькасць згуляных раундаў аднаўляецца толькі як неадмоўны цэлы лік', () => {
-    const teams = [{ name: 'Вусы Купалы', roundsPlayed: 2 }, { name: 'Мары Глобуса', roundsPlayed: -1 }, { name: 'Вусы Скарыны', roundsPlayed: '3' }]
+    const teams = [{ name: 'Вусы Купалы', roundsPlayed: 2 }, { name: 'Карона Вітаўта', roundsPlayed: -1 }, { name: 'Вусы Скарыны', roundsPlayed: '3' }]
     const loaded = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ screen: 'ready', teams }) }))
     expect(loaded.teams[0].roundsPlayed).toBe(2)
     expect(loaded.teams[1]).not.toHaveProperty('roundsPlayed')

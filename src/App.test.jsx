@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, createEvent, fireEvent, render, screen, within } from '@testing-library/react'
 import App from './App.jsx'
 import { initialState } from './game/gameState.js'
-import { ANSWER_LOCK_MS, COUNTDOWN_STEP_MS, DEFAULT_SETTINGS, RANDOM_TEAM_NAMES, STORAGE_KEY, TEAM_MOTIFS } from './game/constants.js'
+import { ADULT_TEAM_NAMES, ANSWER_LOCK_MS, COUNTDOWN_STEP_MS, DEFAULT_SETTINGS, RANDOM_TEAM_NAMES, STORAGE_KEY, TEAM_MOTIFS } from './game/constants.js'
 import { THEME_BG } from './theme.js'
 import { fixedTeams } from './test/fixtures.js'
 import { toLatin } from './i18n/latin.js'
@@ -52,6 +52,25 @@ describe('App', () => {
     const names = teamNames()
     names.forEach((name) => expect(RANDOM_TEAM_NAMES).toContain(name))
     expect(names[0]).not.toBe(names[1])
+  })
+
+  it('у рэжыме 18+ каманды атрымліваюць юрлівыя назвы, а па-за ім — звычайныя', () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('radio', { name: '18+' }))
+    teamNames().forEach((name) => expect(RANDOM_TEAM_NAMES).toContain(name))
+    fireEvent.click(screen.getByRole('button', { name: 'Так, мне ёсць 18' }))
+    const hot = teamNames()
+    hot.forEach((name) => expect(ADULT_TEAM_NAMES).toContain(name))
+    expect(saved().teams.map((team) => team.name)).toEqual(hot)
+    within(screen.getByRole('list', { name: 'Каманды' })).getAllByRole('listitem').forEach((item) => {
+      expect(item.querySelector('svg')).toHaveAttribute('data-motif', TEAM_MOTIFS[item.textContent])
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Выпадковыя назвы/ }))
+    teamNames().forEach((name) => expect(ADULT_TEAM_NAMES).toContain(name))
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Лёгкі' }))
+    teamNames().forEach((name) => expect(RANDOM_TEAM_NAMES).toContain(name))
   })
 
   it('старыя стандартныя назвы з захаванай гульні замяняюцца назвамі са спіса', () => {

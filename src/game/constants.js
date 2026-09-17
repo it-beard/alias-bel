@@ -11,8 +11,7 @@ export const MAX_TEAMS = 5
 /** Колеры камандаў: чырвань, васілёк, лес, бурштын, верас. */
 export const TEAM_COLORS = ['#c1272d', '#2b6cc4', '#2f8a4b', '#c58a12', '#6b4fa3']
 
-/** Кожная назва мае свой піксельны знак (гл. src/ornament/teamLogos.js). */
-export const TEAM_MOTIFS = {
+const FAMILY_TEAM_MOTIFS = {
   'Вусы Мулявіна': 'mulavin-mustache',
   'Крынж Еўфрасінні': 'facepalm',
   'Каласы пад сярпом ШІ': 'wheat-sickle',
@@ -23,14 +22,30 @@ export const TEAM_MOTIFS = {
   'Барада Барадуліна': 'beard',
   'Ваўчыцы Усяслава': 'wolf',
   'Вусы Скарыны': 'skaryna-mustache',
-  'Смочкі Барадуліна': 'nipples',
   'Вусы Купалы': 'kupala-mustache',
-  'Мары Глобуса': 'dream',
-  'Каханкі Пясецкага': 'orion-heart',
 }
 
+/** Юрлівыя назвы — толькі для рэжыму 18+. */
+const ADULT_TEAM_MOTIFS = {
+  'Смочкі Барадуліна': 'nipples',
+  'Мара Глобуса': 'dream',
+  'Каханкі Пясецкага': 'orion-heart',
+  'Любошчы Пане Каханку': 'lips',
+  'Таемны ход да Барбары': 'keyhole',
+  'Дудка Багушэвіча': 'pipe',
+  'Паўстанне Каліноўскага': 'fist',
+  'Першы раз Скарыны': 'first-time',
+  'Аголеная Шагала': 'fig-leaf',
+  'Папараць-кветка Купалы': 'fern-flower',
+  'Пяць мужчын у леснічоўцы': 'lodge',
+}
+
+/** Кожная назва мае свой піксельны знак (гл. src/ornament/teamLogos.js). */
+export const TEAM_MOTIFS = { ...FAMILY_TEAM_MOTIFS, ...ADULT_TEAM_MOTIFS }
+
 /** Назвы і знакі захоўваюцца разам, каб новыя назвы не заставаліся без лагатыпа. */
-export const RANDOM_TEAM_NAMES = Object.keys(TEAM_MOTIFS)
+export const RANDOM_TEAM_NAMES = Object.keys(FAMILY_TEAM_MOTIFS)
+export const ADULT_TEAM_NAMES = Object.keys(ADULT_TEAM_MOTIFS)
 
 export const ROUND_TIMES = [30, 45, 60, 90]
 export const TARGET_SCORES = [20, 30, 50, 75]

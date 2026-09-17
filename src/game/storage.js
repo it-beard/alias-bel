@@ -1,7 +1,7 @@
-import { initialState, inProgress } from './gameState.js'
-import { DEFAULT_SETTINGS, MAX_TEAMS, RANDOM_TEAM_NAMES, ROUND_TIMES, SCRIPTS, STORAGE_KEY, TARGET_SCORES, TEAM_COLORS, THEMES } from './constants.js'
+import { initialState, inProgress, makeTeams } from './gameState.js'
+import { DEFAULT_SETTINGS, MAX_TEAMS, ROUND_TIMES, SCRIPTS, STORAGE_KEY, TARGET_SCORES, TEAM_COLORS, THEMES } from './constants.js'
 import { getWords, LEVEL_ORDER } from '../data/words.js'
-import { fillNames, motifForName } from './teamNames.js'
+import { fillNames, motifForName, teamNamesFor } from './teamNames.js'
 
 export const SCREENS = ['setup', 'ready', 'play', 'result', 'finish']
 
@@ -31,7 +31,8 @@ function integer(value, fallback = 0) {
  * Адказы не губляюцца пасля перазагрузкі. Актыўны раунд аднаўляецца на паўзе;
  * час у закрытай укладцы ўлічваецца, калі гульню не паставілі на паўзу загадзя.
  * Каманды нармалізуюцца: колер бярэцца з палітры, знак — паводле назвы. Назвы не са спіса
- * (старыя стандартныя, упісаныя ўручную ў ранейшых версіях, паўторы) замяняюцца выпадковымі са спіса.
+ * (старыя стандартныя, упісаныя ўручную ў ранейшых версіях, паўторы, юрлівыя па-за рэжымам 18+)
+ * замяняюцца выпадковымі са спіса для выбранага ўзроўню.
  */
 export function loadSaved(storage) {
   try {
@@ -44,12 +45,14 @@ export function loadSaved(storage) {
     const settings = normalizeSettings(saved.settings)
 
     const rawTeams = Array.isArray(saved.teams) ? saved.teams.slice(0, MAX_TEAMS) : []
+    const pool = teamNamesFor(settings.level)
     const names = fillNames(
       rawTeams.map((team, i) => {
         const name = team?.name
         const repeated = rawTeams.slice(0, i).some((earlier) => earlier?.name === name)
-        return RANDOM_TEAM_NAMES.includes(name) && !repeated ? name : null
+        return pool.includes(name) && !repeated ? name : null
       }),
+      pool,
     )
     const teams =
       rawTeams.length > 0
@@ -61,7 +64,7 @@ export function loadSaved(storage) {
             score: integer(team?.score),
             ...(Number.isSafeInteger(team?.roundsPlayed) && team.roundsPlayed >= 0 ? { roundsPlayed: team.roundsPlayed } : {}),
           }))
-        : initialState.teams
+        : pool === teamNamesFor(initialState.settings.level) ? initialState.teams : makeTeams(initialState.teams.length, [], pool)
 
     const screen = SCREENS.includes(saved.screen) ? saved.screen : 'setup'
     const validWords = new Set(getWords(settings.level))

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
-import { fillNames, motifForName, pickRandomNames } from './teamNames.js'
+import { fillNames, motifForName, pickRandomNames, teamNamesFor } from './teamNames.js'
 import { makeTeams, reducer, initialState } from './gameState.js'
-import { MAX_TEAMS, RANDOM_TEAM_NAMES, TEAM_COLORS, TEAM_MOTIFS } from './constants.js'
+import { ADULT_TEAM_NAMES, MAX_TEAMS, RANDOM_TEAM_NAMES, TEAM_COLORS, TEAM_MOTIFS } from './constants.js'
 
 describe('спіс выпадковых назваў', () => {
   it('змест зафіксаваны', () => {
@@ -16,20 +16,46 @@ describe('спіс выпадковых назваў', () => {
       'Барада Барадуліна',
       'Ваўчыцы Усяслава',
       'Вусы Скарыны',
-      'Смочкі Барадуліна',
       'Вусы Купалы',
-      'Мары Глобуса',
-      'Каханкі Пясецкага',
     ])
   })
 
-  it('назвы ўнікальныя, не задаўгія для табліцы і іх хапае на ўсе каманды двойчы', () => {
-    expect(new Set(RANDOM_TEAM_NAMES).size).toBe(RANDOM_TEAM_NAMES.length)
-    expect(RANDOM_TEAM_NAMES.length).toBeGreaterThanOrEqual(MAX_TEAMS * 2)
-    for (const name of RANDOM_TEAM_NAMES) {
+  it('юрлівыя назвы для рэжыму 18+ зафіксаваныя', () => {
+    expect(ADULT_TEAM_NAMES).toEqual([
+      'Смочкі Барадуліна',
+      'Мара Глобуса',
+      'Каханкі Пясецкага',
+      'Любошчы Пане Каханку',
+      'Таемны ход да Барбары',
+      'Дудка Багушэвіча',
+      'Паўстанне Каліноўскага',
+      'Першы раз Скарыны',
+      'Аголеная Шагала',
+      'Папараць-кветка Купалы',
+      'Пяць мужчын у леснічоўцы',
+    ])
+  })
+
+  it.each([
+    ['звычайныя', RANDOM_TEAM_NAMES],
+    ['юрлівыя', ADULT_TEAM_NAMES],
+  ])('%s назвы ўнікальныя, не задаўгія для табліцы і іх хапае на ўсе каманды двойчы', (_, pool) => {
+    expect(new Set(pool).size).toBe(pool.length)
+    expect(pool.length).toBeGreaterThanOrEqual(MAX_TEAMS * 2)
+    for (const name of pool) {
       expect(name.length, name).toBeLessThanOrEqual(24)
       expect(name, name).toBe(name.trim())
     }
+  })
+
+  it('спісы не перасякаюцца, і ў кожнай назвы ёсць знак', () => {
+    for (const name of ADULT_TEAM_NAMES) expect(RANDOM_TEAM_NAMES).not.toContain(name)
+    expect(Object.keys(TEAM_MOTIFS)).toEqual([...RANDOM_TEAM_NAMES, ...ADULT_TEAM_NAMES])
+  })
+
+  it('teamNamesFor дае юрлівы спіс толькі для рэжыму 18+', () => {
+    expect(teamNamesFor('adult')).toBe(ADULT_TEAM_NAMES)
+    for (const level of ['easy', 'medium', 'hard', 'all', undefined, 'wat']) expect(teamNamesFor(level)).toBe(RANDOM_TEAM_NAMES)
   })
 
   it('стандартных назваў няма: пачатковыя каманды таксама са спіса', () => {
@@ -73,6 +99,12 @@ describe('pickRandomNames', () => {
     expect(names.slice(2).every((name) => avoid.includes(name))).toBe(true)
   })
 
+  it('бярэ назвы з перададзенага спіса', () => {
+    for (let i = 0; i < 20; i++) {
+      pickRandomNames(MAX_TEAMS, [], ADULT_TEAM_NAMES).forEach((name) => expect(ADULT_TEAM_NAMES).toContain(name))
+    }
+  })
+
   it('выбар залежыць ад Math.random', () => {
     vi.spyOn(Math, 'random').mockReturnValue(0)
     const first = pickRandomNames(2)
@@ -92,6 +124,13 @@ describe('fillNames', () => {
       expect(name).not.toBe('Вусы Купалы')
     })
     expect(new Set(names).size).toBe(5)
+  })
+
+  it('пустыя месцы можна запаўняць з іншага спіса', () => {
+    const names = fillNames(['Мара Глобуса', undefined, null], ADULT_TEAM_NAMES)
+    expect(names[0]).toBe('Мара Глобуса')
+    names.slice(1).forEach((name) => expect(ADULT_TEAM_NAMES).toContain(name))
+    expect(new Set(names).size).toBe(3)
   })
 
   it('пусты радок — гэта свая назва, яна не замяняецца', () => {
@@ -127,6 +166,48 @@ describe('reducer: randomizeTeamNames', () => {
       state = reducer(state, { type: 'randomizeTeamNames' })
       state.teams.forEach((team) => expect(before).not.toContain(team.name))
     }
+  })
+})
+
+describe('reducer: назвы ў рэжыме 18+', () => {
+  const adult = (state) => reducer(state, { type: 'setSetting', key: 'level', value: 'adult' })
+  const names = (state) => state.teams.map((team) => team.name)
+
+  it('уваход у рэжым 18+ раздае юрлівыя назвы, захоўваючы колеры і рахунак', () => {
+    const state = { ...initialState, teams: makeTeams(5).map((team, i) => ({ ...team, score: i * 2 })) }
+    const next = adult(state)
+    expect(new Set(names(next)).size).toBe(5)
+    next.teams.forEach((team, i) => {
+      expect(ADULT_TEAM_NAMES).toContain(team.name)
+      expect(team).toMatchObject({ id: i, color: TEAM_COLORS[i], motif: TEAM_MOTIFS[team.name], score: i * 2 })
+    })
+  })
+
+  it('выхад з рэжыму 18+ вяртае звычайныя назвы', () => {
+    const next = reducer(adult({ ...initialState, teams: makeTeams(4) }), { type: 'setSetting', key: 'level', value: 'hard' })
+    expect(next.settings.level).toBe('hard')
+    names(next).forEach((name) => expect(RANDOM_TEAM_NAMES).toContain(name))
+  })
+
+  it('змена ўзроўню паміж звычайнымі і іншыя налады назваў не чапаюць', () => {
+    const state = { ...initialState, teams: makeTeams(3) }
+    expect(reducer(state, { type: 'setSetting', key: 'level', value: 'all' }).teams).toBe(state.teams)
+    expect(reducer(state, { type: 'setSetting', key: 'roundSeconds', value: 45 }).teams).toBe(state.teams)
+    const hot = adult(state)
+    expect(adult(hot).teams).toBe(hot.teams)
+    expect(reducer(hot, { type: 'setSetting', key: 'sound', value: false }).teams).toBe(hot.teams)
+  })
+
+  it('у рэжыме 18+ костка і новыя каманды таксама бяруць юрлівыя назвы', () => {
+    let state = adult({ ...initialState, teams: makeTeams(2) })
+    for (let i = 0; i < 10; i++) {
+      state = reducer(state, { type: 'randomizeTeamNames' })
+      names(state).forEach((name) => expect(ADULT_TEAM_NAMES).toContain(name))
+    }
+    const more = reducer(state, { type: 'setTeamCount', count: 5 })
+    expect(names(more).slice(0, 2)).toEqual(names(state))
+    expect(new Set(names(more)).size).toBe(5)
+    names(more).forEach((name) => expect(ADULT_TEAM_NAMES).toContain(name))
   })
 })
 

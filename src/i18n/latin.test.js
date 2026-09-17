@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { isCyrillic, toLatin } from './latin.js'
 import { EASY, HARD, MEDIUM } from '../data/words.js'
-import { APP_NAME, APP_TITLE, RANDOM_TEAM_NAMES } from '../game/constants.js'
+import { ADULT_TEAM_NAMES, APP_NAME, APP_TITLE, RANDOM_TEAM_NAMES } from '../game/constants.js'
 
 const cases = [
   // базавыя літары
@@ -159,10 +159,19 @@ describe('выпадковыя назвы камандаў на лацінцы',
     ['Барада Барадуліна', 'Barada Baradulina'],
     ['Ваўчыцы Усяслава', 'Vaŭčycy Usiasłava'],
     ['Вусы Скарыны', 'Vusy Skaryny'],
-    ['Смочкі Барадуліна', 'Smočki Baradulina'],
     ['Вусы Купалы', 'Vusy Kupały'],
-    ['Мары Глобуса', 'Mary Hłobusa'],
+    // юрлівыя, для рэжыму 18+
+    ['Смочкі Барадуліна', 'Smočki Baradulina'],
+    ['Мара Глобуса', 'Mara Hłobusa'],
     ['Каханкі Пясецкага', 'Kachanki Piasieckaha'],
+    ['Любошчы Пане Каханку', 'Luboščy Panie Kachanku'],
+    ['Таемны ход да Барбары', 'Tajemny chod da Barbary'],
+    ['Дудка Багушэвіча', 'Dudka Bahuševiča'],
+    ['Паўстанне Каліноўскага', 'Paŭstannie Kalinoŭskaha'],
+    ['Першы раз Скарыны', 'Pieršy raz Skaryny'],
+    ['Аголеная Шагала', 'Aholenaja Šahała'],
+    ['Папараць-кветка Купалы', 'Paparać-kvietka Kupały'],
+    ['Пяць мужчын у леснічоўцы', 'Piać mužčyn u lesničoŭcy'],
   ]
 
   it.each(expectedNames)('%s → %s', (input, expected) => {
@@ -170,8 +179,9 @@ describe('выпадковыя назвы камандаў на лацінцы',
   })
 
   it('праверана кожная назва са спіса', () => {
-    expect(expectedNames.map(([name]) => name)).toEqual(RANDOM_TEAM_NAMES)
-    for (const name of RANDOM_TEAM_NAMES) expect(toLatin(name), name).not.toMatch(/[\u0400-\u04ff]/)
+    const all = [...RANDOM_TEAM_NAMES, ...ADULT_TEAM_NAMES]
+    expect(expectedNames.map(([name]) => name)).toEqual(all)
+    for (const name of all) expect(toLatin(name), name).not.toMatch(/[\u0400-\u04ff]/)
   })
 })
 

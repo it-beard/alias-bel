@@ -1,13 +1,13 @@
 import { createDeck, drawWord } from './deck.js'
 import { DEFAULT_SETTINGS, MAX_TEAMS, MIN_TEAMS, TEAM_COLORS } from './constants.js'
-import { fillNames, motifForName, pickRandomNames } from './teamNames.js'
+import { fillNames, motifForName, pickRandomNames, teamNamesFor } from './teamNames.js'
 
 /**
  * Каманды з колерамі па парадку і знакамі паводле назваў. Назвы бяруцца з `previous`,
- * а новыя каманды атрымліваюць выпадковыя назвы са спіса без паўтораў.
+ * а новыя каманды атрымліваюць выпадковыя назвы са спіса `pool` без паўтораў.
  */
-export function makeTeams(count, previous = []) {
-  const names = fillNames(Array.from({ length: count }, (_, i) => previous[i]?.name))
+export function makeTeams(count, previous = [], pool) {
+  const names = fillNames(Array.from({ length: count }, (_, i) => previous[i]?.name), pool)
   return names.map((name, i) => ({
     id: i,
     name,
@@ -60,12 +60,13 @@ export function reducer(state, action) {
     case 'setTeamCount':
       if (!Number.isInteger(action.count) || action.count < MIN_TEAMS || action.count > MAX_TEAMS || action.count === state.teams.length) return state
       // Іншы склад каманд — новая партыя. Не пакідаем ход за выдаленай камандай.
-      return { ...initialState, settings: state.settings, teams: makeTeams(action.count, state.teams), gameActive: false }
+      return { ...initialState, settings: state.settings, teams: makeTeams(action.count, state.teams, teamNamesFor(state.settings.level)), gameActive: false }
 
     case 'randomizeTeamNames': {
       const names = pickRandomNames(
         state.teams.length,
         state.teams.map((team) => team.name),
+        teamNamesFor(state.settings.level),
       )
       return {
         ...state,
@@ -73,8 +74,14 @@ export function reducer(state, action) {
       }
     }
 
-    case 'setSetting':
-      return { ...state, settings: { ...state.settings, [action.key]: action.value } }
+    case 'setSetting': {
+      const next = { ...state, settings: { ...state.settings, [action.key]: action.value } }
+      const pool = teamNamesFor(next.settings.level)
+      if (action.key !== 'level' || pool === teamNamesFor(state.settings.level)) return next
+      // Юрлівыя назвы жывуць толькі ў рэжыме 18+: пры ўваходзе і выхадзе каманды пераназываюцца.
+      const names = pickRandomNames(state.teams.length, [], pool)
+      return { ...next, teams: state.teams.map((team, i) => ({ ...team, name: names[i], motif: motifForName(names[i]) })) }
+    }
 
     case 'startGame': {
       const teams = state.teams.map((t) => ({ ...t, score: 0, roundsPlayed: 0 }))
