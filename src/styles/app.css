@@ -530,6 +530,17 @@
   font-size: 0.8rem;
 }
 
+/* тры спасылкі не змяшчаюцца ў радок — без кропак, каб ніводная не вісела ў канцы радка */
+@media (max-width: 380px) {
+  .site-links {
+    gap: 6px 16px;
+  }
+
+  .site-links > span {
+    display: none;
+  }
+}
+
 .site-links a {
   color: inherit;
   text-underline-offset: 3px;

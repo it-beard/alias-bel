@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import SetupScreen from './SetupScreen.jsx'
@@ -5,6 +7,8 @@ import { initialState, makeTeams } from '../game/gameState.js'
 import { ScriptContext } from '../i18n/script.js'
 import { unlockAudio, vibrate } from '../game/feedback.js'
 import { fixedTeams } from '../test/fixtures.js'
+import { ADULT, getWords } from '../data/words.js'
+import { words } from '../game/plural.js'
 
 vi.mock('../game/feedback.js', () => ({
   unlockAudio: vi.fn(),
@@ -48,6 +52,43 @@ describe('SetupScreen', () => {
     expect(screen.getByText(/бясплатная браўзерная гульня/)).toHaveTextContent('886 слоў')
     expect(screen.getByText('Як гуляць у «Аліяс»?')).toBeInTheDocument()
     expect(screen.getByText('Ці трэба спампоўваць або рэгістравацца?')).toBeInTheDocument()
+  })
+
+  it('у «Пра гульню» сказана, колькі слоў у 18+ і што яны не змешваюцца з астатнімі', () => {
+    setup()
+    const count = words(ADULT.length)
+    expect(getWords('adult')).toHaveLength(ADULT.length)
+    const stat = screen.getByText('Пра гульню').querySelector('span')
+    expect(stat).toHaveTextContent(`886 слоў · 18+: ${count} · кірыліца і лацінка`)
+    expect(screen.getByText(/Ёсць і асобны рэжым 18\+/)).toHaveTextContent(
+      `Ёсць і асобны рэжым 18+ — ${count} беларускай секс-лексікі. Дарослыя словы не змешваюцца з астатнімі: у рэжыме «Усе» іх няма.`,
+    )
+    expect(within(screen.getByRole('list', { name: 'Магчымасці гульні' })).getByText(`Рэжым 18+: ${count}`)).toBeInTheDocument()
+    // абяцанне з апісання праўдзівае: у «Усе» няма ніводнага слова, якое ёсць толькі ў 18+
+    const family = new Set(getWords('all'))
+    expect(ADULT.filter((word) => family.has(word))).toEqual(['каханне'])
+  })
+
+  it('першы абзац апісання і адказы на пытанні супадаюць з FAQ-разметкай у index.html', () => {
+    setup()
+    const html = readFileSync(resolve(process.cwd(), 'index.html'), 'utf8')
+    const graph = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])['@graph']
+    const faq = graph.find((item) => item['@type'] === 'FAQPage').mainEntity
+    for (const { acceptedAnswer } of faq) expect(screen.getByText(acceptedAnswer.text)).toBeInTheDocument()
+  })
+
+  it('у падвале — падзяка, кантакты для паведамленняў пра памылкі і GitHub', () => {
+    setup()
+    const links = within(screen.getByRole('contentinfo', { name: 'Карысныя спасылкі' })).getAllByRole('link')
+    expect(links.map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
+      ['Падзякаваць', 'https://itbeard.com/support/'],
+      ['Знайшлі памылку?', 'https://itbeard.com/contacts'],
+      ['Гульня на GitHub', 'https://github.com/it-beard/alias-bel'],
+    ])
+    for (const link of links) {
+      expect(link).toHaveAttribute('target', '_blank')
+      expect(link).toHaveAttribute('rel', 'noreferrer')
+    }
   })
 
   it('рэдкія налады схаваныя ў шторцы', () => {

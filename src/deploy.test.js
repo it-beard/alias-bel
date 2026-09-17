@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { ADULT } from './data/words.js'
 
 const root = resolve(import.meta.dirname, '..')
 const read = (path) => readFileSync(resolve(root, path), 'utf8')
@@ -72,6 +73,8 @@ describe('публікацыя на GitHub Pages', () => {
     expect(read('public/robots.txt')).toContain('Sitemap: https://alias.itbeard.com/sitemap.xml')
     expect(read('public/sitemap.xml')).toContain('<loc>https://alias.itbeard.com/</loc>')
     expect(read('public/llms.txt')).toContain('886 унікальных беларускіх слоў')
+    expect(read('public/llms.txt')).toContain(`${ADULT.length} слоў беларускай секс-лексікі`)
+    expect(read('README.md')).toContain(`${ADULT.length} слоў беларускай секс-лексікі`)
 
     const image = readBuffer('public/og-image.png')
     expect(image.subarray(1, 4).toString()).toBe('PNG')

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ADULT_LEVEL, LEVELS, LEVEL_ORDER } from '../data/words.js'
+import { ADULT_LEVEL, LEVELS, LEVEL_ORDER, getWords } from '../data/words.js'
 import { APP_NAME, MAX_TEAMS, MIN_TEAMS, ROUND_TIMES, TARGET_SCORES } from '../game/constants.js'
 import { unlockAudio, vibrate } from '../game/feedback.js'
 import { inProgress } from '../game/gameState.js'
@@ -12,6 +12,7 @@ import AdultGate from './AdultGate.jsx'
 import { Mark, Motif } from './Ornament.jsx'
 
 const teamCounts = Array.from({ length: MAX_TEAMS - MIN_TEAMS + 1 }, (_, i) => i + MIN_TEAMS)
+const adultWords = words(getWords(ADULT_LEVEL).length)
 
 /** Пацвярджэнні для дзеянняў, якія абрываюць незавершаную гульню. */
 const CONFIRMS = {
@@ -195,17 +196,20 @@ export default function SetupScreen({ state, dispatch, onRules }) {
       </section>
 
       <details className="game-info">
-        <summary className="game-info__toggle">{t('Пра гульню')}<span>{t('886 слоў · кірыліца і лацінка')}</span></summary>
+        <summary className="game-info__toggle">{t('Пра гульню')}<span>{t(`886 слоў · 18+: ${adultWords} · кірыліца і лацінка`)}</span></summary>
         <section className="game-info__body" aria-labelledby="game-info-title">
           <h2 className="panel__title" id="game-info-title">{t('Што такое «Аліяс па-беларуску»?')}</h2>
           <p className="game-info__lead">
             {t('Гэта бясплатная браўзерная гульня, у якой трэба тлумачыць беларускія словы, не называючы іх. У гульні 886 слоў, тры ўзроўні складанасці і рэжымы для 1–5 каманд.')}
           </p>
+          <p className="game-info__lead">
+            {t(`Ёсць і асобны рэжым 18+ — ${adultWords} беларускай секс-лексікі. Дарослыя словы не змешваюцца з астатнімі: у рэжыме «Усе» іх няма.`)}
+          </p>
           <ul className="game-info__facts" aria-label={t('Магчымасці гульні')}>
             <li>{t('886 беларускіх слоў')}</li>
             <li>{t('Ад 1 да 5 каманд')}</li>
             <li>{t('Тры ўзроўні складанасці')}</li>
-            <li>{t('Рэжым 18+')}</li>
+            <li>{t(`Рэжым 18+: ${adultWords}`)}</li>
             <li>{t('Кірыліца і лацінка')}</li>
           </ul>
           <details className="game-info__question">
@@ -222,6 +226,10 @@ export default function SetupScreen({ state, dispatch, onRules }) {
       <footer className="site-links" aria-label={t('Карысныя спасылкі')}>
         <a href="https://itbeard.com/support/" target="_blank" rel="noreferrer">
           {t('Падзякаваць')}
+        </a>
+        <span aria-hidden="true">·</span>
+        <a href="https://itbeard.com/contacts" target="_blank" rel="noreferrer">
+          {t('Знайшлі памылку?')}
         </a>
         <span aria-hidden="true">·</span>
         <a href="https://github.com/it-beard/alias-bel" target="_blank" rel="noreferrer">
