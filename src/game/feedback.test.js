@@ -163,10 +163,25 @@ describe('feedback (гук і вібрацыя)', () => {
     expect(() => mod.vibrate(10)).not.toThrow()
   })
 
-  it('canVibrate паказвае, ці ёсць у браўзера Vibration API', () => {
-    vi.stubGlobal('navigator', { userAgent: 'test' })
+  it('canVibrate патрабуе Vibration API і тэлефон або планшэт', () => {
+    vi.stubGlobal('navigator', { userAgent: 'test', userAgentData: { mobile: true } })
     expect(mod.canVibrate()).toBe(false)
+    vi.stubGlobal('navigator', { userAgent: 'test', vibrate: vi.fn(), userAgentData: { mobile: true } })
+    expect(mod.canVibrate()).toBe(true)
+  })
+
+  it('canVibrate на дэсктопе false, хоць navigator.vibrate ёсць; сама вібрацыя не глушыцца', () => {
+    const vibrateFn = vi.fn()
+    vi.stubGlobal('navigator', { userAgent: 'test', vibrate: vibrateFn, userAgentData: { mobile: false } })
+    expect(mod.canVibrate()).toBe(false)
+    mod.vibrate(10)
+    expect(vibrateFn).toHaveBeenCalledWith(10)
+  })
+
+  it('canVibrate без userAgentData пазнае тэлефон па грубым указальніку', () => {
     vi.stubGlobal('navigator', { userAgent: 'test', vibrate: vi.fn() })
+    expect(mod.canVibrate()).toBe(false)
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({ matches: query === '(pointer: coarse)' }))
     expect(mod.canVibrate()).toBe(true)
   })
 

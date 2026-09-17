@@ -63,7 +63,7 @@ export default function SettingsSheet({ settings, onChange, onClose }) {
           <Toggle label={t('Гук')} value={settings.sound} onChange={set('sound')} />
           <Toggle
             label={t('Вібрацыя')}
-            hint={t(canVibrate() ? 'Не працуе ў бязгучным рэжыме і пры эканоміі зараду' : 'Гэты браўзер не падтрымлівае вібрацыю')}
+            hint={t(canVibrate() ? 'Не працуе ў бязгучным рэжыме і пры эканоміі зараду' : 'Гэтая прылада або браўзер не падтрымлівае вібрацыю')}
             value={settings.vibration}
             onChange={setVibration}
           />

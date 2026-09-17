@@ -55,9 +55,20 @@ export const sounds = {
   },
 }
 
-/** Ці ўмее браўзер вібраваць: на iPhone і ў Firefox для Android Vibration API няма. */
-export function canVibrate() {
+/** Ці ёсць у браўзера Vibration API: на iPhone і ў Firefox для Android яго няма. */
+function hasVibrationApi() {
   return typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function'
+}
+
+/** Тэлефон або планшэт: дэсктопны Chrome мае navigator.vibrate, але вібраваць яму няма чым. */
+function isHandheld() {
+  if (navigator.userAgentData?.mobile) return true
+  return typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches
+}
+
+/** Ці дойдзе вібрацыя да карыстальніка — ад гэтага залежыць толькі падказка ў наладах. */
+export function canVibrate() {
+  return hasVibrationApi() && isHandheld()
 }
 
 /**
@@ -66,7 +77,8 @@ export function canVibrate() {
  */
 export function vibrate(pattern) {
   try {
-    if (canVibrate()) navigator.vibrate(pattern)
+    // без isHandheld: памылка ў вызначэнні прылады не павінна глушыць вібрацыю
+    if (hasVibrationApi()) navigator.vibrate(pattern)
   } catch {
     /* Вібрацыя можа быць забаронена наладамі браўзера. */
   }

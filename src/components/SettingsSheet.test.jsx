@@ -71,12 +71,12 @@ describe('SettingsSheet', () => {
     expect(onChange).toHaveBeenCalledWith('vibration', true)
   })
 
-  it('выключэнне вібрацыі не вібруе; без падтрымкі браўзера пра гэта сказана', () => {
+  it('выключэнне вібрацыі не вібруе; без падтрымкі пра гэта сказана', () => {
     vi.mocked(vibrate).mockClear()
     vi.mocked(canVibrate).mockReturnValueOnce(false)
     setup()
     const toggle = screen.getByRole('switch', { name: /Вібрацыя/ })
-    expect(toggle).toHaveTextContent('Гэты браўзер не падтрымлівае вібрацыю')
+    expect(toggle).toHaveTextContent('Гэтая прылада або браўзер не падтрымлівае вібрацыю')
     fireEvent.click(toggle)
     expect(vibrate).not.toHaveBeenCalled()
   })
