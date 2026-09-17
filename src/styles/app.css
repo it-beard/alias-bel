@@ -1,5 +1,7 @@
 .app {
-  height: 100dvh;
+  /* Не 100dvh: пасля перазагрузкі Chrome на Android часам лічыць dvh так, нібы адрасны радок схаваны,
+     і кнопкі знізу сыходзяць за экран. Ланцужок html → body → #root (100%) заўсёды роўны бачнай вобласці. */
+  height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -868,7 +870,6 @@
 
 /* ---------- гульнявы экран ---------- */
 .screen--play {
-  height: 100dvh;
   overflow: hidden;
   justify-content: space-between;
   gap: 12px;
