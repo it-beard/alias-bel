@@ -169,7 +169,7 @@ describe('выпадковыя назвы камандаў на лацінцы',
     ['Дудка Багушэвіча', 'Dudka Bahuševiča'],
     ['Паўстанне Каліноўскага', 'Paŭstannie Kalinoŭskaha'],
     ['Першы раз Скарыны', 'Pieršy raz Skaryny'],
-    ['Аголеная Шагала', 'Aholenaja Šahała'],
+    ['Аголеныя Шагалы', 'Aholenaja Šahała'],
     ['Папараць-кветка Купалы', 'Paparać-kvietka Kupały'],
     ['Пяць мужчын у леснічоўцы', 'Piać mužčyn u lesničoŭcy'],
   ]
