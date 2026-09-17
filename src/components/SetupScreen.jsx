@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { LEVELS, LEVEL_ORDER } from '../data/words.js'
+import { ADULT_LEVEL, LEVELS, LEVEL_ORDER } from '../data/words.js'
 import { APP_NAME, MAX_TEAMS, MIN_TEAMS, ROUND_TIMES, TARGET_SCORES } from '../game/constants.js'
 import { unlockAudio, vibrate } from '../game/feedback.js'
 import { inProgress } from '../game/gameState.js'
@@ -8,6 +8,7 @@ import { useScript, useT } from '../i18n/script.js'
 import Segmented from './Segmented.jsx'
 import SettingsSheet from './SettingsSheet.jsx'
 import ConfirmSheet from './ConfirmSheet.jsx'
+import AdultGate from './AdultGate.jsx'
 import { Mark, Motif } from './Ornament.jsx'
 
 const teamCounts = Array.from({ length: MAX_TEAMS - MIN_TEAMS + 1 }, (_, i) => i + MIN_TEAMS)
@@ -18,10 +19,14 @@ export default function SetupScreen({ state, dispatch, onRules }) {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [rolls, setRolls] = useState(0)
   const [pending, setPending] = useState(null)
+  const [ageGate, setAgeGate] = useState(false)
   const { settings, teams } = state
   const set = (key, value) => dispatch({ type: 'setSetting', key, value })
   const canContinue = inProgress(state)
   const level = LEVELS[settings.level] ?? LEVELS.easy
+  const adult = settings.level === ADULT_LEVEL
+  // Узровень, да якога вяртаемся, калі рэжым 18+ выключаюць паўторным націскам.
+  const [familyLevel, setFamilyLevel] = useState(adult ? LEVELS.easy.id : level.id)
 
   const start = () => {
     if (settings.sound) unlockAudio()
@@ -36,6 +41,18 @@ export default function SetupScreen({ state, dispatch, onRules }) {
     if (pending.type === 'teams') dispatch({ type: 'setTeamCount', count: pending.count })
     else start()
     setPending(null)
+  }
+  const changeLevel = (value) => {
+    setFamilyLevel(value)
+    set('level', value)
+  }
+  const toggleAdult = () => {
+    if (adult) set('level', familyLevel)
+    else setAgeGate(true)
+  }
+  const confirmAge = () => {
+    set('level', ADULT_LEVEL)
+    setAgeGate(false)
   }
   const randomizeNames = () => {
     if (settings.vibration) vibrate(12)
@@ -137,8 +154,19 @@ export default function SetupScreen({ state, dispatch, onRules }) {
           label={t('Складанасць слоў')}
           options={LEVEL_ORDER.map((id) => ({ value: id, label: t(LEVELS[id].short) }))}
           value={settings.level}
-          onChange={(value) => set('level', value)}
+          onChange={changeLevel}
         />
+        <button type="button" className={`adult${adult ? ' is-on' : ''}`} aria-pressed={adult} onClick={toggleAdult}>
+          <span className="adult__badge" aria-hidden="true">
+            18+
+          </span>
+          <span className="adult__text">
+            <span className="adult__title">{t('Рэжым для дарослых')}</span>
+            <span className="adult__sub">{t('Словы, якіх няма ў Купалы')}</span>
+          </span>
+          {/* «Крукі» — знак кахання і згоды */}
+          <Motif name="hooks" size={26} className="adult__motif" />
+        </button>
         <p className="panel__hint">
           {t(level.hint)} · {t(words(new Set(level.words).size))}
         </p>
@@ -177,6 +205,7 @@ export default function SetupScreen({ state, dispatch, onRules }) {
             <li>{t('886 беларускіх слоў')}</li>
             <li>{t('Ад 1 да 5 каманд')}</li>
             <li>{t('Тры ўзроўні складанасці')}</li>
+            <li>{t('Рэжым 18+')}</li>
             <li>{t('Кірыліца і лацінка')}</li>
           </ul>
           <details className="game-info__question">
@@ -210,6 +239,7 @@ export default function SetupScreen({ state, dispatch, onRules }) {
       </div>
 
       {settingsOpen && <SettingsSheet settings={settings} onChange={set} onClose={() => setSettingsOpen(false)} />}
+      {ageGate && <AdultGate onConfirm={confirmAge} onClose={() => setAgeGate(false)} />}
       {pending && (
         <ConfirmSheet
           title={t(pending.type === 'teams' ? 'Змяніць каманды?' : 'Пачаць новую гульню?')}

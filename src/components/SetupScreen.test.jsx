@@ -128,6 +128,52 @@ describe('SetupScreen', () => {
     })
   })
 
+  it('рэжым 18+ уключаецца толькі пасля пацвярджэння ўзросту', () => {
+    const { dispatch } = setup()
+    const tile = screen.getByRole('button', { name: /Рэжым для дарослых/ })
+    expect(tile).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.queryByRole('radio', { name: '18+' })).not.toBeInTheDocument()
+
+    fireEvent.click(tile)
+    expect(screen.getByRole('dialog', { name: 'Вам дакладна ёсць 18 гадоў?' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Не, вярнуцца' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(dispatch).not.toHaveBeenCalled()
+
+    fireEvent.click(tile)
+    fireEvent.click(screen.getByRole('button', { name: 'Так, мне ёсць 18' }))
+    expect(dispatch).toHaveBeenCalledWith({ type: 'setSetting', key: 'level', value: 'adult' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('уключаны рэжым 18+ вылучаны, а паўторны націск вяртае звычайныя словы', () => {
+    const { dispatch } = setup({ ...base, settings: { ...initialState.settings, level: 'adult' } })
+    const tile = screen.getByRole('button', { name: /Рэжым для дарослых/ })
+    expect(tile).toHaveAttribute('aria-pressed', 'true')
+    expect(tile).toHaveClass('is-on')
+    expect(screen.getByText('Ад заляцанняў да любошчаў · 66 слоў')).toBeInTheDocument()
+    screen.getAllByRole('radio', { name: /Лёгкі|Сярэдні|Складаны|Усе/ }).forEach((radio) => {
+      expect(radio).toHaveAttribute('aria-checked', 'false')
+    })
+    fireEvent.click(tile)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(dispatch).toHaveBeenCalledWith({ type: 'setSetting', key: 'level', value: 'easy' })
+  })
+
+  it('пасля рэжыму 18+ вяртаецца да апошняга выбранага ўзроўню', () => {
+    const dispatch = vi.fn()
+    const view = (level) => (
+      <ScriptContext.Provider value="cyr">
+        <SetupScreen state={{ ...base, settings: { ...initialState.settings, level } }} dispatch={dispatch} onRules={() => {}} />
+      </ScriptContext.Provider>
+    )
+    const { rerender } = render(view('easy'))
+    fireEvent.click(screen.getByRole('radio', { name: 'Складаны' }))
+    rerender(view('adult'))
+    fireEvent.click(screen.getByRole('button', { name: /Рэжым для дарослых/ }))
+    expect(dispatch).toHaveBeenLastCalledWith({ type: 'setSetting', key: 'level', value: 'hard' })
+  })
+
   it('пачынае гульню, разблакаваўшы аўдыя, і адкрывае правілы', () => {
     const { dispatch, onRules } = setup()
     fireEvent.click(screen.getByRole('button', { name: 'Пачаць гульню' }))

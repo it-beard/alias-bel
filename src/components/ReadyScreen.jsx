@@ -5,6 +5,7 @@ import Dialog from './Dialog.jsx'
 import { Motif } from './Ornament.jsx'
 import { sounds, unlockAudio, vibrate } from '../game/feedback.js'
 import { COUNTDOWN_STEP_MS } from '../game/constants.js'
+import { ADULT_LEVEL } from '../data/words.js'
 import { useT } from '../i18n/script.js'
 
 export default function ReadyScreen({ state, dispatch, onRules }) {
@@ -42,6 +43,7 @@ export default function ReadyScreen({ state, dispatch, onRules }) {
         </button>
         <span className="topbar__title">
           {t('Раунд')} {state.roundNo}
+          {settings.level === ADULT_LEVEL && <>{' '}<span className="tag18">18+</span></>}
         </span>
         <button type="button" className="topbar__btn" onClick={onRules}>
           {t('Правілы')}

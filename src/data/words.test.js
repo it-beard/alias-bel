@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { EASY, HARD, LEVELS, LEVEL_ORDER, MEDIUM, getWords } from './words.js'
+import { ADULT, ADULT_LEVEL, EASY, HARD, LEVELS, LEVEL_IDS, LEVEL_ORDER, MEDIUM, getWords } from './words.js'
 
 const LETTERS = "абвгґдеёжзійклмнопрстуўфхцчшыьэюя'’"
 // уласныя назвы (Каляды, Купалле) могуць пачынацца з вялікай літары; дэфіс — для складаных слоў
@@ -11,9 +11,10 @@ describe('слоўнікі', () => {
     expect(MEDIUM).toHaveLength(304)
     expect(HARD).toHaveLength(242)
     expect(getWords('all')).toHaveLength(886)
+    expect(ADULT).toHaveLength(66)
   })
 
-  it.each(LEVEL_ORDER)('узровень %s без паўтораў, пустых радкоў і лішніх прабелаў', (id) => {
+  it.each(LEVEL_IDS)('узровень %s без паўтораў, пустых радкоў і лішніх прабелаў', (id) => {
     const list = LEVELS[id].words
     expect(new Set(list).size).toBe(list.length)
     for (const word of list) {
@@ -29,6 +30,20 @@ describe('слоўнікі', () => {
     }
   })
 
+  it('рэжым 18+ — асобны слоўнік: беларускай кірыліцай і па-за «Усе разам»', () => {
+    expect(LEVEL_IDS).toEqual([...LEVEL_ORDER, ADULT_LEVEL])
+    expect(getWords(ADULT_LEVEL)).toEqual(ADULT)
+    const hard = new Set(HARD)
+    for (const word of ADULT) {
+      // выразы з некалькіх слоў («кліны падбіваць») пішуцца праз прабел
+      for (const part of word.split(' ')) expect(part, word).toMatch(BELARUSIAN)
+      expect(word, word).toBe(word.toLowerCase())
+      expect(hard.has(word), word).toBe(false)
+    }
+    // з дзіцячых і сярэдніх слоўнікаў сюды трапляе толькі «каханне»
+    expect(ADULT.filter((word) => getWords('all').includes(word))).toEqual(['каханне'])
+  })
+
   it('узроўні не перасякаюцца', () => {
     const easy = new Set(EASY)
     const medium = new Set(MEDIUM)
@@ -41,7 +56,7 @@ describe('слоўнікі', () => {
 
   it('LEVELS мае подпісы і парадак', () => {
     expect(LEVEL_ORDER).toEqual(['easy', 'medium', 'hard', 'all'])
-    for (const id of LEVEL_ORDER) {
+    for (const id of LEVEL_IDS) {
       expect(LEVELS[id].id).toBe(id)
       expect(LEVELS[id].label).toBeTruthy()
       expect(LEVELS[id].short).toBeTruthy()

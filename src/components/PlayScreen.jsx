@@ -7,6 +7,7 @@ import { sounds, unlockAudio, vibrate } from '../game/feedback.js'
 import { roundScore } from '../game/gameState.js'
 import { ANSWER_LOCK_MS } from '../game/constants.js'
 import { wordSize } from '../game/wordSize.js'
+import { ADULT_LEVEL } from '../data/words.js'
 import { useScript, useT } from '../i18n/script.js'
 import { Motif } from './Ornament.jsx'
 import Dialog from './Dialog.jsx'
@@ -109,6 +110,7 @@ export default function PlayScreen({ state, dispatch }) {
             {word}
           </p>
           <p className="card__index">{results.length + 1}</p>
+          {settings.level === ADULT_LEVEL && <span className="tag18 card__adult">18+</span>}
           <span className="card__stamp card__stamp--ok" style={{ opacity: Math.max(0, lean) }} aria-hidden="true">
             ✓
           </span>

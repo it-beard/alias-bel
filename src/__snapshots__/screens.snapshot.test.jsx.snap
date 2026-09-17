@@ -1804,6 +1804,46 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
         Усе
       </button>
     </div>
+    <button
+      aria-pressed="false"
+      class="adult"
+      type="button"
+    >
+      <span
+        aria-hidden="true"
+        class="adult__badge"
+      >
+        18+
+      </span>
+      <span
+        class="adult__text"
+      >
+        <span
+          class="adult__title"
+        >
+          Рэжым для дарослых
+        </span>
+        <span
+          class="adult__sub"
+        >
+          Словы, якіх няма ў Купалы
+        </span>
+      </span>
+      <svg
+        aria-hidden="true"
+        class="motif adult__motif"
+        data-motif="hooks"
+        height="26"
+        shape-rendering="crispEdges"
+        viewBox="0 0 9 9"
+        width="26"
+      >
+        <path
+          d="M2 0h1v1h-1zM6 0h1v1h-1zM1 1h1v1h-1zM3 1h1v1h-1zM5 1h1v1h-1zM7 1h1v1h-1zM0 2h1v1h-1zM4 2h1v1h-1zM8 2h1v1h-1zM1 3h1v1h-1zM7 3h1v1h-1zM2 4h1v1h-1zM6 4h1v1h-1zM1 5h1v1h-1zM7 5h1v1h-1zM0 6h1v1h-1zM4 6h1v1h-1zM8 6h1v1h-1zM1 7h1v1h-1zM3 7h1v1h-1zM5 7h1v1h-1zM7 7h1v1h-1zM2 8h1v1h-1zM6 8h1v1h-1z"
+          fill="currentColor"
+        />
+      </svg>
+    </button>
     <p
       class="panel__hint"
     >
@@ -1961,6 +2001,9 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
         </li>
         <li>
           Тры ўзроўні складанасці
+        </li>
+        <li>
+          Рэжым 18+
         </li>
         <li>
           Кірыліца і лацінка
@@ -2323,6 +2366,46 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
         Usie
       </button>
     </div>
+    <button
+      aria-pressed="false"
+      class="adult"
+      type="button"
+    >
+      <span
+        aria-hidden="true"
+        class="adult__badge"
+      >
+        18+
+      </span>
+      <span
+        class="adult__text"
+      >
+        <span
+          class="adult__title"
+        >
+          Režym dla darosłych
+        </span>
+        <span
+          class="adult__sub"
+        >
+          Słovy, jakich niama ŭ Kupały
+        </span>
+      </span>
+      <svg
+        aria-hidden="true"
+        class="motif adult__motif"
+        data-motif="hooks"
+        height="26"
+        shape-rendering="crispEdges"
+        viewBox="0 0 9 9"
+        width="26"
+      >
+        <path
+          d="M2 0h1v1h-1zM6 0h1v1h-1zM1 1h1v1h-1zM3 1h1v1h-1zM5 1h1v1h-1zM7 1h1v1h-1zM0 2h1v1h-1zM4 2h1v1h-1zM8 2h1v1h-1zM1 3h1v1h-1zM7 3h1v1h-1zM2 4h1v1h-1zM6 4h1v1h-1zM1 5h1v1h-1zM7 5h1v1h-1zM0 6h1v1h-1zM4 6h1v1h-1zM8 6h1v1h-1zM1 7h1v1h-1zM3 7h1v1h-1zM5 7h1v1h-1zM7 7h1v1h-1zM2 8h1v1h-1zM6 8h1v1h-1z"
+          fill="currentColor"
+        />
+      </svg>
+    </button>
     <p
       class="panel__hint"
     >
@@ -2480,6 +2563,9 @@ exports[`снапшоты экранаў > setup (lat) 1`] = `
         </li>
         <li>
           Try ŭzroŭni składanasci
+        </li>
+        <li>
+          Režym 18+
         </li>
         <li>
           Kirylica i łacinka

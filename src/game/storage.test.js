@@ -67,6 +67,14 @@ describe('loadSaved', () => {
     expect(loaded.settings).toMatchObject({ level: 'hard', script: 'cyr', theme: 'auto', roundSeconds: 60 })
   })
 
+  it('захоўвае рэжым 18+ і яго калоду', () => {
+    const saved = { ...initialState, screen: 'ready', settings: { ...initialState.settings, level: 'adult' }, deckLevel: 'adult', deck: ['чэлес', 'хлеб', 'любошчы'] }
+    const loaded = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify(saved) }))
+    expect(loaded.settings.level).toBe('adult')
+    expect(loaded.deckLevel).toBe('adult')
+    expect(loaded.deck).toEqual(['чэлес', 'любошчы'])
+  })
+
   it('нармалізуе каманды: колеры з палітры, знакі паводле назваў, рахунак лікам', () => {
     const saved = {
       screen: 'ready',

@@ -237,6 +237,15 @@ describe('PlayScreen', () => {
     expect(vibrate).not.toHaveBeenCalled()
   })
 
+  it('у рэжыме 18+ картка пазначаная', () => {
+    const { container, unmount } = setup()
+    expect(container.querySelector('.card__adult')).not.toBeInTheDocument()
+    unmount()
+    setup({ ...playing(), current: 'любошчы', settings: { ...initialState.settings, level: 'adult' } })
+    expect(screen.getByText('любошчы')).toBeInTheDocument()
+    expect(screen.getByText('18+')).toHaveClass('card__adult')
+  })
+
   it('без бягучага слова картка пустая, але экран не падае', () => {
     const { container } = setup({ ...playing(), current: null })
     expect(container.querySelector('.card__word')).toBeEmptyDOMElement()

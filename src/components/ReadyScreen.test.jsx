@@ -40,6 +40,15 @@ describe('ReadyScreen', () => {
     expect(screen.getByText('8')).toBeInTheDocument()
   })
 
+  it('значок 18+ бачны толькі ў рэжыме для дарослых', () => {
+    const { unmount } = setup()
+    expect(screen.queryByText('18+')).not.toBeInTheDocument()
+    unmount()
+    setup({ ...ready, settings: { ...ready.settings, level: 'adult' } })
+    expect(screen.getByText('18+')).toHaveClass('tag18')
+    expect(screen.getByText(/^Раунд 2/)).toHaveTextContent('Раунд 2 18+')
+  })
+
   it('адлічвае 3-2-1 і пачынае раунд', () => {
     const { dispatch } = setup()
     fireEvent.click(screen.getByRole('button', { name: /Пачаць раунд/ }))
