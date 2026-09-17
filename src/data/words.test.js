@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ADULT, ADULT_LEVEL, EASY, HARD, LEVELS, LEVEL_IDS, LEVEL_ORDER, MEDIUM, getWords } from './words.js'
+import { ADULT, ADULT_LEVEL, EASY, HARD, LEVELS, LEVEL_ORDER, MEDIUM, getWords } from './words.js'
 
 const LETTERS = "абвгґдеёжзійклмнопрстуўфхцчшыьэюя'’"
 // уласныя назвы (Каляды, Купалле) могуць пачынацца з вялікай літары; дэфіс — для складаных слоў
@@ -14,7 +14,7 @@ describe('слоўнікі', () => {
     expect(ADULT).toHaveLength(108)
   })
 
-  it.each(LEVEL_IDS)('узровень %s без паўтораў, пустых радкоў і лішніх прабелаў', (id) => {
+  it.each(LEVEL_ORDER)('узровень %s без паўтораў, пустых радкоў і лішніх прабелаў', (id) => {
     const list = LEVELS[id].words
     expect(new Set(list).size).toBe(list.length)
     for (const word of list) {
@@ -31,7 +31,6 @@ describe('слоўнікі', () => {
   })
 
   it('рэжым 18+ — асобны слоўнік: беларускай кірыліцай і па-за «Усе разам»', () => {
-    expect(LEVEL_IDS).toEqual([...LEVEL_ORDER, ADULT_LEVEL])
     expect(getWords(ADULT_LEVEL)).toEqual(ADULT)
     const hard = new Set(HARD)
     for (const word of ADULT) {
@@ -55,8 +54,8 @@ describe('слоўнікі', () => {
   })
 
   it('LEVELS мае подпісы і парадак', () => {
-    expect(LEVEL_ORDER).toEqual(['easy', 'medium', 'hard', 'all'])
-    for (const id of LEVEL_IDS) {
+    expect(LEVEL_ORDER).toEqual(['easy', 'medium', 'hard', 'all', ADULT_LEVEL])
+    for (const id of LEVEL_ORDER) {
       expect(LEVELS[id].id).toBe(id)
       expect(LEVELS[id].label).toBeTruthy()
       expect(LEVELS[id].short).toBeTruthy()

@@ -177,13 +177,10 @@ export const LEVELS = {
   adult: { id: 'adult', label: 'Для дарослых', short: '18+', hint: 'Ад заляцанняў да любошчаў', words: ADULT },
 }
 
-export const LEVEL_ORDER = ['easy', 'medium', 'hard', 'all']
-
-/** Рэжым 18+ выбіраецца асобнай пліткай і толькі пасля пацвярджэння ўзросту. */
+/** Рэжым 18+ уключаецца толькі пасля пацвярджэння ўзросту. */
 export const ADULT_LEVEL = 'adult'
 
-/** Усе ўзроўні, якія могуць быць у захаваных наладах. */
-export const LEVEL_IDS = [...LEVEL_ORDER, ADULT_LEVEL]
+export const LEVEL_ORDER = ['easy', 'medium', 'hard', 'all', ADULT_LEVEL]
 
 /** Унікальныя словы выбранага ўзроўню. */
 export function getWords(levelId) {

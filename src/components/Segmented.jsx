@@ -11,7 +11,7 @@ export default function Segmented({ options, value, onChange, label, className =
             role="radio"
             aria-checked={on}
             tabIndex={on || (!options.some((item) => item.value === value) && index === 0) ? 0 : -1}
-            className={`seg__btn${on ? ' is-on' : ''}`}
+            className={`seg__btn${option.className ? ` ${option.className}` : ''}${on ? ' is-on' : ''}`}
             onClick={() => onChange(option.value)}
             onKeyDown={(event) => {
               const direction = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key]

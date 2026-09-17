@@ -284,120 +284,42 @@
 }
 
 /* ---------- рэжым 18+ ---------- */
-.adult,
+.seg__btn--adult,
 .tag18,
 .gate,
 .btn--adult {
   --hot: #ff2d6f;
   --hot-deep: #c9184a;
   --violet: #7b2cbf;
-  --ember: #d9480f;
-  --plum: #1b0f1d;
 }
 
-.adult {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  width: 100%;
-  min-height: 62px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 9px 14px 9px 10px;
-  border: 2px solid transparent;
-  border-radius: 14px;
-  background:
-    linear-gradient(var(--plum), var(--plum)) padding-box,
-    linear-gradient(115deg, var(--hot), var(--violet) 55%, var(--ember)) border-box;
-  color: #fff;
-  text-align: left;
-  transition:
-    transform 0.1s,
-    box-shadow 0.2s;
-}
-
-/* водбліск, які зрэдку прабягае па плітцы */
-.adult::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.16) 50%, transparent 60%);
-  transform: translateX(-100%);
-  animation: adult-glint 4.5s ease-in-out infinite;
-}
-
-@keyframes adult-glint {
-  0%,
-  60% {
-    transform: translateX(-100%);
-  }
-
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.adult:active {
-  transform: scale(0.985);
-}
-
-.adult.is-on {
-  background: linear-gradient(115deg, var(--hot-deep), var(--violet) 70%, var(--ember)) border-box;
-  box-shadow: 0 10px 26px -12px var(--hot);
-}
-
-.adult__badge,
-.gate__badge {
-  flex: none;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  border: 2px solid var(--hot);
-  color: var(--hot);
+.seg__btn--adult {
+  flex-grow: 0.6;
   font-family: var(--font-display);
-  font-weight: 800;
-  line-height: 1;
-}
-
-.adult__badge {
-  width: 40px;
-  height: 40px;
   font-size: 0.78rem;
+  font-weight: 800;
+  color: color-mix(in srgb, var(--hot-deep) 80%, var(--muted));
 }
 
-.adult.is-on .adult__badge {
-  border-color: #fff;
-  background: #fff;
-  color: var(--hot-deep);
-}
-
-.adult__text {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.adult__title {
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-
-.adult__sub {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.adult__motif {
-  flex: none;
-  color: var(--hot);
-}
-
-.adult.is-on .adult__motif {
+.seg__btn--adult.is-on {
+  background: linear-gradient(115deg, var(--hot-deep), var(--violet));
   color: #fff;
+}
+
+/* пяць подпісаў на самых вузкіх экранах */
+@media (max-width: 340px) {
+  .seg--levels {
+    gap: 0;
+  }
+
+  .seg--levels .seg__btn {
+    font-size: 0.78rem;
+    padding: 0 2px;
+  }
+
+  .seg--levels .seg__btn--adult {
+    font-size: 0.66rem;
+  }
 }
 
 .tag18 {
@@ -432,12 +354,18 @@
 }
 
 .gate__badge {
+  flex: none;
   width: 68px;
   height: 68px;
-  border: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
   background: linear-gradient(135deg, var(--hot-deep), var(--violet));
   color: #fff;
+  font-family: var(--font-display);
   font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .btn--adult {

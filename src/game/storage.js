@@ -1,6 +1,6 @@
 import { initialState, inProgress } from './gameState.js'
 import { DEFAULT_SETTINGS, MAX_TEAMS, RANDOM_TEAM_NAMES, ROUND_TIMES, SCRIPTS, STORAGE_KEY, TARGET_SCORES, TEAM_COLORS, THEMES } from './constants.js'
-import { getWords, LEVEL_IDS } from '../data/words.js'
+import { getWords, LEVEL_ORDER } from '../data/words.js'
 import { fillNames, motifForName } from './teamNames.js'
 
 export const SCREENS = ['setup', 'ready', 'play', 'result', 'finish']
@@ -8,7 +8,7 @@ export const SCREENS = ['setup', 'ready', 'play', 'result', 'finish']
 function normalizeSettings(raw = {}) {
   const settings = { ...DEFAULT_SETTINGS }
   const choices = {
-    level: LEVEL_IDS,
+    level: LEVEL_ORDER,
     roundSeconds: ROUND_TIMES,
     targetScore: TARGET_SCORES,
     script: SCRIPTS.map(({ id }) => id),
@@ -78,7 +78,7 @@ export function loadSaved(storage) {
       roundNo: Math.max(1, integer(saved.roundNo, 1)),
       deck: saved.deckLevel === settings.level && Array.isArray(saved.deck)
         ? [...new Set(saved.deck.filter((word) => validWords.has(word)))] : [],
-      deckLevel: LEVEL_IDS.includes(saved.deckLevel) ? saved.deckLevel : null,
+      deckLevel: LEVEL_ORDER.includes(saved.deckLevel) ? saved.deckLevel : null,
       current: null,
       results: ['play', 'result'].includes(screen) ? results : [],
       endsAt: null,

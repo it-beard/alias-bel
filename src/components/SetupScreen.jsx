@@ -24,9 +24,6 @@ export default function SetupScreen({ state, dispatch, onRules }) {
   const set = (key, value) => dispatch({ type: 'setSetting', key, value })
   const canContinue = inProgress(state)
   const level = LEVELS[settings.level] ?? LEVELS.easy
-  const adult = settings.level === ADULT_LEVEL
-  // Узровень, да якога вяртаемся, калі рэжым 18+ выключаюць паўторным націскам.
-  const [familyLevel, setFamilyLevel] = useState(adult ? LEVELS.easy.id : level.id)
 
   const start = () => {
     if (settings.sound) unlockAudio()
@@ -43,12 +40,8 @@ export default function SetupScreen({ state, dispatch, onRules }) {
     setPending(null)
   }
   const changeLevel = (value) => {
-    setFamilyLevel(value)
-    set('level', value)
-  }
-  const toggleAdult = () => {
-    if (adult) set('level', familyLevel)
-    else setAgeGate(true)
+    if (value === ADULT_LEVEL && settings.level !== ADULT_LEVEL) setAgeGate(true)
+    else set('level', value)
   }
   const confirmAge = () => {
     set('level', ADULT_LEVEL)
@@ -151,22 +144,16 @@ export default function SetupScreen({ state, dispatch, onRules }) {
       <section className="panel">
         <h2 className="panel__title">{t('Словы')}</h2>
         <Segmented
+          className="seg--levels"
           label={t('Складанасць слоў')}
-          options={LEVEL_ORDER.map((id) => ({ value: id, label: t(LEVELS[id].short) }))}
+          options={LEVEL_ORDER.map((id) => ({
+            value: id,
+            label: t(LEVELS[id].short),
+            className: id === ADULT_LEVEL ? 'seg__btn--adult' : undefined,
+          }))}
           value={settings.level}
           onChange={changeLevel}
         />
-        <button type="button" className={`adult${adult ? ' is-on' : ''}`} aria-pressed={adult} onClick={toggleAdult}>
-          <span className="adult__badge" aria-hidden="true">
-            18+
-          </span>
-          <span className="adult__text">
-            <span className="adult__title">{t('Рэжым для дарослых')}</span>
-            <span className="adult__sub">{t('Словы, якіх няма ў Купалы')}</span>
-          </span>
-          {/* «Крукі» — знак кахання і згоды */}
-          <Motif name="hooks" size={26} className="adult__motif" />
-        </button>
         <p className="panel__hint">
           {t(level.hint)} · {t(words(new Set(level.words).size))}
         </p>

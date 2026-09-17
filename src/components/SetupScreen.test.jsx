@@ -128,49 +128,35 @@ describe('SetupScreen', () => {
     })
   })
 
-  it('рэжым 18+ уключаецца толькі пасля пацвярджэння ўзросту', () => {
+  it('рэжым 18+ стаіць у адным радзе з узроўнямі і ўключаецца толькі пасля пацвярджэння ўзросту', () => {
     const { dispatch } = setup()
-    const tile = screen.getByRole('button', { name: /Рэжым для дарослых/ })
-    expect(tile).toHaveAttribute('aria-pressed', 'false')
-    expect(screen.queryByRole('radio', { name: '18+' })).not.toBeInTheDocument()
+    const levels = within(screen.getByRole('radiogroup', { name: 'Складанасць слоў' })).getAllByRole('radio')
+    expect(levels.map((radio) => radio.textContent)).toEqual(['Лёгкі', 'Сярэдні', 'Складаны', 'Усе', '18+'])
+    const adult = screen.getByRole('radio', { name: '18+' })
+    expect(adult).toHaveClass('seg__btn--adult')
+    expect(adult).toHaveAttribute('aria-checked', 'false')
 
-    fireEvent.click(tile)
+    fireEvent.click(adult)
     expect(screen.getByRole('dialog', { name: 'Вам дакладна ёсць 18 гадоў?' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Не, вярнуцца' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(dispatch).not.toHaveBeenCalled()
 
-    fireEvent.click(tile)
+    fireEvent.click(adult)
     fireEvent.click(screen.getByRole('button', { name: 'Так, мне ёсць 18' }))
     expect(dispatch).toHaveBeenCalledWith({ type: 'setSetting', key: 'level', value: 'adult' })
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('уключаны рэжым 18+ вылучаны, а паўторны націск вяртае звычайныя словы', () => {
+  it('уключаны рэжым 18+ паўторна пра ўзрост не пытаецца і выключаецца выбарам іншага ўзроўню', () => {
     const { dispatch } = setup({ ...base, settings: { ...initialState.settings, level: 'adult' } })
-    const tile = screen.getByRole('button', { name: /Рэжым для дарослых/ })
-    expect(tile).toHaveAttribute('aria-pressed', 'true')
-    expect(tile).toHaveClass('is-on')
+    const adult = screen.getByRole('radio', { name: '18+' })
+    expect(adult).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByText('Ад заляцанняў да любошчаў · 108 слоў')).toBeInTheDocument()
-    screen.getAllByRole('radio', { name: /Лёгкі|Сярэдні|Складаны|Усе/ }).forEach((radio) => {
-      expect(radio).toHaveAttribute('aria-checked', 'false')
-    })
-    fireEvent.click(tile)
+    fireEvent.click(adult)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    expect(dispatch).toHaveBeenCalledWith({ type: 'setSetting', key: 'level', value: 'easy' })
-  })
-
-  it('пасля рэжыму 18+ вяртаецца да апошняга выбранага ўзроўню', () => {
-    const dispatch = vi.fn()
-    const view = (level) => (
-      <ScriptContext.Provider value="cyr">
-        <SetupScreen state={{ ...base, settings: { ...initialState.settings, level } }} dispatch={dispatch} onRules={() => {}} />
-      </ScriptContext.Provider>
-    )
-    const { rerender } = render(view('easy'))
     fireEvent.click(screen.getByRole('radio', { name: 'Складаны' }))
-    rerender(view('adult'))
-    fireEvent.click(screen.getByRole('button', { name: /Рэжым для дарослых/ }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(dispatch).toHaveBeenLastCalledWith({ type: 'setSetting', key: 'level', value: 'hard' })
   })
 

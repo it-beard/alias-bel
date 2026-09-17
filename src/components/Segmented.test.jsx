@@ -23,6 +23,12 @@ describe('Segmented', () => {
     expect(container.firstChild).toHaveClass('seg', 'x')
   })
 
+  it('асобны пункт можа мець свой клас', () => {
+    render(<Segmented options={[...options, { value: 90, label: '90 с', className: 'hot' }]} value={90} onChange={() => {}} />)
+    expect(screen.getByRole('radio', { name: '90 с' })).toHaveClass('seg__btn', 'hot', 'is-on')
+    expect(screen.getByRole('radio', { name: '30 с' }).className).toBe('seg__btn')
+  })
+
   it('стрэлкі пераносяць выбар і фокус па крузе, Tab мае адзін прыпынак', () => {
     const onChange = vi.fn()
     render(<Segmented options={options} value={60} onChange={onChange} />)
