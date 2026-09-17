@@ -1514,7 +1514,7 @@ exports[`снапшоты экранаў > rules (lat) 1`] = `
 
 exports[`снапшоты экранаў > setup (cyr) 1`] = `
 <div
-  class="screen screen--scroll screen--setup"
+  class="screen screen--scroll"
 >
   <header
     class="brand"
@@ -2045,7 +2045,7 @@ exports[`снапшоты экранаў > setup (cyr) 1`] = `
 
 exports[`снапшоты экранаў > setup (lat) 1`] = `
 <div
-  class="screen screen--scroll screen--setup"
+  class="screen screen--scroll"
 >
   <header
     class="brand"

@@ -58,7 +58,7 @@ export default function SetupScreen({ state, dispatch, onRules }) {
   }
 
   return (
-    <div className="screen screen--scroll screen--setup">
+    <div className="screen screen--scroll">
       <header className="brand">
         <div className="brand__row">
           <h1 className="brand__title">

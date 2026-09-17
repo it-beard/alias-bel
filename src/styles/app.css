@@ -19,7 +19,6 @@
 
 .screen--scroll {
   overflow-y: auto;
-  scrollbar-width: thin;
   scroll-padding-bottom: 90px;
 }
 
@@ -27,11 +26,14 @@
   flex-shrink: 0;
 }
 
-.screen--setup {
+/* пракрутка працуе, але паласы не відаць — як у праграме на тэлефоне */
+.screen--scroll,
+.sheet__body {
   scrollbar-width: none;
 }
 
-.screen--setup::-webkit-scrollbar {
+.screen--scroll::-webkit-scrollbar,
+.sheet__body::-webkit-scrollbar {
   display: none;
 }
 
