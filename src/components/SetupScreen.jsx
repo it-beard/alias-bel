@@ -13,6 +13,13 @@ import { Mark, Motif } from './Ornament.jsx'
 
 const teamCounts = Array.from({ length: MAX_TEAMS - MIN_TEAMS + 1 }, (_, i) => i + MIN_TEAMS)
 
+/** Пацвярджэнні для дзеянняў, якія абрываюць незавершаную гульню. */
+const CONFIRMS = {
+  teams: { title: 'Змяніць каманды?', text: 'Рахунак бягучай партыі будзе скінуты.', confirmLabel: 'Змяніць' },
+  start: { title: 'Пачаць новую гульню?', text: 'Рахунак бягучай партыі будзе скінуты.', confirmLabel: 'Пачаць нанова' },
+  finish: { title: 'Завяршыць гульню?', text: 'Пераможца вызначыцца па бягучым рахунку.', confirmLabel: 'Завяршыць', danger: true },
+}
+
 export default function SetupScreen({ state, dispatch, onRules }) {
   const t = useT()
   const script = useScript()
@@ -36,6 +43,7 @@ export default function SetupScreen({ state, dispatch, onRules }) {
   }
   const confirmChange = () => {
     if (pending.type === 'teams') dispatch({ type: 'setTeamCount', count: pending.count })
+    else if (pending.type === 'finish') dispatch({ type: 'finishNow' })
     else start()
     setPending(null)
   }
@@ -81,9 +89,14 @@ export default function SetupScreen({ state, dispatch, onRules }) {
         <section className="panel resume" style={{ '--team': teams[state.turnIndex]?.color }}>
           <div className="panel__head">
             <h2 className="panel__title">{t('Незавершаная гульня')}</h2>
-            <button type="button" className="btn btn--primary btn--compact" onClick={resume}>
-              {t('Працягнуць')}
-            </button>
+            <div className="resume__actions">
+              <button type="button" className="btn btn--ghost btn--compact" onClick={() => setPending({ type: 'finish' })}>
+                {t('Завяршыць')}
+              </button>
+              <button type="button" className="btn btn--primary btn--compact" onClick={resume}>
+                {t('Працягнуць')}
+              </button>
+            </div>
           </div>
           <p className="resume__line">
             <span className="resume__round">
@@ -229,9 +242,10 @@ export default function SetupScreen({ state, dispatch, onRules }) {
       {ageGate && <AdultGate onConfirm={confirmAge} onClose={() => setAgeGate(false)} />}
       {pending && (
         <ConfirmSheet
-          title={t(pending.type === 'teams' ? 'Змяніць каманды?' : 'Пачаць новую гульню?')}
-          text={t('Рахунак бягучай партыі будзе скінуты.')}
-          confirmLabel={t(pending.type === 'teams' ? 'Змяніць' : 'Пачаць нанова')}
+          title={t(CONFIRMS[pending.type].title)}
+          text={t(CONFIRMS[pending.type].text)}
+          confirmLabel={t(CONFIRMS[pending.type].confirmLabel)}
+          danger={CONFIRMS[pending.type].danger}
           onConfirm={confirmChange}
           onClose={() => setPending(null)}
         />

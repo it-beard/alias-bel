@@ -215,6 +215,43 @@ describe('SetupScreen', () => {
     expect(dispatch).toHaveBeenCalledWith({ type: 'startGame' })
   })
 
+  it('незавершаную гульню можна завяршыць з плашкі — толькі пасля пацвярджэння', () => {
+    const { dispatch } = setup({ ...base, teams: fixedTeams(2, [7, 3]), roundNo: 2 })
+    const panel = screen.getByRole('heading', { name: 'Незавершаная гульня' }).closest('section')
+    const finish = within(panel).getByRole('button', { name: 'Завяршыць' })
+
+    fireEvent.click(finish)
+    const dialog = screen.getByRole('dialog', { name: 'Завяршыць гульню?' })
+    expect(dialog).toHaveTextContent('Пераможца вызначыцца па бягучым рахунку.')
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Не, вярнуцца' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(dispatch).not.toHaveBeenCalled()
+
+    fireEvent.click(finish)
+    const confirm = within(screen.getByRole('dialog')).getByRole('button', { name: 'Завяршыць' })
+    expect(confirm).toHaveClass('btn--danger')
+    fireEvent.click(confirm)
+    expect(dispatch).toHaveBeenCalledTimes(1)
+    expect(dispatch).toHaveBeenCalledWith({ type: 'finishNow' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('без незавершанай гульні кнопкі «Завяршыць» няма', () => {
+    setup()
+    expect(screen.queryByRole('button', { name: 'Завяршыць' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Незавершаная гульня' })).not.toBeInTheDocument()
+  })
+
+  it('пацвярджэнні для змены каманд і новай гульні засталіся звычайнымі, не «небяспечнымі»', () => {
+    setup({ ...base, teams: fixedTeams(2, [7, 3]), roundNo: 2 })
+    fireEvent.click(screen.getByRole('radio', { name: '3' }))
+    expect(screen.getByRole('dialog', { name: 'Змяніць каманды?' })).toHaveTextContent('Рахунак бягучай партыі будзе скінуты.')
+    expect(screen.getByRole('button', { name: 'Змяніць' })).toHaveClass('btn--primary')
+    fireEvent.click(screen.getByRole('button', { name: 'Не, вярнуцца' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Новая гульня' }))
+    expect(screen.getByRole('button', { name: 'Пачаць нанова' })).toHaveClass('btn--primary')
+  })
+
   it('працяг гульні без гуку не чапае аўдыя, а новую гульню можна не пацвярджаць', () => {
     vi.mocked(unlockAudio).mockClear()
     const { dispatch } = setup({ ...base, gameActive: true, settings: { ...initialState.settings, sound: false } })

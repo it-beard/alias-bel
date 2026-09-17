@@ -16,6 +16,7 @@
   --ok: #2a7f4c;
   --on-ok: #ffffff;
   --bad: #cf2033;
+  --on-bad: #ffffff;
   --adult: #b3153f;
   --shadow: 0 12px 32px -20px rgba(40, 30, 20, 0.35);
   --team: var(--accent);
@@ -48,6 +49,7 @@
     --ok: #3fb872;
     --on-ok: #0a1a10;
     --bad: #ff5f70;
+    --on-bad: #1a0a0c;
     --adult: #ff6b95;
     --shadow: 0 12px 32px -20px rgba(0, 0, 0, 0.8);
     --team-text: color-mix(in srgb, var(--team) 65%, white);
@@ -69,6 +71,7 @@
   --ok: #3fb872;
   --on-ok: #0a1a10;
   --bad: #ff5f70;
+  --on-bad: #1a0a0c;
   --adult: #ff6b95;
   --shadow: 0 12px 32px -20px rgba(0, 0, 0, 0.8);
   --team-text: color-mix(in srgb, var(--team) 65%, white);

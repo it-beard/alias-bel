@@ -329,6 +329,30 @@ describe('App', () => {
     expect(screen.getByText('Пакуль няма адказаў.')).toBeInTheDocument()
   })
 
+  it('незавершаную гульню можна завяршыць проста з наладаў', () => {
+    const teams = fixedTeams(2, [12, 7]).map((team) => ({ ...team, roundsPlayed: 2 }))
+    seed({ ...initialState, settings: { ...DEFAULT_SETTINGS, sound: false, vibration: false }, teams, screen: 'ready', roundNo: 3, gameActive: true })
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'Налады' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Завяршыць' }))
+    expect(saved().screen).toBe('setup')
+    fireEvent.click(within(screen.getByRole('dialog', { name: 'Завяршыць гульню?' })).getByRole('button', { name: 'Завяршыць' }))
+
+    expect(screen.getByText('Перамога')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Вусы Мулявіна' })).toBeInTheDocument()
+    expect(screen.getByText('12 ачкоў за 2 раунды')).toBeInTheDocument()
+    expect(saved()).toMatchObject({ screen: 'finish', gameActive: false })
+    expect(saved().teams.map((team) => team.score)).toEqual([12, 7])
+
+    // плашка знікае: гульня завершаная, і новую можна пачаць без пытанняў
+    fireEvent.click(screen.getByRole('button', { name: 'Налады' }))
+    expect(screen.queryByRole('heading', { name: 'Незавершаная гульня' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Завяршыць' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Пачаць гульню' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByText('Раунд 1')).toBeInTheDocument()
+  })
+
   it('з наладаў можна вярнуцца да незавершанай гульні', () => {
     seed({ ...initialState, settings: { ...DEFAULT_SETTINGS, sound: false }, screen: 'ready', roundNo: 2 })
     render(<App />)

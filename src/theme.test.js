@@ -105,4 +105,11 @@ describe('палітра', () => {
     }
     expect(token(blocks[1], 'adult')).toBe(token(blocks[2], 'adult'))
   })
+
+  it('тэкст на «небяспечнай» кнопцы чытаецца ў абедзвюх тэмах (WCAG AA)', () => {
+    for (const block of blocks) {
+      expect(contrast(token(block, 'on-bad'), token(block, 'bad'))).toBeGreaterThanOrEqual(4.5)
+    }
+    expect(token(blocks[1], 'on-bad')).toBe(token(blocks[2], 'on-bad'))
+  })
 })

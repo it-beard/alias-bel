@@ -199,6 +199,28 @@
   border-left: 4px solid var(--team);
 }
 
+.resume__actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* на тэлефоне кнопкі не змяшчаюцца побач з загалоўкам — аддаём ім увесь радок */
+@media (max-width: 520px) {
+  .resume .panel__head {
+    margin-right: 0;
+  }
+
+  .resume__actions {
+    flex: 1 1 100%;
+    margin-top: 6px;
+  }
+
+  .resume__actions .btn {
+    flex: 1;
+  }
+}
+
 .resume__line {
   display: flex;
   flex-wrap: wrap;
@@ -622,7 +644,7 @@
 
 .btn--danger {
   background: var(--bad);
-  color: #fff;
+  color: var(--on-bad);
 }
 
 .btn--ghost {
