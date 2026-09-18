@@ -184,6 +184,7 @@ describe('выпадковыя назвы камандаў на лацінцы',
     ['Аголеныя Шагалы', 'Aholenyja Šahały'],
     ['Папараць-кветка Купалы', 'Paparać-kvietka Kupały'],
     ['Пяць мужчын у леснічоўцы', 'Piać mužčyn u lesničoŭcy'],
+    ['Смык Беларускі', 'Smyk Biełaruski'],
   ]
 
   it.each(expectedNames)('%s → %s', (input, expected) => {

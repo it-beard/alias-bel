@@ -11,7 +11,7 @@ describe('слоўнікі', () => {
     expect(MEDIUM).toHaveLength(304)
     expect(HARD).toHaveLength(242)
     expect(getWords('all')).toHaveLength(886)
-    expect(ADULT).toHaveLength(106)
+    expect(ADULT).toHaveLength(107)
   })
 
   it.each(LEVEL_ORDER)('узровень %s без паўтораў, пустых радкоў і лішніх прабелаў', (id) => {

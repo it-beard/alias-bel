@@ -211,7 +211,7 @@ describe('SetupScreen', () => {
     const { dispatch } = setup({ ...base, settings: { ...initialState.settings, level: 'adult' } })
     const adult = screen.getByRole('radio', { name: '18+' })
     expect(adult).toHaveAttribute('aria-checked', 'true')
-    expect(screen.getByText('Ад заляцанняў да любошчаў · 106 слоў')).toBeInTheDocument()
+    expect(screen.getByText('Ад заляцанняў да любошчаў · 107 слоў')).toBeInTheDocument()
     fireEvent.click(adult)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('radio', { name: 'Складаны' }))

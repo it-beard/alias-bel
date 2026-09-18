@@ -11,7 +11,7 @@ const BELARUSIAN = /^[абвгґдеёжзійклмнопрстуўфхцчшы
 
 describe('падказкі да слоў', () => {
   it('колькасць падказак зафіксаваная', () => {
-    expect(HINTED).toHaveLength(227)
+    expect(HINTED).toHaveLength(228)
   })
 
   it('ёсць толькі да слоў са слоўнікаў гульні', () => {
