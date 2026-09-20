@@ -4,7 +4,7 @@ import { useWakeLock } from '../hooks/useWakeLock.js'
 import { useSwipe } from '../hooks/useSwipe.js'
 import { useKeys } from '../hooks/useKeys.js'
 import { sounds, unlockAudio, vibrate } from '../game/feedback.js'
-import { roundScore } from '../game/gameState.js'
+import { lastWordShared, roundScore } from '../game/gameState.js'
 import { ANSWER_LOCK_MS } from '../game/constants.js'
 import { wordSize } from '../game/wordSize.js'
 import { ADULT_LEVEL } from '../data/words.js'
@@ -13,6 +13,7 @@ import { useScript, useT } from '../i18n/script.js'
 import { Motif } from './Ornament.jsx'
 import Dialog from './Dialog.jsx'
 import ConfirmSheet from './ConfirmSheet.jsx'
+import TeamPickSheet from './TeamPickSheet.jsx'
 
 export default function PlayScreen({ state, dispatch }) {
   const t = useT()
@@ -27,6 +28,9 @@ export default function PlayScreen({ state, dispatch }) {
   const hint = settings.hints ? getHint(current) : null
   const [confirmEnd, setConfirmEnd] = useState(false)
   const hintOpen = hint !== null && !paused && hintAt === results.length
+  const shared = lastWordShared(state)
+  // шторка «хто адгадаў» для агульнага апошняга слова
+  const [picking, setPicking] = useState(false)
 
   const left = useCountdown(endsAt, () => {
     if (settings.sound) sounds.timeUp()
@@ -43,18 +47,25 @@ export default function PlayScreen({ state, dispatch }) {
     if (settings.sound) sounds.tick()
   }, [left, paused, lastWord, settings.sound])
 
-  const answer = (guessed) => {
+  const answer = (guessed, by) => {
     if (paused) return
     const now = Date.now()
-    if (!lastWord && endsAt !== null && now >= endsAt && !settings.lastWordRule) {
+    const expired = !lastWord && endsAt !== null && now >= endsAt
+    if (expired && !settings.lastWordRule) {
       dispatch({ type: 'timeUp' })
       return
     }
     if (now < lockUntil.current) return
     lockUntil.current = now + ANSWER_LOCK_MS
+    // агульнае апошняе слова: спачатку пытаемся, хто адгадаў
+    if (guessed && by === undefined && shared && (lastWord || expired)) {
+      setPicking(true)
+      return
+    }
+    setPicking(false)
     if (settings.sound) (guessed ? sounds.correct : sounds.skip)()
     if (settings.vibration) vibrate(guessed ? 50 : [40, 60, 40])
-    dispatch({ type: 'answer', guessed })
+    dispatch(by === undefined ? { type: 'answer', guessed } : { type: 'answer', guessed, by })
   }
 
   const togglePause = () => {
@@ -69,7 +80,7 @@ export default function PlayScreen({ state, dispatch }) {
     setHintAt(hintOpen ? null : results.length)
   }
 
-  const swipe = useSwipe({ onRight: () => answer(true), onLeft: () => answer(false), enabled: !paused })
+  const swipe = useSwipe({ onRight: () => answer(true), onLeft: () => answer(false), enabled: !paused && !picking })
   useKeys(
     {
       ArrowRight: () => answer(true),
@@ -79,7 +90,7 @@ export default function PlayScreen({ state, dispatch }) {
       ' ': togglePause,
       Escape: togglePause,
     },
-    !paused,
+    !paused && !picking,
   )
 
   const shownLeft = paused ? Math.ceil(pausedLeft / 1000) : left
@@ -117,7 +128,7 @@ export default function PlayScreen({ state, dispatch }) {
         <div className="timer__track">
           <div className="timer__fill" style={{ transform: `scaleX(${progress})` }} />
         </div>
-        <span className="timer__value">{lastWord ? t('Апошняе слова!') : shownLeft}</span>
+        <span className="timer__value">{lastWord ? t(shared ? 'Адгадваюць усе!' : 'Апошняе слова!') : shownLeft}</span>
       </div>
 
       <div className="cardzone">
@@ -214,6 +225,15 @@ export default function PlayScreen({ state, dispatch }) {
             </button>
           </div>
         </Dialog>
+      )}
+
+      {picking && !paused && (
+        <TeamPickSheet
+          teams={state.teams}
+          activeIndex={state.turnIndex}
+          onPick={(i) => answer(true, i)}
+          onClose={() => setPicking(false)}
+        />
       )}
 
       {paused && confirmEnd && (

@@ -223,7 +223,7 @@ describe('loadSaved', () => {
   })
 
   it('захаванае апошняе слова аднаўляецца як апошняе слова', () => {
-    const saved = { ...initialState, screen: 'play', current: 'хлеб', lastWord: true, endsAt: null }
+    const saved = { ...initialState, screen: 'play', current: 'хлеб', lastWord: true, endsAt: null, settings: { ...initialState.settings, lastWordRule: true } }
     expect(loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify(saved) }))).toMatchObject({ screen: 'play', current: 'хлеб', lastWord: true, pausedLeft: null })
   })
 
@@ -240,6 +240,34 @@ describe('loadSaved', () => {
     expect(ready.results).toEqual([])
     const notArray = loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ ...initialState, screen: 'result', results: 'oops' }) }))
     expect(notArray.results).toEqual([])
+  })
+
+  it('агульнае апошняе слова аднаўляецца з камандай, якая яго адгадала; смецце ў `by` адкідаецца', () => {
+    const load = (results, extra = {}) =>
+      loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ ...initialState, screen: 'result', results, ...extra }) })).results
+    expect(load([{ word: 'хлеб', guessed: true, shared: true, by: 1 }])).toEqual([{ word: 'хлеб', guessed: true, shared: true, by: 1 }])
+    expect(load([{ word: 'хлеб', guessed: false, shared: true, by: 1 }])).toEqual([{ word: 'хлеб', guessed: false, shared: true }])
+    // сваю каманду, няісную каманду і не лік у `by` не захоўваем
+    expect(load([{ word: 'хлеб', guessed: true, shared: true, by: 1 }], { turnIndex: 1 })).toEqual([{ word: 'хлеб', guessed: true, shared: true }])
+    expect(load([{ word: 'хлеб', guessed: true, shared: true, by: 7 }])).toEqual([{ word: 'хлеб', guessed: true, shared: true }])
+    expect(load([{ word: 'хлеб', guessed: true, shared: true, by: '1' }])).toEqual([{ word: 'хлеб', guessed: true, shared: true }])
+    // `by` без пазнакі агульнага слова — смецце
+    expect(load([{ word: 'хлеб', guessed: true, shared: 'yes', by: 1 }])).toEqual([{ word: 'хлеб', guessed: true }])
+  })
+
+  it('правіла апошняга слова па змаўчанні выключанае, але ўключанае раней застаецца ўключаным', () => {
+    const load = (settings) => loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ ...initialState, settings }) })).settings
+    const { lastWordRule: _, ...old } = initialState.settings
+    expect(load(old).lastWordRule).toBe(false)
+    expect(load({ ...old, lastWordRule: true }).lastWordRule).toBe(true)
+  })
+
+  it('налада агульнага апошняга слова: у старых захаваннях яе няма — выключаная, уключаная захоўваецца', () => {
+    const load = (settings) => loadSaved(memoryStorage({ [STORAGE_KEY]: JSON.stringify({ ...initialState, settings }) })).settings
+    const { lastWordForAll: _, ...old } = initialState.settings
+    expect(load(old).lastWordForAll).toBe(false)
+    expect(load({ ...old, lastWordForAll: true }).lastWordForAll).toBe(true)
+    expect(load({ ...old, lastWordForAll: 'так' }).lastWordForAll).toBe(false)
   })
 
   it('на экране наладаў памятае, ці была партыя пачатая', () => {

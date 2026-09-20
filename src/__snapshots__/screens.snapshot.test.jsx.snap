@@ -1455,7 +1455,8 @@ exports[`снапшоты экранаў > rules (cyr) 1`] = `
          — яна паказвае пераклад.
       </li>
       <li>
-        Раунд доўжыцца зададзены час. Пасля сігналу можна дагуляць апошняе слова, калі правіла ўключана.
+        Раунд доўжыцца зададзены час. Пасля сігналу можна дагуляць апошняе слова, калі правіла ўключана. 
+        У наладах яго можна аддаць усім камандам: ачко атрымлівае тая, што адгадала першай.
       </li>
       <li>
         Пасля раунда паказваецца спіс словаў — спрэчныя адзнакі можна выправіць націскам.
@@ -1526,7 +1527,8 @@ exports[`снапшоты экранаў > rules (lat) 1`] = `
          — jana pakazvaje pierakład.
       </li>
       <li>
-        Raund doŭžycca zadadzieny čas. Pasla sihnału možna dahulać apošniaje słova, kali praviła ŭklučana.
+        Raund doŭžycca zadadzieny čas. Pasla sihnału možna dahulać apošniaje słova, kali praviła ŭklučana. 
+        U naładach jaho možna addać usim kamandam: ačko atrymlivaje taja, što adhadała pieršaj.
       </li>
       <li>
         Pasla raunda pakazvajecca spis słovaŭ — sprečnyja adznaki možna vypravić naciskam.

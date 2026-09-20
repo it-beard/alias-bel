@@ -1364,6 +1364,66 @@
   color: var(--bad);
 }
 
+/* агульнае апошняе слова: --team тут — колер каманды, што яго перахапіла */
+.wordlist__item.is-stolen {
+  border-color: color-mix(in srgb, var(--team) 40%, transparent);
+}
+
+.wordlist__text {
+  min-width: 0;
+}
+
+.wordlist__text .wordlist__word {
+  display: block;
+}
+
+/* inline-block не пераймае закрэсленне ад прапушчанага слова */
+.wordlist__note {
+  display: inline-block;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* ---------- выбар каманды ---------- */
+.teampick {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.teampick__item {
+  width: 100%;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--team) 40%, transparent);
+  background: color-mix(in srgb, var(--team) 8%, var(--paper));
+  text-align: left;
+  font-weight: 600;
+  transition: transform 0.1s;
+}
+
+.teampick__item:active {
+  transform: scale(0.98);
+}
+
+.teampick__name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.teampick__note {
+  flex: none;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
 /* ---------- фінал ---------- */
 .finish {
   text-align: center;

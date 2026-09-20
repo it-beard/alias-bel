@@ -1,4 +1,4 @@
-import { initialState, inProgress, makeTeams } from './gameState.js'
+import { initialState, inProgress, makeTeams, sharedResult } from './gameState.js'
 import { DEFAULT_SETTINGS, MAX_TEAMS, ROUND_TIMES, SCRIPTS, STORAGE_KEY, TARGET_SCORES, TEAM_COLORS, THEMES } from './constants.js'
 import { getWords, LEVEL_ORDER } from '../data/words.js'
 import { fillNames, motifForName, teamNamesFor } from './teamNames.js'
@@ -67,17 +67,18 @@ export function loadSaved(storage) {
         : pool === teamNamesFor(initialState.settings.level) ? initialState.teams : makeTeams(initialState.teams.length, [], pool)
 
     const screen = SCREENS.includes(saved.screen) ? saved.screen : 'setup'
+    const turnIndex = Math.min(Math.max(0, integer(saved.turnIndex)), teams.length - 1)
     const validWords = new Set(getWords(settings.level))
     const results = Array.isArray(saved.results)
       ? saved.results.filter((result) => result && typeof result.word === 'string' && result.word.trim() && typeof result.guessed === 'boolean')
-        .map(({ word, guessed }) => ({ word, guessed }))
+        .map(({ word, guessed, shared, by }) => (shared === true ? sharedResult({ teams, turnIndex }, word, guessed, by) : { word, guessed }))
       : []
     const loaded = {
       ...initialState,
       teams,
       settings,
       screen,
-      turnIndex: Math.min(Math.max(0, integer(saved.turnIndex)), teams.length - 1),
+      turnIndex,
       roundNo: Math.max(1, integer(saved.roundNo, 1)),
       deck: saved.deckLevel === settings.level && Array.isArray(saved.deck)
         ? [...new Set(saved.deck.filter((word) => validWords.has(word)))] : [],

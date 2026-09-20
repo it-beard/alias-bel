@@ -271,7 +271,7 @@ describe('App', () => {
   })
 
   it('поўная партыя: дзве каманды да 20 ачкоў', () => {
-    seed({ ...initialState, teams: fixedTeams(2), settings: { ...DEFAULT_SETTINGS, roundSeconds: 30, targetScore: 20, sound: false, vibration: false } })
+    seed({ ...initialState, teams: fixedTeams(2), settings: { ...DEFAULT_SETTINGS, roundSeconds: 30, targetScore: 20, lastWordRule: true, sound: false, vibration: false } })
     render(<App />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Пачаць гульню' }))
@@ -311,6 +311,34 @@ describe('App', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Яшчэ раз' }))
     expect(screen.getByText('Раунд 1')).toBeInTheDocument()
     expect(saved().teams.every((t) => t.score === 0)).toBe(true)
+  })
+
+  it('агульнае апошняе слова: пасля сігналу ачко атрымлівае каманда, якая адгадала першай', () => {
+    seed({ ...initialState, teams: fixedTeams(3), settings: { ...DEFAULT_SETTINGS, roundSeconds: 30, lastWordRule: true, lastWordForAll: true, sound: false, vibration: false } })
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'Пачаць гульню' }))
+    startRound()
+    answer('Адгадана', 2)
+    advance(30_000, 500)
+    expect(screen.getByRole('timer')).toHaveTextContent('Адгадваюць усе!')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Адгадана' }))
+    act(() => vi.advanceTimersByTime(ANSWER_LOCK_MS + 50))
+    fireEvent.click(within(screen.getByRole('dialog', { name: 'Хто адгадаў?' })).getByRole('button', { name: /Каласы пад сярпом ШІ/ }))
+
+    // слова перахапілі: у залік раунда ідуць толькі два свае
+    expect(screen.getByText('+2')).toBeInTheDocument()
+    expect(screen.getByText('адгадана 2 · пас 0')).toBeInTheDocument()
+    expect(saved().results.at(-1)).toMatchObject({ guessed: true, shared: true, by: 2 })
+
+    // памыліліся камандай — выпраўляем на выніку
+    fireEvent.click(screen.getByRole('button', { name: /агульнае апошняе слова/ }))
+    fireEvent.click(within(screen.getByRole('dialog', { name: 'Хто адгадаў?' })).getByRole('button', { name: /Крынж Еўфрасінні/ }))
+    expect(saved().results.at(-1).by).toBe(1)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Далей' }))
+    expect(saved().teams.map((team) => team.score)).toEqual([2, 1, 0])
+    expect(saved().turnIndex).toBe(1)
   })
 
   it('паўза захоўвае час, а спыненне раунда вядзе да выніку', () => {

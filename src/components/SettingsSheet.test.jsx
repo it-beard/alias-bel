@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import SettingsSheet from './SettingsSheet.jsx'
 import { DEFAULT_SETTINGS } from '../game/constants.js'
 import { ScriptContext } from '../i18n/script.js'
@@ -27,7 +27,7 @@ describe('SettingsSheet', () => {
     expect(screen.getByRole('radio', { name: 'Кірыліца' })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('radio', { name: 'Аўта' })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('switch', { name: /Штраф за пас/ })).toHaveAttribute('aria-checked', 'true')
-    expect(screen.getByRole('switch', { name: /Апошняе слова/ })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('switch', { name: /Апошняе слова/ })).toHaveAttribute('aria-checked', 'false')
     expect(screen.getByRole('switch', { name: /Падказкі да слоў/ })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('switch', { name: 'Гук' })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('switch', { name: /Вібрацыя/ })).toHaveAttribute('aria-checked', 'true')
@@ -46,7 +46,7 @@ describe('SettingsSheet', () => {
       ['script', 'lat'],
       ['theme', 'dark'],
       ['skipPenalty', false],
-      ['lastWordRule', false],
+      ['lastWordRule', true],
       ['hints', false],
       ['sound', false],
       ['vibration', false],
@@ -61,6 +61,25 @@ describe('SettingsSheet', () => {
     expect(toggle).toHaveTextContent('Кнопка «?» паказвае пераклад рэдкага слова')
     fireEvent.click(toggle)
     expect(onChange).toHaveBeenCalledWith('hints', true)
+  })
+
+  it('агульнае апошняе слова па змаўчанні выключанае і ўключаецца', () => {
+    expect(DEFAULT_SETTINGS.lastWordForAll).toBe(false)
+    const { onChange } = setup({ ...DEFAULT_SETTINGS, lastWordRule: true })
+    const toggle = screen.getByRole('switch', { name: /Агульнае апошняе слова/ })
+    expect(toggle).toHaveAttribute('aria-checked', 'false')
+    expect(toggle).toHaveTextContent('Яго адгадваюць усе каманды: ачко таму, хто першы')
+    fireEvent.click(toggle)
+    expect(onChange).toHaveBeenCalledWith('lastWordForAll', true)
+  })
+
+  it('без правіла апошняга слова (як па змаўчанні) пераключальніка агульнага слова няма', () => {
+    expect(DEFAULT_SETTINGS.lastWordRule).toBe(false)
+    setup()
+    expect(screen.queryByRole('switch', { name: /Агульнае апошняе слова/ })).not.toBeInTheDocument()
+    cleanup()
+    setup({ ...DEFAULT_SETTINGS, lastWordRule: false, lastWordForAll: true })
+    expect(screen.queryByRole('switch', { name: /Агульнае апошняе слова/ })).not.toBeInTheDocument()
   })
 
   it('уключэнне вібрацыі дае пробны імпульс', () => {

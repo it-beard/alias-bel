@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { inProgress, initialState, makeTeams, reducer, roundScore } from './gameState.js'
+import { inProgress, initialState, lastWordShared, makeTeams, reducer, roundScore, sharedResult } from './gameState.js'
 import { DEFAULT_SETTINGS, RANDOM_TEAM_NAMES, TEAM_COLORS, TEAM_MOTIFS } from './constants.js'
 import { getWords } from '../data/words.js'
 
@@ -36,6 +36,15 @@ describe('roundScore', () => {
   it('са штрафам адымае прапушчаныя', () => expect(roundScore(results, true)).toBe(1))
   it('без штрафу лічыць толькі адгаданыя', () => expect(roundScore(results, false)).toBe(2))
   it('пусты раунд дае нуль', () => expect(roundScore([], true)).toBe(0))
+  it('слова, перахопленае іншай камандай, не лічыцца ні адгаданым, ні прапушчаным', () => {
+    const stolen = [...results, { guessed: true, shared: true, by: 1 }]
+    expect(roundScore(stolen, true)).toBe(1)
+    expect(roundScore(stolen, false)).toBe(2)
+  })
+  it('агульнае слова, якое ўзяла свая каманда або не ўзяў ніхто, лічыцца як звычайнае', () => {
+    expect(roundScore([{ guessed: true, shared: true }], true)).toBe(1)
+    expect(roundScore([{ guessed: false, shared: true }], true)).toBe(-1)
+  })
 })
 
 describe('inProgress', () => {
@@ -133,8 +142,14 @@ describe('reducer: ход гульні', () => {
     expect(next.deck.length).toBe(getWords('easy').length - 1)
   })
 
+  it('па змаўчанні апошняе слова не дагульваецца: timeUp адразу адкрывае вынік', () => {
+    expect(DEFAULT_SETTINGS.lastWordRule).toBe(false)
+    const next = run([{ type: 'startGame' }, { type: 'startTurn' }, { type: 'timeUp' }])
+    expect(next).toMatchObject({ screen: 'result', current: null, lastWord: false })
+  })
+
   it('timeUp з правілам апошняга слова пакідае слова на экране', () => {
-    const play = run([{ type: 'startGame' }, { type: 'startTurn' }])
+    const play = run([{ type: 'setSetting', key: 'lastWordRule', value: true }, { type: 'startGame' }, { type: 'startTurn' }])
     const next = reducer(play, { type: 'timeUp' })
     expect(next.lastWord).toBe(true)
     expect(next.endsAt).toBeNull()
@@ -366,5 +381,119 @@ describe('reducer: ход гульні', () => {
     expect(done.screen).toBe('result')
     expect(done.results).toHaveLength(lastWordRule ? 1 : 0)
     expect(done.deck).toBe(playing.deck)
+  })
+})
+
+describe('reducer: агульнае апошняе слова', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-09-15T12:00:00Z'))
+  })
+  afterEach(() => vi.useRealTimers())
+
+  const rule = { type: 'setSetting', key: 'lastWordRule', value: true }
+  const forAll = { type: 'setSetting', key: 'lastWordForAll', value: true }
+  const lastWord = (...before) => run([...before, rule, forAll, { type: 'startGame' }, { type: 'startTurn' }, { type: 'timeUp' }])
+
+  it('па змаўчанні выключанае', () => {
+    expect(DEFAULT_SETTINGS.lastWordForAll).toBe(false)
+    expect(lastWordShared(initialState)).toBe(false)
+  })
+
+  it('працуе толькі разам з правілам апошняга слова і калі каманд больш за адну', () => {
+    expect(lastWordShared(run([forAll]))).toBe(false)
+    const on = run([rule, forAll])
+    expect(lastWordShared(on)).toBe(true)
+    expect(lastWordShared(run([{ type: 'setSetting', key: 'lastWordRule', value: false }], on))).toBe(false)
+    expect(lastWordShared(run([{ type: 'setTeamCount', count: 1 }], on))).toBe(false)
+  })
+
+  it('sharedResult запісвае толькі чужую каманду з дапушчальным індэксам', () => {
+    const state = { teams: makeTeams(3), turnIndex: 1 }
+    expect(sharedResult(state, 'хлеб', true, 2)).toEqual({ word: 'хлеб', guessed: true, shared: true, by: 2 })
+    expect(sharedResult(state, 'хлеб', true, 1)).toEqual({ word: 'хлеб', guessed: true, shared: true })
+    expect(sharedResult(state, 'хлеб', false, 2)).toEqual({ word: 'хлеб', guessed: false, shared: true })
+    for (const by of [3, -1, 1.5, '2', null, undefined]) {
+      expect(sharedResult(state, 'хлеб', true, by)).toEqual({ word: 'хлеб', guessed: true, shared: true })
+    }
+  })
+
+  it('слова, адгаданае іншай камандай, прыносіць ачко ёй, а не той, што тлумачыла', () => {
+    const play = lastWord()
+    const done = reducer(play, { type: 'answer', guessed: true, by: 1 })
+    expect(done.screen).toBe('result')
+    expect(done.results).toEqual([{ word: play.current, guessed: true, shared: true, by: 1 }])
+    const next = reducer(done, { type: 'commitRound' })
+    expect(next.teams.map((team) => team.score)).toEqual([0, 1])
+    expect(next.teams.map((team) => team.roundsPlayed)).toEqual([1, 0])
+    expect(next.turnIndex).toBe(1)
+  })
+
+  it('свая каманда атрымлівае ачко як звычайна, а пас — штраф', () => {
+    const own = reducer(lastWord(), { type: 'answer', guessed: true, by: 0 })
+    expect(own.results[0]).toEqual({ word: own.results[0].word, guessed: true, shared: true })
+    expect(reducer(own, { type: 'commitRound' }).teams.map((team) => team.score)).toEqual([1, 0])
+    const nobody = reducer(lastWord(), { type: 'answer', guessed: false })
+    expect(nobody.results[0]).toMatchObject({ guessed: false, shared: true })
+    expect(reducer(nobody, { type: 'commitRound' }).teams.map((team) => team.score)).toEqual([-1, 0])
+  })
+
+  it('словы да сігналу застаюцца звычайнымі', () => {
+    const play = run([rule, forAll, { type: 'startGame' }, { type: 'startTurn' }])
+    const next = reducer(play, { type: 'answer', guessed: true, by: 1 })
+    expect(next.results).toEqual([{ word: play.current, guessed: true }])
+    expect(next.screen).toBe('play')
+  })
+
+  it('клік пасля дэдлайну, але да tick, таксама лічыцца агульным словам', () => {
+    const play = run([rule, forAll, { type: 'startGame' }, { type: 'startTurn' }])
+    vi.setSystemTime(play.endsAt + 1)
+    const done = reducer(play, { type: 'answer', guessed: true, by: 1 })
+    expect(done.results).toEqual([{ word: play.current, guessed: true, shared: true, by: 1 }])
+  })
+
+  it('без налады або з адной камандай апошняе слова звычайнае', () => {
+    const off = run([rule, { type: 'startGame' }, { type: 'startTurn' }, { type: 'timeUp' }])
+    expect(reducer(off, { type: 'answer', guessed: true, by: 1 }).results).toEqual([{ word: off.current, guessed: true }])
+    const solo = lastWord({ type: 'setTeamCount', count: 1 })
+    expect(reducer(solo, { type: 'answer', guessed: true, by: 1 }).results).toEqual([{ word: solo.current, guessed: true }])
+  })
+
+  it('перахопленае слова можа давесці іншую каманду да мэты', () => {
+    const state = {
+      ...run([forAll, { type: 'setTeamCount', count: 3 }, { type: 'startGame' }]),
+      screen: 'result',
+      turnIndex: 2,
+      results: [{ word: 'а', guessed: true, shared: true, by: 0 }],
+    }
+    state.teams = state.teams.map((team, i) => ({ ...team, score: i === 0 ? state.settings.targetScore - 1 : 3 }))
+    const next = reducer(state, { type: 'commitRound' })
+    expect(next.teams.map((team) => team.score)).toEqual([state.settings.targetScore, 3, 3])
+    expect(next.screen).toBe('finish')
+  })
+
+  it('assignResult перавыбірае каманду або здымае адзнаку', () => {
+    const state = {
+      ...run([forAll, { type: 'setTeamCount', count: 3 }]),
+      screen: 'result',
+      results: [{ word: 'а', guessed: true }, { word: 'б', guessed: true, shared: true, by: 1 }],
+    }
+    const last = (action) => reducer(state, { type: 'assignResult', index: 1, ...action }).results[1]
+    expect(last({ by: 2 })).toEqual({ word: 'б', guessed: true, shared: true, by: 2 })
+    expect(last({ by: 0 })).toEqual({ word: 'б', guessed: true, shared: true })
+    expect(last({ by: null })).toEqual({ word: 'б', guessed: false, shared: true })
+  })
+
+  it('assignResult не чапае звычайныя словы і няісныя індэксы', () => {
+    const state = { ...initialState, screen: 'result', results: [{ word: 'а', guessed: true }] }
+    expect(reducer(state, { type: 'assignResult', index: 0, by: 1 })).toBe(state)
+    expect(reducer(state, { type: 'assignResult', index: 5, by: 1 })).toBe(state)
+  })
+
+  it('toggleResult на агульным слове вяртае яго той камандзе, што тлумачыла', () => {
+    const state = { ...initialState, screen: 'result', results: [{ word: 'а', guessed: true, shared: true, by: 1 }] }
+    const skipped = reducer(state, { type: 'toggleResult', index: 0 })
+    expect(skipped.results).toEqual([{ word: 'а', guessed: false, shared: true }])
+    expect(reducer(skipped, { type: 'toggleResult', index: 0 }).results).toEqual([{ word: 'а', guessed: true, shared: true }])
   })
 })

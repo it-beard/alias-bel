@@ -32,11 +32,29 @@ export const initialState = {
   lastWord: false,
 }
 
+/** Ці перахапіла агульнае апошняе слова іншая каманда: тады яно не ідзе ў залік той, што тлумачыла. */
+export const isStolen = (result) => result.guessed && result.by != null
+
 /** Ачкі за раунд паводле бягучых адзнак у спісе слоў. */
 export function roundScore(results, skipPenalty) {
-  const guessed = results.filter((r) => r.guessed).length
-  const skipped = results.length - guessed
+  const own = results.filter((r) => !isStolen(r))
+  const guessed = own.filter((r) => r.guessed).length
+  const skipped = own.length - guessed
   return skipPenalty ? guessed - skipped : guessed
+}
+
+/** Ці адгадваюць апошняе слова ўсе каманды: абедзве налады ўключаныя і ёсць з кім спаборнічаць. */
+export function lastWordShared(state) {
+  return state.settings.lastWordRule && state.settings.lastWordForAll && state.teams.length > 1
+}
+
+/**
+ * Адзнака агульнага апошняга слова. `by` — індэкс каманды, якая адгадала першай;
+ * у вынік ён трапляе, толькі калі гэта не тая каманда, што тлумачыла.
+ */
+export function sharedResult({ teams, turnIndex }, word, guessed, by) {
+  const other = guessed && Number.isInteger(by) && by >= 0 && by < teams.length && by !== turnIndex
+  return { word, guessed, shared: true, ...(other ? { by } : {}) }
 }
 
 /** Ці ёсць незавершаная гульня, да якой можна вярнуцца з наладаў. */
@@ -136,11 +154,13 @@ export function reducer(state, action) {
       if (expired && !state.settings.lastWordRule) {
         return { ...state, screen: 'result', current: null, endsAt: null, lastWord: false }
       }
-      const results = [...state.results, { word: state.current, guessed: action.guessed }]
       if (state.lastWord || expired) {
-        return { ...state, results, current: null, screen: 'result', endsAt: null, lastWord: false }
+        const last = lastWordShared(state)
+          ? sharedResult(state, state.current, action.guessed, action.by)
+          : { word: state.current, guessed: action.guessed }
+        return { ...state, results: [...state.results, last], current: null, screen: 'result', endsAt: null, lastWord: false }
       }
-      return nextWord({ ...state, results })
+      return nextWord({ ...state, results: [...state.results, { word: state.current, guessed: action.guessed }] })
     }
 
     case 'timeUp': {
@@ -157,8 +177,21 @@ export function reducer(state, action) {
     case 'toggleResult':
       return {
         ...state,
-        results: state.results.map((r, i) => (i === action.index ? { ...r, guessed: !r.guessed } : r)),
+        results: state.results.map((r, i) => {
+          if (i !== action.index) return r
+          // агульнае слова без выбару каманды вяртаецца той, што тлумачыла
+          return r.shared ? sharedResult(state, r.word, !r.guessed) : { ...r, guessed: !r.guessed }
+        }),
       }
+
+    case 'assignResult': {
+      // хто адгадаў агульнае апошняе слова: індэкс каманды або null, калі ніхто
+      if (!state.results[action.index]?.shared) return state
+      return {
+        ...state,
+        results: state.results.map((r, i) => (i === action.index ? sharedResult(state, r.word, action.by !== null, action.by) : r)),
+      }
+    }
 
     case 'pause':
       if (state.screen !== 'play' || state.pausedLeft !== null || state.lastWord) return state
@@ -172,8 +205,12 @@ export function reducer(state, action) {
     case 'commitRound': {
       if (state.screen !== 'result') return state
       const delta = roundScore(state.results, state.settings.skipPenalty)
-      const teams = state.teams.map((t, i) => (i === state.turnIndex
-        ? { ...t, score: t.score + delta, roundsPlayed: (t.roundsPlayed ?? state.roundNo - 1) + 1 } : t))
+      const teams = state.teams.map((t, i) => {
+        if (i === state.turnIndex) return { ...t, score: t.score + delta, roundsPlayed: (t.roundsPlayed ?? state.roundNo - 1) + 1 }
+        // перахопленае агульнае слова — ачко той камандзе, што адгадала
+        const stolen = state.results.filter((r) => isStolen(r) && r.by === i).length
+        return stolen ? { ...t, score: t.score + stolen } : t
+      })
       const isLastInCircle = state.turnIndex === teams.length - 1
       const reached = teams.some((t) => t.score >= state.settings.targetScore)
       if (reached && isLastInCircle) {

@@ -56,6 +56,14 @@ export default function SettingsSheet({ settings, onChange, onClose }) {
             value={settings.lastWordRule}
             onChange={set('lastWordRule')}
           />
+          {settings.lastWordRule && (
+            <Toggle
+              label={t('Агульнае апошняе слова')}
+              hint={t('Яго адгадваюць усе каманды: ачко таму, хто першы')}
+              value={settings.lastWordForAll}
+              onChange={set('lastWordForAll')}
+            />
+          )}
           <Toggle
             label={t('Падказкі да слоў')}
             hint={t('Кнопка «?» паказвае пераклад рэдкага слова')}

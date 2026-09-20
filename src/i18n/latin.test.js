@@ -89,6 +89,8 @@ const cases = [
   ['Правілы', 'Praviły'],
   ['Адгадана', 'Adhadana'],
   ['Апошняе слова!', 'Apošniaje słova!'],
+  ['Адгадваюць усе!', 'Adhadvajuć usie!'],
+  ['Хто адгадаў?', 'Chto adhadaŭ?'],
   ['Гуляем да', 'Hulajem da'],
   ['Раунд 3', 'Raund 3'],
   ['60 с', '60 s'],

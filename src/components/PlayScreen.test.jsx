@@ -290,7 +290,9 @@ describe('PlayScreen', () => {
   })
 
   it('з правілам апошняга слова запознены адказ яшчэ залічваецца', () => {
-    const { dispatch } = setup()
+    const state = playing()
+    state.settings = { ...state.settings, lastWordRule: true }
+    const { dispatch } = setup(state)
     vi.setSystemTime(NOW + 61_000)
     fireEvent.click(screen.getByRole('button', { name: 'Пас' }))
     expect(dispatch).toHaveBeenCalledTimes(1)
@@ -581,6 +583,104 @@ describe('PlayScreen', () => {
     it('без бягучага слова кнопкі няма', () => {
       setup({ ...playing(), current: null })
       expect(hintButton()).not.toBeInTheDocument()
+    })
+  })
+
+  describe('агульнае апошняе слова', () => {
+    const forAll = (extra = {}) => {
+      const state = playing()
+      return { ...state, teams: fixedTeams(3), turnIndex: 1, endsAt: null, lastWord: true, settings: { ...state.settings, lastWordRule: true, lastWordForAll: true }, ...extra }
+    }
+    const picker = () => screen.queryByRole('dialog', { name: 'Хто адгадаў?' })
+    const unlock = () => act(() => vi.advanceTimersByTime(ANSWER_LOCK_MS + 10))
+
+    it('таймер кажа, што адгадваюць усе, а «Адгадана» пытаецца, хто адгадаў', () => {
+      const { dispatch } = setup(forAll())
+      expect(screen.getByRole('timer')).toHaveTextContent('Адгадваюць усе!')
+      fireEvent.click(screen.getByRole('button', { name: 'Адгадана' }))
+      expect(dispatch).not.toHaveBeenCalled()
+      expect(sounds.correct).not.toHaveBeenCalled()
+      const names = within(picker()).getAllByRole('listitem').map((item) => item.textContent)
+      expect(names).toEqual(['Вусы Мулявіна', 'Крынж Еўфрасіннііх раунд', 'Каласы пад сярпом ШІ'])
+    })
+
+    it('выбар каманды адпраўляе адказ з яе індэксам, з гукам і вібрацыяй', () => {
+      const { dispatch } = setup(forAll())
+      fireEvent.click(screen.getByRole('button', { name: 'Адгадана' }))
+      unlock()
+      fireEvent.click(within(picker()).getByRole('button', { name: /Каласы пад сярпом ШІ/ }))
+      expect(dispatch).toHaveBeenCalledTimes(1)
+      expect(dispatch).toHaveBeenCalledWith({ type: 'answer', guessed: true, by: 2 })
+      expect(sounds.correct).toHaveBeenCalledTimes(1)
+      expect(vibrate).toHaveBeenCalledWith(50)
+      expect(picker()).not.toBeInTheDocument()
+    })
+
+    it('падвойны націск на «Адгадана» не выбірае каманду, што з’явілася пад пальцам', () => {
+      const { dispatch } = setup(forAll())
+      fireEvent.click(screen.getByRole('button', { name: 'Адгадана' }))
+      fireEvent.click(within(picker()).getByRole('button', { name: /Вусы Мулявіна/ }))
+      expect(dispatch).not.toHaveBeenCalled()
+      expect(picker()).toBeInTheDocument()
+    })
+
+    it('«Назад» вяртае да слова, «Пас» значыць, што не адгадаў ніхто', () => {
+      const { dispatch } = setup(forAll())
+      fireEvent.click(screen.getByRole('button', { name: 'Адгадана' }))
+      fireEvent.click(within(picker()).getByRole('button', { name: 'Назад' }))
+      expect(picker()).not.toBeInTheDocument()
+      expect(dispatch).not.toHaveBeenCalled()
+      unlock()
+      fireEvent.click(screen.getByRole('button', { name: 'Пас' }))
+      expect(dispatch).toHaveBeenCalledWith({ type: 'answer', guessed: false })
+      expect(picker()).not.toBeInTheDocument()
+    })
+
+    it('свайп направа і стрэлка таксама адкрываюць выбар; пад ім клавішы маўчаць', () => {
+      const { dispatch, container } = setup(forAll())
+      const card = container.querySelector('.card')
+      fireEvent.pointerDown(card, { clientX: 0, clientY: 0, pointerId: 1, button: 0 })
+      fireEvent.pointerUp(card, { clientX: 200, clientY: 0, pointerId: 1 })
+      expect(picker()).toBeInTheDocument()
+      unlock()
+      fireEvent.keyDown(window, { key: 'ArrowLeft' })
+      fireEvent.keyDown(window, { key: 'ArrowRight' })
+      expect(dispatch).not.toHaveBeenCalled()
+      fireEvent.click(within(picker()).getByRole('button', { name: 'Назад' }))
+      unlock()
+      fireEvent.keyDown(window, { key: 'ArrowRight' })
+      expect(picker()).toBeInTheDocument()
+    })
+
+    it('да сігналу «Адгадана» працуе як звычайна', () => {
+      const { dispatch } = setup(forAll({ endsAt: NOW + 60_000, lastWord: false }))
+      expect(screen.getByRole('timer')).toHaveTextContent('60')
+      fireEvent.click(screen.getByRole('button', { name: 'Адгадана' }))
+      expect(dispatch).toHaveBeenCalledWith({ type: 'answer', guessed: true })
+      expect(picker()).not.toBeInTheDocument()
+    })
+
+    it('клік пасля дэдлайну, але да tick, таксама пытаецца пра каманду', () => {
+      const { dispatch } = setup(forAll({ endsAt: NOW + 60_000, lastWord: false }))
+      vi.setSystemTime(NOW + 61_000)
+      fireEvent.click(screen.getByRole('button', { name: 'Адгадана' }))
+      expect(dispatch).not.toHaveBeenCalled()
+      expect(picker()).toBeInTheDocument()
+    })
+
+    it('з адной камандай або без правіла апошняга слова выбару няма', () => {
+      const { dispatch } = setup(forAll({ teams: fixedTeams(1), turnIndex: 0 }))
+      expect(screen.getByRole('timer')).toHaveTextContent('Апошняе слова!')
+      fireEvent.click(screen.getByRole('button', { name: 'Адгадана' }))
+      expect(dispatch).toHaveBeenCalledWith({ type: 'answer', guessed: true })
+      expect(picker()).not.toBeInTheDocument()
+    })
+
+    it('у лацінцы', () => {
+      setup(forAll(), 'lat')
+      expect(screen.getByRole('timer')).toHaveTextContent('Adhadvajuć usie!')
+      fireEvent.click(screen.getByRole('button', { name: 'Adhadana' }))
+      expect(screen.getByRole('dialog', { name: 'Chto adhadaŭ?' })).toBeInTheDocument()
     })
   })
 
